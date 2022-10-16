@@ -1,4 +1,4 @@
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class AuthCredentialsDTO {
   @IsString()
@@ -12,5 +12,6 @@ export class AuthCredentialsDTO {
 
   @IsString()
   @MinLength(8)
+  @IsOptional()
   passwordConfirm?: string;
 }

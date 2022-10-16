@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpException,
   HttpStatus,
   InternalServerErrorException,
@@ -14,10 +15,10 @@ import { AUTH_ROUTE } from './utils/routes';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post()
+  @Post('signup')
   async signUp(@Body() authCredentialsDto: AuthCredentialsDTO) {
     try {
-      return await this.authService.signUp(authCredentialsDto);
+      return this.authService.signUp(authCredentialsDto);
     } catch (err) {
       if (err.code === 11000) {
         throw new HttpException(
@@ -25,6 +26,16 @@ export class AuthController {
           HttpStatus.CONFLICT,
         );
       }
+      throw new InternalServerErrorException();
+    }
+  }
+
+  @Post('signin')
+  @HttpCode(HttpStatus.OK)
+  async signIn(@Body() authCredetialsDto: AuthCredentialsDTO) {
+    try {
+      return this.authService.signIn(authCredetialsDto);
+    } catch (err) {
       throw new InternalServerErrorException();
     }
   }

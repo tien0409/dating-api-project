@@ -10,6 +10,9 @@ import { SharedModule } from './shared/shared.module';
     AuthModule,
     MongooseModule.forRoot(
       'mongodb+srv://stone0409:leanhtien@cluster0.ae0l5o3.mongodb.net/?retryWrites=true&w=majority',
+      {
+        dbName: 'Dating',
+      },
     ),
     UsersModule,
     BaseModule,
