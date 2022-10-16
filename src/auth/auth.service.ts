@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+
 import { UsersRepository } from 'src/users/users.repository';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 
@@ -8,6 +10,8 @@ export class AuthService {
 
   async signUp(authCredetialsDto: AuthCredentialsDTO) {
     const { username, password } = authCredetialsDto;
-    return this.usersRepository.create({ username, password });
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+    return this.usersRepository.create({ username, password: hashedPassword });
   }
 }
