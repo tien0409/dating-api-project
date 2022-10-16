@@ -6,14 +6,17 @@ import {
   HttpStatus,
   InternalServerErrorException,
   Post,
+  Req,
+  Res,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 import { AUTH_ROUTE } from './utils/routes';
 
 @Controller(AUTH_ROUTE)
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   async signUp(@Body() authCredentialsDto: AuthCredentialsDTO) {
@@ -31,9 +34,19 @@ export class AuthController {
   }
 
   @Post('signin')
+  /* @UseGuards(AuthGuard('jwt')) */
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body() authCredetialsDto: AuthCredentialsDTO) {
+  async signIn(
+    @Body() authCredetialsDto: AuthCredentialsDTO,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     try {
+      const { user } = req;
+      const cookie = this.authService.getCookieWithJwtToken({
+        username: (user as AuthCredentialsDTO).username,
+      });
+      res.setHeader('Set-Cookie', cookie);
       return this.authService.signIn(authCredetialsDto);
     } catch (err) {
       throw new InternalServerErrorException();

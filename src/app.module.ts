@@ -1,22 +1,26 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from './auth/auth.module';
-import { BaseModule } from './base/base.module';
-import { UsersModule } from './users/users.module';
-import { SharedModule } from './shared/shared.module';
+import { ConfigModule } from '@nestjs/config';
+
+import { AuthModule } from './modules/auth/auth.module';
+import { BaseModule } from './modules/base/base.module';
+import { UsersModule } from './modules/users/users.module';
+import envConfigs from './configs/env.config';
+import { MongoConfig } from './configs/mongodb.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: ['.env.development'],
+      load: [envConfigs],
+    }),
     AuthModule,
-    MongooseModule.forRoot(
-      'mongodb+srv://stone0409:leanhtien@cluster0.ae0l5o3.mongodb.net/?retryWrites=true&w=majority',
-      {
-        dbName: 'Dating',
-      },
-    ),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: MongoConfig,
+    }),
     UsersModule,
     BaseModule,
-    SharedModule,
   ],
   controllers: [],
   providers: [],
