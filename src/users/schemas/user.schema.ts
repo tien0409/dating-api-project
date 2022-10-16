@@ -6,7 +6,7 @@ export type UserDocument = User & Document;
 
 @Schema()
 export class User extends BaseSchema {
-  @Prop({ required: true, minlength: 4, maxlength: 12 })
+  @Prop({ required: true, unique: true, minlength: 4, maxlength: 12 })
   username: string;
 
   @Prop({ required: true, minlength: 8 })

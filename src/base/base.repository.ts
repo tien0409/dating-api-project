@@ -29,7 +29,7 @@ export abstract class BaseRepository<T extends Document> {
 
   async create(modelData: unknown): Promise<T> {
     const entity = new this.model(modelData);
-    return entity.save();
+    return await entity.save();
   }
 
   async deleteOne(id: string): Promise<boolean> {
