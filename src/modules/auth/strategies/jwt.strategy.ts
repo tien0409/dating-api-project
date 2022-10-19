@@ -3,13 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UsersRepository } from 'src/modules/users/users.repository';
+import { UsersService } from 'src/modules/users/users.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
     private readonly configService: ConfigService,
   ) {
     super({
@@ -22,9 +22,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
-    const { username } = payload;
-    const user = this.usersRepository.findOne({ username });
+  async validate(jwtPayload: JwtPayload) {
+    const { username } = jwtPayload;
+    const user = await this.usersService.getByUsername(username);
     if (!user) {
       throw new UnauthorizedException('Please check your login credetials');
     }

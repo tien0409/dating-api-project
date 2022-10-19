@@ -22,6 +22,10 @@ export class AuthService {
     )}`;
   }
 
+  getCookieForLogout() {
+    return `Authentication=; HttpOnly; Path=/; Max-age=0`;
+  }
+
   async signUp(authCredetialsDto: AuthCredentialsDTO) {
     const { username, password } = authCredetialsDto;
     const salt = await bcrypt.genSalt();
@@ -29,7 +33,7 @@ export class AuthService {
     return this.usersService.createUser({ username, password: hashedPassword });
   }
 
-  async signIn(authCredetialsDto: AuthCredentialsDTO) {
+  async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
     const { username, password } = authCredetialsDto;
     const userExists = await this.usersService.getByUsername(username);
     if (!userExists) {
@@ -40,8 +44,6 @@ export class AuthService {
       throw new UnauthorizedException('Please check your login credetials');
     }
 
-    const payload: JwtPayload = { username };
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
+    return userExists;
   }
 }
