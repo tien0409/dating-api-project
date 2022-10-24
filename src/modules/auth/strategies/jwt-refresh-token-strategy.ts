@@ -7,27 +7,34 @@ import { UsersService } from 'src/modules/users/users.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtRefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh-token',
+) {
   constructor(
-    private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {
     super({
-      secretOrKey: configService.get('jwt.accessSecret'),
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          return req?.cookies?.Authentication;
+          return req?.cookies?.Refresh;
         },
       ]),
+      secretOrKey: configService.get('jwt.refreshSecret'),
+      passReqToCallback: true,
     });
   }
 
-  async validate(jwtPayload: JwtPayload) {
-    const { userId } = jwtPayload;
-    const user = await this.usersService.getUserById(userId);
-    if (!user) {
+  validate(req: Request, payload: JwtPayload) {
+    const refreshToken = req.cookies?.Refresh;
+    const user = this.usersService.getUserByRefreshToken(
+      refreshToken,
+      payload.userId,
+    );
+
+    if (!user)
       throw new UnauthorizedException('Please check your login credetials');
-    }
     return user;
   }
 }

@@ -15,15 +15,32 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  getCookieWithJwtToken(jwtPayload: JwtPayload) {
-    const token = this.jwtService.sign(jwtPayload);
+  getCookieWithJwtAccessToken(jwtPayload: JwtPayload) {
+    const token = this.jwtService.sign(jwtPayload, {
+      secret: this.configService.get('jwt.accessSecret'),
+      expiresIn: '10s',
+    });
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'jwt.expiresIn',
+      'jwt.accessExpiresIn',
     )}`;
   }
 
+  getCookieWithJwtRefreshToken(jwtPayload: JwtPayload) {
+    const token = this.jwtService.sign(jwtPayload, {
+      secret: this.configService.get('jwt.refreshSecret'),
+      expiresIn: this.configService.get('jwt.refreshExpiresIn') + 's',
+    });
+    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+      'jwt.refreshExpiresIn',
+    )}`;
+    return { cookie, token };
+  }
+
   getCookieForLogout() {
-    return `Authentication=; HttpOnly; Path=/; Max-age=0`;
+    return [
+      'Authentication=; HttpOnly; Path=/; Max-Age=0',
+      'Refresh=; HttpOnly; Path=/; Max-Age=0',
+    ];
   }
 
   async signUp(authCredetialsDto: AuthCredentialsDTO) {
@@ -35,7 +52,7 @@ export class AuthService {
 
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
     const { username, password } = authCredetialsDto;
-    const userExists = await this.usersService.getByUsername(username);
+    const userExists = await this.usersService.getUserByUsername(username);
     if (!userExists) {
       throw new UnauthorizedException('Please check your login credetials');
     }

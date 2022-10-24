@@ -13,6 +13,9 @@ export class User extends BaseSchema {
   password: string;
 
   @Prop()
+  refreshToken?: string;
+
+  @Prop()
   firstName?: string;
 
   @Prop()

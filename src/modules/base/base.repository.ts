@@ -11,11 +11,7 @@ export abstract class BaseRepository<T extends Document> {
     filterQuery: FilterQuery<T>,
     projection?: Record<string, unknown>,
   ): Promise<T | null> {
-    return this.model.findOne(filterQuery, {
-      _id: 0,
-      _v: 0,
-      ...projection,
-    });
+    return this.model.findOne(filterQuery, projection);
   }
 
   async findOneAndUpdate(
