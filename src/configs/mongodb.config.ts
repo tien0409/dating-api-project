@@ -14,6 +14,7 @@ export class MongoConfig implements MongooseOptionsFactory {
     | Promise<MongooseModuleOptions> {
     return {
       uri: this.configService.get('database.uri'),
-    };
+      dbName: this.configService.get('database.name'),
+    } as MongooseModuleOptions;
   }
 }

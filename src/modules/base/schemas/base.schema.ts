@@ -6,9 +6,8 @@ export type BaseDocument = BaseSchema & Document;
 
 @Schema()
 export class BaseSchema {
-  @Prop()
   @Transform(({ value }) => value.toString())
-  _id: string;
+  _id?: string;
 
   @Prop()
   createdAt?: Date;

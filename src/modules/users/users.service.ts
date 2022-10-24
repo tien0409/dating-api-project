@@ -34,8 +34,8 @@ export class UsersService {
     if (isMatchRefreshToken) return user;
   }
 
-  createUser(createUserDto: CreateUserDTO) {
-    return this.usersRepository.create(createUserDto);
+  async createUser(createUserDto: CreateUserDTO) {
+    return await this.usersRepository.create(createUserDto);
   }
 
   removeRefreshToken(userId: string) {
