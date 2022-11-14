@@ -20,7 +20,13 @@ import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard';
 import JwtRefreshTokenGuard from './guards/jwt-refresh-token.guard';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { AUTH_ROUTE } from './utils/routes';
+import {
+  AUTH_ROUTE,
+  LOGOUT_ROUTE,
+  REFRESH_ROUTE,
+  SIGN_IN_ROUTE,
+  SIGN_UP_ROUTE,
+} from './utils/routes';
 
 @Controller(AUTH_ROUTE)
 export class AuthController {
@@ -29,7 +35,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
-  @Post('signup')
+  @Post(SIGN_UP_ROUTE)
   async signUp(@Body() authCredentialsDto: AuthCredentialsDTO) {
     try {
       return await this.authService.signUp(authCredentialsDto);
@@ -44,7 +50,7 @@ export class AuthController {
     }
   }
 
-  @Post('signin')
+  @Post(SIGN_IN_ROUTE)
   @UseGuards(LocalAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
@@ -65,7 +71,7 @@ export class AuthController {
     }
   }
 
-  @Get('refresh')
+  @Get(REFRESH_ROUTE)
   @UseGuards(JwtRefreshTokenGuard)
   refresh(@Req() req, @Res() res) {
     const { user } = req;
@@ -77,7 +83,7 @@ export class AuthController {
     res.json({ data: user });
   }
 
-  @Post('logout')
+  @Post(LOGOUT_ROUTE)
   @UseGuards(JwtAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res() res: Response) {
