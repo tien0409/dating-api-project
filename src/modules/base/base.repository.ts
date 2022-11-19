@@ -23,6 +23,22 @@ export abstract class BaseRepository<T extends Document> {
     });
   }
 
+  async updateOne(
+    filterQuery: FilterQuery<T>,
+    updateEntityData: UpdateQuery<unknown>,
+  ): Promise<boolean> {
+    const updated = await this.model.updateOne(filterQuery, updateEntityData);
+    return updated.modifiedCount === 1;
+  }
+
+  async updateMany(
+    filterQuery: FilterQuery<T>,
+    updateEntityData: UpdateQuery<unknown>,
+  ): Promise<boolean> {
+    const updated = await this.model.updateMany(filterQuery, updateEntityData);
+    return updated.modifiedCount >= 1;
+  }
+
   async create(modelData: unknown): Promise<T> {
     const entity = new this.model(modelData);
     return await entity.save();
