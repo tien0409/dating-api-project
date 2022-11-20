@@ -1,7 +1,9 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { MailService } from '../mail/mail.service';
 
 import { UsersService } from '../users/users.service';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
@@ -13,6 +15,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   getCookieWithJwtAccessToken(jwtPayload: JwtPayload) {
@@ -47,10 +50,23 @@ export class AuthService {
     const { email, password } = authCredetialsDto;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    return await this.usersService.createUser({
+    const confirmationCode = this.jwtService.sign(
+      { email },
+      {
+        secret: this.configService.get('jwt.accessSecret'),
+        expiresIn: this.configService.get('jwt.mailExpiresIn'),
+      },
+    );
+
+    const newUser = await this.usersService.createUser({
       email,
       password: hashedPassword,
+      confirmationCode,
     });
+
+    await this.mailService.sendVerifyMail({ email, confirmationCode });
+
+    return newUser;
   }
 
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {

@@ -1,5 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3001,
+  clientURL: process.env.CLIENT_URL,
   database: {
     uri: process.env.DATABASE_URI,
     name: process.env.DATABASE_DB_NAME,
@@ -9,5 +10,12 @@ export default () => ({
     accessExpiresIn: parseInt(process.env.JWT_ACCESS_EXPIRES_IN, 10),
     refreshSecret: process.env.JWT_REFRESH_TOKEN_SECRET,
     refreshExpiresIn: parseInt(process.env.JWT_REFRESH_EXPIRES_IN, 10),
+    mailExpiresIn: parseInt(process.env.JWT_MAIL_EXPIRES_IN, 10),
+  },
+  mailer: {
+    host: process.env.MAILER_HOST,
+    port: parseInt(process.env.MAILER_PORT, 10),
+    username: process.env.MAILER_USERNAME,
+    password: process.env.MAILER_PASSWORD,
   },
 });

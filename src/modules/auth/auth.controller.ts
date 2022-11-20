@@ -39,7 +39,10 @@ export class AuthController {
   async signUp(@Body() authCredentialsDto: AuthCredentialsDTO, @Res() res) {
     try {
       await this.authService.signUp(authCredentialsDto);
-      res.json({ message: 'Register successfully!' });
+      res.json({
+        message:
+          'Register successfully! Please check your email to verify account.',
+      });
     } catch (err) {
       if (err.code === 11000) {
         throw new HttpException('Email already exists.', HttpStatus.CONFLICT);

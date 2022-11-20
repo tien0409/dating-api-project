@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import envConfigs from './configs/env.config';
 import { MongoConfig } from './configs/mongodb.config';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MongoConfig } from './configs/mongodb.config';
     BaseModule,
     AuthModule,
     UsersModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],

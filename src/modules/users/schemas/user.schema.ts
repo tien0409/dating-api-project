@@ -13,20 +13,34 @@ export class User extends BaseSchema {
   @Prop({ required: true, minlength: 8 })
   password: string;
 
-  @Prop()
-  refreshToken?: string;
+  @Prop({ maxlength: 15 })
+  username?: string;
 
   @Prop()
   firstName?: string;
 
   @Prop()
   lastName?: string;
+
+  @Prop()
+  bio?: string;
+
+  @Prop({ unique: true })
+  confirmationCode?: string;
+
+  @Prop({ default: null })
+  confirmationTime?: Date;
+
+  @Prop()
+  refreshToken?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.set('toJSON', {
   transform: (doc, ret, opt) => {
+    ret.id = ret._id;
     delete ret.password;
+    delete ret._id;
     return ret;
   },
 });
