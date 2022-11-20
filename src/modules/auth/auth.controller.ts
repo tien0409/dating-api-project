@@ -36,15 +36,13 @@ export class AuthController {
   ) {}
 
   @Post(SIGN_UP_ROUTE)
-  async signUp(@Body() authCredentialsDto: AuthCredentialsDTO) {
+  async signUp(@Body() authCredentialsDto: AuthCredentialsDTO, @Res() res) {
     try {
-      return await this.authService.signUp(authCredentialsDto);
+      await this.authService.signUp(authCredentialsDto);
+      res.json({ message: 'Register successfully!' });
     } catch (err) {
       if (err.code === 11000) {
-        throw new HttpException(
-          'Username already exists.',
-          HttpStatus.CONFLICT,
-        );
+        throw new HttpException('Email already exists.', HttpStatus.CONFLICT);
       }
       throw new InternalServerErrorException();
     }
@@ -65,7 +63,10 @@ export class AuthController {
       await this.usersService.updateFrefreshToken(token, jwtPayload.userId);
 
       res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
-      res.json({ data: user });
+      res.json({
+        data: user,
+        message: 'Login successfully!',
+      });
     } catch (err) {
       throw new InternalServerErrorException();
     }

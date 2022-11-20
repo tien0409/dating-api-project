@@ -20,8 +20,8 @@ export class UsersService {
     return this.usersRepository.findOne({ id: userId });
   }
 
-  getUserByUsername(username: string) {
-    return this.usersRepository.findOne({ username });
+  getUserByEmail(email: string) {
+    return this.usersRepository.findOne({ email });
   }
 
   async getUserByRefreshToken(refreshToken: string, userId: string) {

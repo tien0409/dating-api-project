@@ -44,24 +44,28 @@ export class AuthService {
   }
 
   async signUp(authCredetialsDto: AuthCredentialsDTO) {
-    const { username, password } = authCredetialsDto;
+    const { email, password } = authCredetialsDto;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     return await this.usersService.createUser({
-      username,
+      email,
       password: hashedPassword,
     });
   }
 
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
-    const { username, password } = authCredetialsDto;
-    const userExists = await this.usersService.getUserByUsername(username);
+    const { email, password } = authCredetialsDto;
+    const userExists = await this.usersService.getUserByEmail(email);
     if (!userExists) {
-      throw new UnauthorizedException('Please check your login credetials');
+      throw new UnauthorizedException(
+        'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại sau.',
+      );
     }
     const isMatchPassword = await bcrypt.compare(password, userExists.password);
     if (!isMatchPassword) {
-      throw new UnauthorizedException('Please check your login credetials');
+      throw new UnauthorizedException(
+        'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại sau.',
+      );
     }
 
     return userExists;
