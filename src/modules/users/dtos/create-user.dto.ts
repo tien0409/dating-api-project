@@ -1,10 +1,11 @@
 import { MinLength } from 'class-validator';
 import { IsOptional } from 'class-validator';
-import { IsEmail, IsString } from 'class-validator/types/decorator/decorators';
+import { IsString, Matches } from 'class-validator/types/decorator/decorators';
+import { emailRegex } from 'src/utils/regexes';
 
 export class CreateUserDTO {
   @IsString()
-  @IsEmail()
+  @Matches(emailRegex)
   email?: string;
 
   @IsString()

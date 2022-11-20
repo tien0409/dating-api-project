@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
+import { emailRegex } from 'src/utils/regexes';
 
 export type UserDocument = User & Document;
 
 @Schema()
 export class User extends BaseSchema {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, match: emailRegex })
   email: string;
 
   @Prop({ required: true, minlength: 8 })

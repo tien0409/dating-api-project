@@ -1,8 +1,9 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { emailRegex } from 'src/utils/regexes';
 
 export class AuthCredentialsDTO {
   @IsString()
-  @IsEmail()
+  @Matches(emailRegex)
   email?: string;
 
   @IsString()
