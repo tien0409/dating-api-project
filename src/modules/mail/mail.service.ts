@@ -1,5 +1,9 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -54,16 +58,20 @@ export class MailService {
   }
 
   async verifyMail(decodedConfirmationCode: JwtVerifyMail) {
-    const { email, exp } = decodedConfirmationCode;
-    const user = await this.userService.getByEmail(email);
+    try {
+      const { email, exp } = decodedConfirmationCode;
+      const user = await this.userService.getByEmail(email);
 
-    const timestampCurrent = new Date().getTime() / 1000;
+      const timestampCurrent = new Date().getTime() / 1000;
 
-    if (!user || user.confirmationTime || timestampCurrent > exp) {
-      throw new BadRequestException(
-        "You're email is already verified or the link is expired.",
-      );
+      if (!user || user.confirmationTime || timestampCurrent > exp) {
+        throw new BadRequestException(
+          "You're email is already verified or the link is expired.",
+        );
+      }
+      return this.userService.markEmailConfirmed(email);
+    } catch (err) {
+      throw new InternalServerErrorException(err);
     }
-    return this.userService.markEmailConfirmed(email);
   }
 }

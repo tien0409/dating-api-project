@@ -3,9 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
-  InternalServerErrorException,
   Post,
   Req,
   Res,
@@ -37,18 +35,12 @@ export class AuthController {
 
   @Post(SIGN_UP_ROUTE)
   async signUp(@Body() authCredentialsDto: AuthCredentialsDTO, @Res() res) {
-    try {
-      await this.authService.signUp(authCredentialsDto);
-      res.json({
-        message:
-          'Register successfully! Please check your email to verify account.',
-      });
-    } catch (err) {
-      if (err.code === 11000) {
-        throw new HttpException('Email already exists.', HttpStatus.CONFLICT);
-      }
-      throw new InternalServerErrorException();
-    }
+    await this.authService.signUp(authCredentialsDto);
+
+    res.json({
+      message:
+        'Register successfully! Please check your email to verify account.',
+    });
   }
 
   @Post(SIGN_IN_ROUTE)

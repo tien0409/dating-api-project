@@ -1,5 +1,9 @@
-import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -47,26 +51,33 @@ export class AuthService {
   }
 
   async signUp(authCredetialsDto: AuthCredentialsDTO) {
-    const { email, password } = authCredetialsDto;
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const confirmationCode = this.jwtService.sign(
-      { email },
-      {
-        secret: this.configService.get('jwt.accessSecret'),
-        expiresIn: this.configService.get('jwt.mailExpiresIn'),
-      },
-    );
+    try {
+      const { email, password } = authCredetialsDto;
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(password, salt);
+      const confirmationCode = this.jwtService.sign(
+        { email },
+        {
+          secret: this.configService.get('jwt.accessSecret'),
+          expiresIn: this.configService.get('jwt.mailExpiresIn'),
+        },
+      );
 
-    const newUser = await this.usersService.createUser({
-      email,
-      password: hashedPassword,
-      confirmationCode,
-    });
+      const newUser = await this.usersService.createUser({
+        email,
+        password: hashedPassword,
+        confirmationCode,
+      });
 
-    await this.mailService.sendVerifyMail({ email, confirmationCode });
+      await this.mailService.sendVerifyMail({ email, confirmationCode });
 
-    return newUser;
+      return newUser;
+    } catch (err) {
+      if (err.code === 11000) {
+        throw new ConflictException('Email already exists.');
+      }
+      throw new InternalServerErrorException();
+    }
   }
 
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
@@ -74,13 +85,13 @@ export class AuthService {
     const userExists = await this.usersService.getByEmail(email);
     if (!userExists) {
       throw new UnauthorizedException(
-        'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại sau.',
+        'Email or password is incorrect. Please try again.',
       );
     }
     const isMatchPassword = await bcrypt.compare(password, userExists.password);
     if (!isMatchPassword) {
       throw new UnauthorizedException(
-        'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại sau.',
+        'Email or password is incorrect. Please try again.',
       );
     }
 

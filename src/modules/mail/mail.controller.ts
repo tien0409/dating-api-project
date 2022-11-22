@@ -1,7 +1,6 @@
 import {
   Controller,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -25,23 +24,19 @@ export class MailController {
   async sendVerifyMail(@Req() req: Request) {
     const { user } = req;
 
-    await this.mailService.sendVerifyMail({
+    return await this.mailService.sendVerifyMail({
       email: (user as User).email,
     });
-    return;
   }
 
   @Post(VERIFY_MAIL)
   @HttpCode(HttpStatus.OK)
   async verifyMail(@Res() res: Response, @Param('token') token: string) {
-    try {
-      const decodedConfirmationCode =
-        this.mailService.decodeConfirmationCode(token);
-      await this.mailService.verifyMail(decodedConfirmationCode);
+    const decodedConfirmationCode =
+      this.mailService.decodeConfirmationCode(token);
 
-      res.json({ message: 'Verified mail successfully!' });
-    } catch (err) {
-      throw new HttpException(err.message, err?.response?.statusCode);
-    }
+    await this.mailService.verifyMail(decodedConfirmationCode);
+
+    res.json({ message: 'Verified mail successfully!' });
   }
 }
