@@ -883,26 +883,6 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@ts-nameof/common@^4.2.0":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@ts-nameof/common/-/common-4.2.1.tgz#76e6ab5b4a11c92b2a2a79bf133ae49b57d7efc3"
-  integrity sha512-bWwYOFTTd6Nq7RUqJalIii1su3OyR+N1W0smp5PzHGUVycHuJ7MRiyCQrWgMt1lbbp3GY6cvCttm7Zo5E7A1xQ==
-
-"@ts-nameof/transforms-babel@^4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@ts-nameof/transforms-babel/-/transforms-babel-4.2.1.tgz#3f804ad534fa945c6c48a9cfcd30f47961538595"
-  integrity sha512-4BG5+55JXI3bLzoEqHKPQm5t4JgK2Ae1chAD7w5jDdMI8j1mWqVeonMjNMNIm28dMYs41Qvep25/5hpg24JyOw==
-  dependencies:
-    "@ts-nameof/common" "^4.2.0"
-    "@ts-nameof/transforms-common" "^4.2.1"
-
-"@ts-nameof/transforms-common@^4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@ts-nameof/transforms-common/-/transforms-common-4.2.1.tgz#a38c18ef62f921ffcea7b4a9a693cb63301e23d3"
-  integrity sha512-mg6nkkHqNlKU1B15pEtiikSKadJSOxFFWpi7tEVB7Yhjx0PhoTcSe7oxK0fXHZGeoTGF2SMZjmCsGnbtfcgk6w==
-  dependencies:
-    "@ts-nameof/common" "^4.2.0"
-
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.9.tgz#df4907fc07a886922637b15e02d4cebc4c0021b2"
@@ -6477,13 +6457,6 @@ ts-loader@^9.2.3:
     enhanced-resolve "^5.0.0"
     micromatch "^4.0.0"
     semver "^7.3.4"
-
-ts-nameof.macro@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/ts-nameof.macro/-/ts-nameof.macro-4.2.2.tgz#d73f1d20843448f6c12b2ad93863b2fed6f7b213"
-  integrity sha512-Rh3vDVQ3nVhEMoM3fRMTMBHi/mjc+Hlmt9uuUPVpK32ZE+Dj6+FBaRi267sosleKcONB6TcoC5ObbHnmjsedRg==
-  dependencies:
-    "@ts-nameof/transforms-babel" "^4.2.1"
 
 ts-node@^10.0.0:
   version "10.9.1"

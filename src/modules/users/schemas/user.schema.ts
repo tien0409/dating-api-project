@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { emailRegex } from 'src/utils/regexes';
+import { Address, AddressSchema } from './address.schema';
+import { Gender, GenderSchema } from './gender.schema';
 
 export type UserDocument = User & Document;
 
@@ -25,6 +28,9 @@ export class User extends BaseSchema {
   @Prop()
   bio?: string;
 
+  @Prop()
+  dob?: Date;
+
   @Prop({ unique: true })
   confirmationCode?: string;
 
@@ -33,14 +39,38 @@ export class User extends BaseSchema {
 
   @Prop()
   refreshToken?: string;
+
+  @Prop({ type: GenderSchema })
+  @Type(() => Gender)
+  gender: Gender;
+
+  @Prop({ type: AddressSchema })
+  @Type(() => Address)
+  address: Address;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('photos', {
+  ref: 'UserPhoto',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('interestedInGender', {
+  ref: 'InterestedInGender',
+  localField: '_id',
+  foreignField: 'user',
+});
+
 UserSchema.set('toJSON', {
   transform: (doc, ret, opt) => {
     ret.id = ret._id;
+    ret.age = Date.now() - ret.dob.getTime();
+
     delete ret.password;
     delete ret._id;
+    delete ret.dob;
     return ret;
   },
 });
