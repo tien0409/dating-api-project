@@ -7,7 +7,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
@@ -21,10 +21,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ]),
     });
   }
-
   async validate(jwtPayload: JwtPayload) {
     const { userId } = jwtPayload;
-    const user = await this.usersService.getUserById(userId);
+    const user = await this.usersService.getById(userId);
     if (!user) {
       throw new UnauthorizedException('Please check your login credetials');
     }

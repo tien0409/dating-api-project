@@ -55,24 +55,20 @@ export class AuthController {
   @UseGuards(LocalAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
-    try {
-      const { user } = req;
-      const jwtPayload: JwtPayload = { userId: (user as User)._id };
-      const accessTokenCookie =
-        this.authService.getCookieWithJwtAccessToken(jwtPayload);
-      const { token, cookie } =
-        this.authService.getCookieWithJwtRefreshToken(jwtPayload);
+    const { user } = req;
+    const jwtPayload: JwtPayload = { userId: (user as User)._id };
+    const accessTokenCookie =
+      this.authService.getCookieWithJwtAccessToken(jwtPayload);
+    const { token, cookie } =
+      this.authService.getCookieWithJwtRefreshToken(jwtPayload);
 
-      await this.usersService.updateFrefreshToken(token, jwtPayload.userId);
+    await this.usersService.updateFrefreshToken(token, jwtPayload.userId);
 
-      res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
-      res.json({
-        data: user,
-        message: 'Login successfully!',
-      });
-    } catch (err) {
-      throw new InternalServerErrorException();
-    }
+    res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
+    res.json({
+      data: user,
+      message: 'Login successfully!',
+    });
   }
 
   @Get(REFRESH_ROUTE)

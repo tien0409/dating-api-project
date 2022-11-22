@@ -1,18 +1,21 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { VerifyEmail } from './interfaces/VerifyEmail';
+import { UsersService } from '../users/users.service';
+import { JwtVerifyMail } from './interfaces/JwtVerifyMail';
+import { VerifyMail } from './interfaces/VerifyMail';
 
 @Injectable()
 export class MailService {
   constructor(
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
+    private readonly userService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
-  getMailConfirmationCode(email: string) {
+  encodeConfirmationCode(email: string) {
     return this.jwtService.sign(
       { email },
       {
@@ -22,10 +25,17 @@ export class MailService {
     );
   }
 
-  sendVerifyMail(verifyEmail: VerifyEmail) {
+  decodeConfirmationCode(token: string): JwtVerifyMail {
+    return this.jwtService.verify(token, {
+      secret: this.configService.get('jwt.accessSecret'),
+      ignoreExpiration: true,
+    });
+  }
+
+  sendVerifyMail(verifyEmail: VerifyMail) {
     const { email } = verifyEmail;
     const confirmationCode =
-      verifyEmail?.confirmationCode || this.getMailConfirmationCode(email);
+      verifyEmail?.confirmationCode || this.encodeConfirmationCode(email);
 
     return this.mailerService.sendMail({
       to: email,
@@ -38,8 +48,22 @@ export class MailService {
             know about this then please delete this email.</p><br>\
 <b><a href='${this.configService.get(
         'clientURL',
-      )}/verify-account/${confirmationCode}'>\
+      )}/verify-mail/${confirmationCode}'>\
             Click here to verify your email</a></b>`,
     });
+  }
+
+  async verifyMail(decodedConfirmationCode: JwtVerifyMail) {
+    const { email, exp } = decodedConfirmationCode;
+    const user = await this.userService.getByEmail(email);
+
+    const timestampCurrent = new Date().getTime() / 1000;
+
+    if (!user || user.confirmationTime || timestampCurrent > exp) {
+      throw new BadRequestException(
+        "You're email is already verified or the link is expired.",
+      );
+    }
+    return this.userService.markEmailConfirmed(email);
   }
 }

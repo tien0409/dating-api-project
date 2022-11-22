@@ -16,16 +16,16 @@ export class UsersService {
     );
   }
 
-  getUserById(userId: string) {
+  getById(userId: string) {
     return this.usersRepository.findOne({ id: userId });
   }
 
-  getUserByEmail(email: string) {
+  getByEmail(email: string) {
     return this.usersRepository.findOne({ email });
   }
 
-  async getUserByRefreshToken(refreshToken: string, userId: string) {
-    const user = await this.getUserById(userId);
+  async getByRefreshToken(refreshToken: string, userId: string) {
+    const user = await this.getById(userId);
     const isMatchRefreshToken = await bcrypt.compare(
       refreshToken,
       user.refreshToken,
@@ -36,6 +36,13 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDTO) {
     return await this.usersRepository.create(createUserDto);
+  }
+
+  async markEmailConfirmed(email: string) {
+    return await this.usersRepository.updateOne(
+      { email },
+      { $set: { confirmationTime: new Date() } },
+    );
   }
 
   removeRefreshToken(userId: string) {

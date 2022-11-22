@@ -23,7 +23,7 @@ export class AuthService {
       secret: this.configService.get('jwt.accessSecret'),
       expiresIn: '10s',
     });
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+    return `Authentication=${token}; Path=/; Max-Age=${this.configService.get(
       'jwt.accessExpiresIn',
     )}`;
   }
@@ -33,7 +33,7 @@ export class AuthService {
       secret: this.configService.get('jwt.refreshSecret'),
       expiresIn: this.configService.get('jwt.refreshExpiresIn') + 's',
     });
-    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+    const cookie = `Refresh=${token}; Path=/; Max-Age=${this.configService.get(
       'jwt.refreshExpiresIn',
     )}`;
     return { cookie, token };
@@ -71,7 +71,7 @@ export class AuthService {
 
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
     const { email, password } = authCredetialsDto;
-    const userExists = await this.usersService.getUserByEmail(email);
+    const userExists = await this.usersService.getByEmail(email);
     if (!userExists) {
       throw new UnauthorizedException(
         'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại sau.',
