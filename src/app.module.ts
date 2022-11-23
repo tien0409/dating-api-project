@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users/users.module';
 import envConfigs from './configs/env.config';
 import { MongoConfig } from './configs/mongodb.config';
 import { MailModule } from './modules/mail/mail.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MailModule } from './modules/mail/mail.module';
     AuthModule,
     UsersModule,
     MailModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

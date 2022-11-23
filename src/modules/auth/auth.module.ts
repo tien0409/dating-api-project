@@ -36,5 +36,6 @@ import { MailService } from '../mail/mail.service';
     JwtRefreshTokenStrategy,
   ],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

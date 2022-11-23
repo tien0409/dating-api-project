@@ -7,7 +7,7 @@ import { UsersRepository } from './users.repository';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async updateFrefreshToken(refreshToken: string, userId: string) {
+  async updateRefreshToken(refreshToken: string, userId: string) {
     const salt = await bcrypt.genSalt();
     const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
     await this.usersRepository.findOneAndUpdate(

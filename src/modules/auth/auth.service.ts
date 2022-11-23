@@ -97,4 +97,11 @@ export class AuthService {
 
     return userExists;
   }
+
+  async getUserFromAuthenticationToken(authenticationToken: string) {
+    const payload: JwtPayload = this.jwtService.verify(authenticationToken, {
+      secret: this.configService.get('jwt.accessSecret'),
+    });
+    if (payload.userId) return this.usersService.getById(payload.userId);
+  }
 }

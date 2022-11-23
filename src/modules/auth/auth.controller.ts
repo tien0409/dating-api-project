@@ -54,7 +54,7 @@ export class AuthController {
     const { token, cookie } =
       this.authService.getCookieWithJwtRefreshToken(jwtPayload);
 
-    await this.usersService.updateFrefreshToken(token, jwtPayload.userId);
+    await this.usersService.updateRefreshToken(token, jwtPayload.userId);
 
     res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
     res.json({
