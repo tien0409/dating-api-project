@@ -18,13 +18,13 @@ export class User extends BaseSchema {
   @Prop({ required: true, minlength: 8 })
   password: string;
 
-  @Prop({ maxlength: 15 })
-  username?: string;
+  /* @Prop({ maxlength: 15 }) */
+  /* username?: string; */
 
-  @Prop()
+  @Prop({ maxlength: 20 })
   firstName?: string;
 
-  @Prop()
+  @Prop({ maxlength: 15 })
   lastName?: string;
 
   fullName: string;
@@ -34,6 +34,8 @@ export class User extends BaseSchema {
 
   @Prop()
   dob?: Date;
+
+  age?: number;
 
   @Prop({ unique: true })
   confirmationCode?: string;
@@ -57,6 +59,12 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.virtual('fullName').get(function (this: UserDocument) {
   return `${this.firstName} ${this.lastName}`;
+});
+
+UserSchema.virtual('age').get(function (this: UserDocument) {
+  return this.dob
+    ? Math.floor((Date.now() - this.dob.getTime()) / 3.15576e10)
+    : null;
 });
 
 UserSchema.virtual('photos', {
@@ -92,7 +100,7 @@ UserSchema.virtual('participants', {
 UserSchema.set('toJSON', {
   transform: (doc, ret, opt) => {
     ret.id = ret._id;
-    ret.age = Date.now() - ret.dob.getTime();
+    ret.age = Date.now() - ret.dob?.getTime();
 
     delete ret.password;
     delete ret._id;

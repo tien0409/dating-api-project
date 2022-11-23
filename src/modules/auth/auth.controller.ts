@@ -24,6 +24,7 @@ import {
   REFRESH_ROUTE,
   SIGN_IN_ROUTE,
   SIGN_UP_ROUTE,
+  USER_AUTH,
 } from './utils/routes';
 
 @Controller(AUTH_ROUTE)
@@ -48,11 +49,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
     const { user } = req;
-    const jwtPayload: JwtPayload = { userId: (user as User)._id };
-    const accessTokenCookie =
-      this.authService.getCookieWithJwtAccessToken(jwtPayload);
-    const { token, cookie } =
-      this.authService.getCookieWithJwtRefreshToken(jwtPayload);
+    const jwtPayload: JwtPayload = { userId: (user as User)._id.toString() };
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      jwtPayload,
+    );
+    const {
+      token,
+      cookie,
+    } = await this.authService.getCookieWithJwtRefreshToken(jwtPayload);
 
     await this.usersService.updateRefreshToken(token, jwtPayload.userId);
 
@@ -61,6 +65,14 @@ export class AuthController {
       data: user,
       message: 'Login successfully!',
     });
+  }
+
+  @Get(USER_AUTH)
+  @UseGuards(JwtAuthenticationGuard)
+  getUerAuth(@Req() req: Request) {
+    const { user } = req;
+
+    return this.usersService.getById((user as User)._id);
   }
 
   @Get(REFRESH_ROUTE)
@@ -72,7 +84,7 @@ export class AuthController {
     });
 
     res.setHeader('Set-Cookie', accessTokenCookie);
-    res.json({ data: user });
+    return res.json({ data: user });
   }
 
   @Post(LOGOUT_ROUTE)

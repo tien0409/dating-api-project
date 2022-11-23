@@ -14,7 +14,7 @@ export const RelationshipTypeSchema =
   SchemaFactory.createForClass(RelationshipType);
 
 RelationshipTypeSchema.virtual('interestedInRelations', {
-  ref: "InterestedInRelation",
+  ref: 'InterestedInRelation',
   localField: '_id',
   foreignField: 'relationshipType',
 });

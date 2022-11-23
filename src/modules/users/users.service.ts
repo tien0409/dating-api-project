@@ -11,13 +11,13 @@ export class UsersService {
     const salt = await bcrypt.genSalt();
     const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
     await this.usersRepository.findOneAndUpdate(
-      { id: userId },
+      { _id: userId },
       { $set: { refreshToken: refreshTokenHashed } },
     );
   }
 
   getById(userId: string) {
-    return this.usersRepository.findOne({ id: userId });
+    return this.usersRepository.findOne({ _id: userId });
   }
 
   getByEmail(email: string) {

@@ -1,8 +1,7 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { SchemaTypes, Types } from 'mongoose';
+import { SchemaTypes, Types, Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { User } from 'src/modules/users/schemas/user.schema';
-import { Participant } from './participant.schema';
 
 export type ConversationDocument = Conversation & Document;
 
@@ -21,7 +20,7 @@ export class Conversation extends BaseSchema {
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
 
 ConversationSchema.virtual('participants', {
-  ref: "Participant",
+  ref: 'Participant',
   localField: '_id',
   foreignField: 'conversation',
 });

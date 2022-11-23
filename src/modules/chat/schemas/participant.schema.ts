@@ -11,6 +11,9 @@ export type ParticipantDocument = Participant & Document;
 
 @Schema()
 export class Participant extends BaseSchema {
+  @Prop({ required: true, unique: true })
+  hashedToken: string;
+
   @Prop({ required: true })
   timeJoined: Date;
 

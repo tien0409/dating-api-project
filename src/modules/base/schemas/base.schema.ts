@@ -1,4 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Transform } from 'class-transformer';
 import { Document } from 'mongoose';
 
@@ -9,6 +9,8 @@ export class BaseSchema {
   @Transform(({ value }) => value.toString())
   _id?: string;
 
+  id: string;
+
   @Prop()
   createdAt?: Date;
 
@@ -18,3 +20,9 @@ export class BaseSchema {
   @Prop()
   deletedAt?: Date;
 }
+
+const _BaseSchema = SchemaFactory.createForClass(BaseSchema);
+
+_BaseSchema.virtual('id').get(function (this: BaseDocument) {
+  return this._id.toString();
+});

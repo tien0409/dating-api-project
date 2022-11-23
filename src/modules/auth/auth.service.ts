@@ -7,10 +7,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { MailService } from '../mail/mail.service';
 
 import { UsersService } from '../users/users.service';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
+import { MailService } from '../mail/mail.service';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
@@ -25,14 +25,14 @@ export class AuthService {
   getCookieWithJwtAccessToken(jwtPayload: JwtPayload) {
     const token = this.jwtService.sign(jwtPayload, {
       secret: this.configService.get('jwt.accessSecret'),
-      expiresIn: '10s',
+      expiresIn: this.configService.get('jwt.accessExpiresIn'),
     });
     return `Authentication=${token}; Path=/; Max-Age=${this.configService.get(
       'jwt.accessExpiresIn',
     )}`;
   }
 
-  getCookieWithJwtRefreshToken(jwtPayload: JwtPayload) {
+  async getCookieWithJwtRefreshToken(jwtPayload: JwtPayload) {
     const token = this.jwtService.sign(jwtPayload, {
       secret: this.configService.get('jwt.refreshSecret'),
       expiresIn: this.configService.get('jwt.refreshExpiresIn') + 's',
@@ -40,6 +40,7 @@ export class AuthService {
     const cookie = `Refresh=${token}; Path=/; Max-Age=${this.configService.get(
       'jwt.refreshExpiresIn',
     )}`;
+
     return { cookie, token };
   }
 
