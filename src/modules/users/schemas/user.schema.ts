@@ -2,9 +2,14 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
+import { Conversation } from 'src/modules/chat/schemas/conversation.schema';
+import { Participant } from 'src/modules/chat/schemas/participant.schema';
 import { emailRegex } from 'src/utils/regexes';
 import { Address, AddressSchema } from './address.schema';
 import { Gender, GenderSchema } from './gender.schema';
+import { InterestedInGender } from './interested-in-gender.schema';
+import { InterestedInRelation } from './interested-in-relation.schema';
+import { UserPhoto } from './user-photo.schema';
 
 export type UserDocument = User & Document;
 
@@ -57,8 +62,26 @@ UserSchema.virtual('photos', {
   foreignField: 'user',
 });
 
-UserSchema.virtual('interestedInGender', {
+UserSchema.virtual('interestedInGenders', {
   ref: 'InterestedInGender',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('interestedInRelations', {
+  ref: 'InterestedInRelation',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('conversations', {
+  ref: 'Conversation',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('participants', {
+  ref: 'Participant',
   localField: '_id',
   foreignField: 'user',
 });

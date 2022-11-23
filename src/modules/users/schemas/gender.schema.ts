@@ -1,9 +1,10 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 
 export type GenderDocument = Gender & Document;
 
+@Schema({ toJSON: { virtuals: true } })
 export class Gender extends BaseSchema {
   @Prop({ required: true, unique: true })
   name: string;
@@ -11,7 +12,7 @@ export class Gender extends BaseSchema {
 
 export const GenderSchema = SchemaFactory.createForClass(Gender);
 
-GenderSchema.virtual('interestedInGender', {
+GenderSchema.virtual('interestedInGenders', {
   ref: 'InterestedInGender',
   localField: '_id',
   foreignField: 'gender',
