@@ -2,18 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
-import { Conversation } from 'src/modules/chat/schemas/conversation.schema';
-import { Participant } from 'src/modules/chat/schemas/participant.schema';
 import { emailRegex } from 'src/utils/regexes';
 import { Address, AddressSchema } from './address.schema';
 import { Gender, GenderSchema } from './gender.schema';
-import { InterestedInGender } from './interested-in-gender.schema';
-import { InterestedInRelation } from './interested-in-relation.schema';
-import { UserPhoto } from './user-photo.schema';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({
+  toJSON: { virtuals: true },
+})
 export class User extends BaseSchema {
   @Prop({ required: true, unique: true, match: emailRegex })
   email: string;
@@ -29,6 +26,8 @@ export class User extends BaseSchema {
 
   @Prop()
   lastName?: string;
+
+  fullName: string;
 
   @Prop()
   bio?: string;
@@ -55,6 +54,10 @@ export class User extends BaseSchema {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('fullName').get(function (this: UserDocument) {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 UserSchema.virtual('photos', {
   ref: 'UserPhoto',
