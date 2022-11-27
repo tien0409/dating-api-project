@@ -25,7 +25,7 @@ import {
   SIGN_IN_ROUTE,
   SIGN_UP_ROUTE,
   USER_AUTH,
-} from './utils/routes';
+} from 'src/configs/routes';
 
 @Controller(AUTH_ROUTE)
 export class AuthController {

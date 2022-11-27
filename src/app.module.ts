@@ -9,6 +9,7 @@ import envConfigs from './configs/env.config';
 import { MongoConfig } from './configs/mongodb.config';
 import { MailModule } from './modules/mail/mail.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -25,8 +26,8 @@ import { ChatModule } from './modules/chat/chat.module';
     UsersModule,
     MailModule,
     ChatModule,
+    CloudinaryModule,
   ],
   controllers: [],
-  providers: [],
 })
 export class AppModule {}

@@ -14,7 +14,7 @@ import {
   MAIL_ROUTE,
   SEND_VERIFY_MAIL_ROUTE,
   VERIFY_MAIL_ROUTE,
-} from '../auth/utils/routes';
+} from 'src/configs/routes';
 import { User } from '../users/schemas/user.schema';
 import { MailService } from './mail.service';
 
