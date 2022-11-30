@@ -48,7 +48,7 @@ export class AuthController {
   @UseGuards(LocalAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
-    const { user } = req;
+    const user = req.user as User;
     const jwtPayload: JwtPayload = { userId: (user as User)._id.toString() };
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       jwtPayload,
@@ -62,7 +62,9 @@ export class AuthController {
 
     res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
     res.json({
-      data: user,
+      data: {
+        accountCreated: !!user?.age
+      },
       message: 'Login successfully!',
     });
   }
