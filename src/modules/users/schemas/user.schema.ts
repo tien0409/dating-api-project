@@ -5,6 +5,7 @@ import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address, AddressSchema } from './address.schema';
 import { Gender, GenderSchema } from './gender.schema';
 import { UserLogin, UserLoginSchema } from './user-login.schema';
+import { UserRole, UserRoleSchema } from './user-role.schema';
 
 export type UserDocument = User & Document;
 
@@ -31,6 +32,10 @@ export class User extends BaseSchema {
   @Prop({ type: UserLoginSchema })
   @Type(() => UserLogin)
   userLogin: UserLogin;
+
+  @Prop({ type: UserRoleSchema })
+  @Type(() => UserRole)
+  userRole: UserRole;
 
   @Prop({ type: GenderSchema })
   @Type(() => Gender)

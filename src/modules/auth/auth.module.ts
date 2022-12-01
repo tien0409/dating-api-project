@@ -8,7 +8,7 @@ import { MailModule } from 'src/modules/mail/mail.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
-import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token-strategy';
+import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token.strategy';
 import { MailService } from '../mail/mail.service';
 
 @Module({
