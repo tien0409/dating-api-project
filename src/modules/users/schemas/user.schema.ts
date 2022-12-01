@@ -33,7 +33,7 @@ export class User extends BaseSchema {
   bio?: string;
 
   @Prop()
-  dob?: Date;
+  birthday?: Date;
 
   age?: number;
 
@@ -62,8 +62,8 @@ UserSchema.virtual('fullName').get(function (this: UserDocument) {
 });
 
 UserSchema.virtual('age').get(function (this: UserDocument) {
-  return this.dob
-    ? Math.floor((Date.now() - this.dob.getTime()) / 3.15576e10)
+  return this.birthday
+    ? Math.floor((Date.now() - this.birthday.getTime()) / 3.15576e10)
     : null;
 });
 
@@ -100,7 +100,7 @@ UserSchema.virtual('participants', {
 UserSchema.set('toJSON', {
   transform: (doc, ret, opt) => {
     ret.id = ret._id;
-    ret.age = Date.now() - ret.dob?.getTime();
+    ret.age = Date.now() - ret.birthday?.getTime();
 
     delete ret.password;
     delete ret._id;

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from './dtos/create-user.dto';
+import { UpdateProfileDTO } from './dtos/update-profile.dto';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -49,6 +50,14 @@ export class UsersService {
     return this.usersRepository.findOneAndUpdate(
       { id: userId },
       { $set: { refreshToken: null } },
+    );
+  }
+
+  async createProfile(userId: string, updateProfileDto: UpdateProfileDTO) {
+    console.log('updateProfileDto', updateProfileDto);
+    return this.usersRepository.updateOne(
+      { _id: userId },
+      { ...updateProfileDto },
     );
   }
 }
