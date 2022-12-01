@@ -23,8 +23,6 @@ export class UsersController {
     @Req() req: Request,
   ) {
     const user = req.user as User;
-    console.log('updateProfileDto', updateProfileDto);
-    console.log('user', user);
     return this.usersService.createProfile(user._id, updateProfileDto);
   }
 }

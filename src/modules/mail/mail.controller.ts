@@ -29,7 +29,7 @@ export class MailController {
     const { user } = req;
 
     return await this.mailService.sendVerifyMail({
-      email: (user as User).email,
+      email: (user as User).userLogin?.email,
     });
   }
 

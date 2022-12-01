@@ -64,7 +64,7 @@ export class MailService {
 
       const timestampCurrent = new Date().getTime() / 1000;
 
-      if (!user || user.confirmationTime || timestampCurrent > exp) {
+      if (!user || user.userLogin.confirmationTime || timestampCurrent > exp) {
         throw new BadRequestException(
           "You're email is already verified or the link is expired.",
         );

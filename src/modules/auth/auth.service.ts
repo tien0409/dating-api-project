@@ -89,7 +89,10 @@ export class AuthService {
         'Email or password is incorrect. Please try again.',
       );
     }
-    const isMatchPassword = await bcrypt.compare(password, userExists.password);
+    const isMatchPassword = await bcrypt.compare(
+      password,
+      userExists.userLogin.password,
+    );
     if (!isMatchPassword) {
       throw new UnauthorizedException(
         'Email or password is incorrect. Please try again.',

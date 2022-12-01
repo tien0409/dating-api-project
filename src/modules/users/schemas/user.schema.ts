@@ -2,9 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
-import { emailRegex } from 'src/utils/regexes';
 import { Address, AddressSchema } from './address.schema';
 import { Gender, GenderSchema } from './gender.schema';
+import { UserLogin, UserLoginSchema } from './user-login.schema';
 
 export type UserDocument = User & Document;
 
@@ -12,15 +12,6 @@ export type UserDocument = User & Document;
   toJSON: { virtuals: true },
 })
 export class User extends BaseSchema {
-  @Prop({ required: true, unique: true, match: emailRegex })
-  email: string;
-
-  @Prop({ required: true, minlength: 8 })
-  password: string;
-
-  /* @Prop({ maxlength: 15 }) */
-  /* username?: string; */
-
   @Prop({ maxlength: 20 })
   firstName?: string;
 
@@ -37,14 +28,9 @@ export class User extends BaseSchema {
 
   age?: number;
 
-  @Prop({ unique: true })
-  confirmationCode?: string;
-
-  @Prop({ default: null })
-  confirmationTime?: Date;
-
-  @Prop()
-  refreshToken?: string;
+  @Prop({ type: UserLoginSchema })
+  @Type(() => UserLogin)
+  userLogin: UserLogin;
 
   @Prop({ type: GenderSchema })
   @Type(() => Gender)

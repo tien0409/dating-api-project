@@ -1,0 +1,28 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { BaseSchema } from 'src/modules/base/schemas/base.schema';
+import { emailRegex } from 'src/utils/regexes';
+
+export type UserLoginDocument = UserLogin & Document;
+
+@Schema({
+  toJSON: { virtuals: true },
+})
+export class UserLogin extends BaseSchema {
+  @Prop({ required: true, unique: true, match: emailRegex })
+  email: string;
+
+  @Prop({ required: true, minlength: 8 })
+  password: string;
+
+  @Prop({ unique: true })
+  confirmationCode?: string;
+
+  @Prop({ default: null })
+  confirmationTime?: Date;
+
+  @Prop()
+  refreshToken?: string;
+}
+
+export const UserLoginSchema = SchemaFactory.createForClass(UserLogin);
