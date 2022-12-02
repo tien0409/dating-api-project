@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address, AddressSchema } from './address.schema';
-import { Gender, GenderSchema } from './gender.schema';
+import { Gender, GenderSchema } from '../../genders/gender.schema';
 import { UserLogin, UserLoginSchema } from './user-login.schema';
 import { UserRole, UserRoleSchema } from './user-role.schema';
 

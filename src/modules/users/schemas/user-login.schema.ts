@@ -6,6 +6,7 @@ import { emailRegex } from 'src/utils/regexes';
 export type UserLoginDocument = UserLogin & Document;
 
 @Schema({
+  collection: 'user-logins',
   toJSON: { virtuals: true },
 })
 export class UserLogin extends BaseSchema {

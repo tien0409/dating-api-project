@@ -5,7 +5,7 @@ import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 export type UserRoleDocument = UserRole & Document;
 
 @Schema({
-  toJSON: { virtuals: true },
+  collection: 'user-roles',
 })
 export class UserRole extends BaseSchema {
   @Prop({ required: true, unique: true })

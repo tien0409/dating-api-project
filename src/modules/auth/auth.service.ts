@@ -84,6 +84,7 @@ export class AuthService {
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
     const { email, password } = authCredetialsDto;
     const userExists = await this.usersService.getByEmail(email);
+    console.log('userExists', userExists);
     if (!userExists) {
       throw new UnauthorizedException(
         'Email or password is incorrect. Please try again.',

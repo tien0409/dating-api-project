@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from './dtos/create-user.dto';
 import { UpdateProfileDTO } from './dtos/update-profile.dto';
-import { UserLoginRepository } from './repositories/user-login.repository';
+import { UserLoginsRepository } from './repositories/user-logins.repository';
 import { UsersRepository } from './repositories/users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly userLoginRepository: UserLoginRepository
+    private readonly userLoginRepository: UserLoginsRepository,
   ) {}
 
   async updateRefreshToken(refreshToken: string, userId: string) {
@@ -17,7 +17,7 @@ export class UsersService {
     const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
     await this.usersRepository.findOneAndUpdate(
       { _id: userId },
-      { $set: { "userLogin.refreshToken": refreshTokenHashed } },
+      { $set: { 'userLogin.refreshToken': refreshTokenHashed } },
     );
   }
 
@@ -26,7 +26,7 @@ export class UsersService {
   }
 
   getByEmail(email: string) {
-    return this.usersRepository.findOne({ "userLogin.email": email });
+    return this.usersRepository.findOne({ 'userLogin.email': email });
   }
 
   async getByRefreshToken(refreshToken: string, userId: string) {
@@ -54,7 +54,7 @@ export class UsersService {
   removeRefreshToken(userId: string) {
     return this.usersRepository.findOneAndUpdate(
       { id: userId },
-      { $set: { "userLogin.refreshToken": null } },
+      { $set: { 'userLogin.refreshToken': null } },
     );
   }
 

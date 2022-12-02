@@ -10,6 +10,7 @@ import { MongoConfig } from './configs/mongodb.config';
 import { MailModule } from './modules/mail/mail.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { GendersModule } from './modules/genders/genders.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     MailModule,
     ChatModule,
     CloudinaryModule,
+    GendersModule,
   ],
   controllers: [],
 })

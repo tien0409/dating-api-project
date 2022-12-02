@@ -5,7 +5,9 @@ import { User } from './user.schema';
 
 export type UserPhotoDocument = UserPhoto & Document;
 
-@Schema()
+@Schema({
+  collection: 'user-photos',
+})
 export class UserPhoto extends BaseSchema {
   @Prop({ required: true })
   link?: string;
