@@ -1,17 +1,17 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { User } from '../users/schemas/user.schema';
-import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard';
@@ -26,44 +26,45 @@ import {
   SIGN_UP_ROUTE,
   USER_AUTH,
 } from 'src/configs/routes';
+import { UserLogin } from '../user-logins/user-login.schema';
 
 @Controller(AUTH_ROUTE)
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post(SIGN_UP_ROUTE)
   async signUp(@Body() authCredentialsDto: AuthCredentialsDTO, @Res() res) {
-    await this.authService.signUp(authCredentialsDto);
+    try {
+      await this.authService.signUp(authCredentialsDto);
 
-    res.json({
-      message:
-        'Register successfully! Please check your email to verify account.',
-    });
+      res.json({
+        message:
+          'Register successfully! Please check your email to verify account.',
+      });
+    } catch (err) {
+      if (err.code === 11000) {
+        throw new ConflictException('Email already exists.');
+      }
+      throw new InternalServerErrorException();
+    }
   }
 
   @Post(SIGN_IN_ROUTE)
   @UseGuards(LocalAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as User;
-    const jwtPayload: JwtPayload = { userId: (user as User)._id.toString() };
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+    const userLogin = req.user as UserLogin;
+    const jwtPayload: JwtPayload = {
+      userLoginId: userLogin._id.toString(),
+    };
+    const { accessTokenCookie, cookie } = await this.authService.signIn(
       jwtPayload,
     );
-    const {
-      token,
-      cookie,
-    } = await this.authService.getCookieWithJwtRefreshToken(jwtPayload);
-
-    await this.usersService.updateRefreshToken(token, jwtPayload.userId);
 
     res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
     res.json({
       data: {
-        accountCreated: !!user?.age
+        accountCreated: !!userLogin?.user,
       },
       message: 'Login successfully!',
     });
@@ -71,31 +72,32 @@ export class AuthController {
 
   @Get(USER_AUTH)
   @UseGuards(JwtAuthenticationGuard)
-  getUerAuth(@Req() req: Request) {
-    const { user } = req;
+  getUserAuth(@Req() req: Request) {
+    const userLogin = req.user as UserLogin;
 
-    return this.usersService.getById((user as User)._id);
+    return this.authService.getUserAuth(userLogin.id);
   }
 
   @Get(REFRESH_ROUTE)
   @UseGuards(JwtRefreshTokenGuard)
-  refresh(@Req() req, @Res() res) {
-    const { user } = req;
+  refresh(@Req() req: Request, @Res() res: Response) {
+    const userLogin = req.user as UserLogin;
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken({
-      userId: user.id,
+      userLoginId: userLogin._id,
     });
 
     res.setHeader('Set-Cookie', accessTokenCookie);
-    return res.json({ data: user });
+    return res.json({ data: userLogin });
   }
 
   @Post(LOGOUT_ROUTE)
   @UseGuards(JwtAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res() res: Response) {
-    const { user } = req;
-    await this.usersService.removeRefreshToken((user as User)._id);
-    res.setHeader('Set-Cookie', this.authService.getCookieForLogout());
+    const userLogin = req.user as UserLogin;
+    const cookie = await this.authService.logout(userLogin.id);
+
+    res.setHeader('Set-Cookie', cookie);
     res.json({});
   }
 }

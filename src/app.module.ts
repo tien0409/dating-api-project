@@ -11,6 +11,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { GendersModule } from './modules/genders/genders.module';
+import { UserLoginsModule } from './modules/user-logins/user-logins.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { GendersModule } from './modules/genders/genders.module';
     ChatModule,
     CloudinaryModule,
     GendersModule,
+    UserLoginsModule,
   ],
   controllers: [],
 })

@@ -10,11 +10,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token.strategy';
 import { MailService } from '../mail/mail.service';
+import { UserLoginsModule } from '../user-logins/user-logins.module';
 
 @Module({
   imports: [
     ConfigModule,
     UsersModule,
+    UserLoginsModule,
     PassportModule,
     MailModule,
     JwtModule.registerAsync({

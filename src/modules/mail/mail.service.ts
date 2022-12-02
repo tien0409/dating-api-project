@@ -9,13 +9,15 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { JwtVerifyMail } from './interfaces/JwtVerifyMail';
 import { VerifyMail } from './interfaces/VerifyMail';
+import { UserLoginsService } from '../user-logins/user-logins.service';
 
 @Injectable()
 export class MailService {
   constructor(
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
-    private readonly userService: UsersService,
+    private readonly usersService: UsersService,
+    private readonly userLoginsService: UserLoginsService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -44,7 +46,8 @@ export class MailService {
     return this.mailerService.sendMail({
       to: email,
       subject: 'Dating: Verify Email',
-      text: "This is a automated email verification request sent by the server.\
+      text:
+        "This is a automated email verification request sent by the server.\
             Please don't reply.",
       html: `\
             <h1>Dating: Email Verification Request</h1>\
@@ -60,16 +63,16 @@ export class MailService {
   async verifyMail(decodedConfirmationCode: JwtVerifyMail) {
     try {
       const { email, exp } = decodedConfirmationCode;
-      const user = await this.userService.getByEmail(email);
+      const user = await this.userLoginsService.getByEmail(email);
 
       const timestampCurrent = new Date().getTime() / 1000;
 
-      if (!user || user.userLogin.confirmationTime || timestampCurrent > exp) {
+      if (!user || user.confirmationTime || timestampCurrent > exp) {
         throw new BadRequestException(
           "You're email is already verified or the link is expired.",
         );
       }
-      return this.userService.markEmailConfirmed(email);
+      return this.userLoginsService.markEmailConfirmed(email);
     } catch (err) {
       throw new InternalServerErrorException(err);
     }

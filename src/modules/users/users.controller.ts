@@ -1,10 +1,18 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { CREATE_PROFILE_ROUTE, USERS_ROUTE } from 'src/configs/routes';
 import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard';
-import { UpdateProfileDTO } from './dtos/update-profile.dto';
-import { User } from './schemas/user.schema';
+import { CreateProfileDTO } from './dtos/create-profile.dto';
 import { UsersService } from './users.service';
+import { UserLogin } from '../user-logins/user-login.schema';
 
 @Controller(USERS_ROUTE)
 @UseGuards(JwtAuthenticationGuard)
@@ -18,11 +26,13 @@ export class UsersController {
   }
 
   @Post(CREATE_PROFILE_ROUTE)
-  createProfile(
-    @Body() updateProfileDto: UpdateProfileDTO,
+  async createProfile(
+    @Body() createProfileDto: CreateProfileDTO,
     @Req() req: Request,
+    @Res() res: Response,
   ) {
-    const user = req.user as User;
-    return this.usersService.createProfile(user._id, updateProfileDto);
+    const userLogin = req.user as UserLogin;
+    await this.usersService.createProfile(userLogin.id, createProfileDto);
+    return res.json();
   }
 }

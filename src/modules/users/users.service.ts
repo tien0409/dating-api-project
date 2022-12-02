@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { CreateProfileDTO } from './dtos/create-profile.dto';
+import { UsersRepository } from './users.repository';
 import { CreateUserDTO } from './dtos/create-user.dto';
-import { UpdateProfileDTO } from './dtos/update-profile.dto';
-import { UserLoginsRepository } from './repositories/user-logins.repository';
-import { UsersRepository } from './repositories/users.repository';
+import { UserLoginsRepository } from '../user-logins/user-logins.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly userLoginRepository: UserLoginsRepository,
+    private readonly userLoginsRepository: UserLoginsRepository,
   ) {}
 
   async updateRefreshToken(refreshToken: string, userId: string) {
@@ -21,47 +21,23 @@ export class UsersService {
     );
   }
 
+  getByUserLogin(userLoginId: string) {
+    return this.usersRepository.findOne({ 'userLogin._id': userLoginId });
+  }
+
   getById(userId: string) {
     return this.usersRepository.findOne({ _id: userId });
   }
 
-  getByEmail(email: string) {
-    return this.usersRepository.findOne({ 'userLogin.email': email });
-  }
-
-  async getByRefreshToken(refreshToken: string, userId: string) {
-    const user = await this.getById(userId);
-    const isMatchRefreshToken = await bcrypt.compare(
-      refreshToken,
-      user.userLogin.refreshToken,
-    );
-
-    if (isMatchRefreshToken) return user;
-  }
-
   async createUser(createUserDto: CreateUserDTO) {
-    const userLogin = await this.userLoginRepository.create(createUserDto);
-    return this.usersRepository.create({ userLogin });
+    return this.usersRepository.create(createUserDto);
   }
 
-  async markEmailConfirmed(email: string) {
-    return await this.usersRepository.updateOne(
-      { email },
-      { $set: { confirmationTime: new Date() } },
-    );
-  }
-
-  removeRefreshToken(userId: string) {
-    return this.usersRepository.findOneAndUpdate(
-      { id: userId },
-      { $set: { 'userLogin.refreshToken': null } },
-    );
-  }
-
-  async createProfile(userId: string, updateProfileDto: UpdateProfileDTO) {
-    return this.usersRepository.updateOne(
-      { _id: userId },
-      { ...updateProfileDto },
+  async createProfile(userLoginId: string, createProfileDto: CreateProfileDTO) {
+    const newUser = await this.usersRepository.create(createProfileDto);
+    return await this.userLoginsRepository.updateOne(
+      { _id: userLoginId },
+      { $set: { user: newUser } },
     );
   }
 }

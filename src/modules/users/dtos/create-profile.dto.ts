@@ -2,12 +2,16 @@ import {
   IsArray,
   IsDateString,
   IsNotEmpty,
+  IsNotEmptyObject,
+  IsObject,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
 
-export class UpdateProfileDTO {
+import { Gender } from '../../genders/gender.schema';
+
+export class CreateProfileDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)
@@ -22,9 +26,9 @@ export class UpdateProfileDTO {
   @IsNotEmpty()
   birthday?: Date;
 
-  @IsString()
-  @IsNotEmpty()
-  gender?: string;
+  @IsObject()
+  @IsNotEmptyObject()
+  gender?: Gender;
 
   @IsArray()
   @IsNotEmpty()

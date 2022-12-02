@@ -4,7 +4,10 @@ import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address, AddressSchema } from './address.schema';
 import { Gender, GenderSchema } from '../../genders/gender.schema';
-import { UserLogin, UserLoginSchema } from './user-login.schema';
+import {
+  UserLogin,
+  UserLoginSchema,
+} from '../../user-logins/user-login.schema';
 import { UserRole, UserRoleSchema } from './user-role.schema';
 
 export type UserDocument = User & Document;
@@ -28,10 +31,6 @@ export class User extends BaseSchema {
   birthday?: Date;
 
   age?: number;
-
-  @Prop({ type: UserLoginSchema })
-  @Type(() => UserLogin)
-  userLogin: UserLogin;
 
   @Prop({ type: UserRoleSchema })
   @Type(() => UserRole)
