@@ -2,8 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { emailRegex } from 'src/utils/regexes';
-import { User, UserSchema } from '../users/schemas/user.schema';
-import { Type } from 'class-transformer';
 
 export type UserLoginDocument = UserLogin & Document;
 
@@ -26,10 +24,6 @@ export class UserLogin extends BaseSchema {
 
   @Prop()
   refreshToken?: string;
-
-  @Prop({ type: UserSchema })
-  @Type(() => User)
-  user: User;
 }
 
 export const UserLoginSchema = SchemaFactory.createForClass(UserLogin);

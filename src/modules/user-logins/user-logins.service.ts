@@ -1,22 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { UserLoginsRepository } from './user-logins.repository';
 import { CreateUserLoginDTO } from './dtos/create-user-login.dto';
 import * as bcrypt from 'bcrypt';
+import { Model } from 'mongoose';
+import { UserLogin, UserLoginDocument } from './user-login.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class UserLoginsService {
-  constructor(private readonly userLoginsRepository: UserLoginsRepository) {}
+  constructor(
+    @InjectModel(UserLogin.name)
+    private readonly userLoginModel: Model<UserLoginDocument>,
+  ) {}
 
-  async getById(id: string) {
-    return (await this.userLoginsRepository.findOne({ _id: id })).populate(
-      'user',
+  getById(id: string) {
+    return this.userLoginModel.findById({ _id: id });
+  }
+
+  updateUserField(userLoginId: string, user: User) {
+    return this.userLoginModel.updateOne(
+      { _id: userLoginId },
+      { $set: { user } },
     );
   }
 
   async getByEmail(email: string) {
-    return (await this.userLoginsRepository.findOne({ email })).populate(
-      'user',
-    );
+    return (await this.userLoginModel.findOne({ email })).populate('user');
   }
 
   async getByRefreshToken(refreshToken: string, userId: string) {
@@ -30,11 +39,12 @@ export class UserLoginsService {
   }
 
   createUserLogin(createUserLoginDto: CreateUserLoginDTO) {
-    return this.userLoginsRepository.create(createUserLoginDto);
+    console.log("createUserLoginDto", createUserLoginDto);
+    return this.userLoginModel.create({... createUserLoginDto });
   }
 
-  async markEmailConfirmed(email: string) {
-    return await this.userLoginsRepository.updateOne(
+  markEmailConfirmed(email: string) {
+    return this.userLoginModel.updateOne(
       { email },
       { $set: { confirmationTime: new Date() } },
     );
@@ -43,14 +53,14 @@ export class UserLoginsService {
   async updateRefreshToken(refreshToken: string, userLoginId: string) {
     const salt = await bcrypt.genSalt();
     const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
-    await this.userLoginsRepository.findOneAndUpdate(
+    await this.userLoginModel.findOneAndUpdate(
       { _id: userLoginId },
       { $set: { refreshToken: refreshTokenHashed } },
     );
   }
 
   removeRefreshToken(userLoginId: string) {
-    return this.userLoginsRepository.findOneAndUpdate(
+    return this.userLoginModel.findOneAndUpdate(
       { id: userLoginId },
       { $set: { refreshToken: null } },
     );

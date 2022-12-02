@@ -25,11 +25,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(jwtPayload: JwtPayload) {
-    const { userLoginId } = jwtPayload;
-    const userLogin = await this.userLoginsService.getById(userLoginId);
-    if (!userLogin) {
+    const { userId } = jwtPayload;
+    const user = await this.usersService.getById(userId).populate('userLogin');
+    if (!user) {
       throw new UnauthorizedException('Please check your login credetials');
     }
-    return userLogin;
+    return user;
   }
 }

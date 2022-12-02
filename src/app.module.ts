@@ -12,6 +12,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { GendersModule } from './modules/genders/genders.module';
 import { UserLoginsModule } from './modules/user-logins/user-logins.module';
+import { UserPhotosModule } from './modules/user-photos/user-photos.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UserLoginsModule } from './modules/user-logins/user-logins.module';
     CloudinaryModule,
     GendersModule,
     UserLoginsModule,
+    UserPhotosModule,
   ],
   controllers: [],
 })

@@ -27,6 +27,7 @@ import {
   USER_AUTH,
 } from 'src/configs/routes';
 import { UserLogin } from '../user-logins/user-login.schema';
+import { User } from '../users/schemas/user.schema';
 
 @Controller(AUTH_ROUTE)
 export class AuthController {
@@ -53,9 +54,10 @@ export class AuthController {
   @UseGuards(LocalAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
-    const userLogin = req.user as UserLogin;
+    const user = req.user as User;
     const jwtPayload: JwtPayload = {
-      userLoginId: userLogin._id.toString(),
+      userId: user.id,
+      userLoginId: user.userLogin.id,
     };
     const { accessTokenCookie, cookie } = await this.authService.signIn(
       jwtPayload,
@@ -64,7 +66,7 @@ export class AuthController {
     res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
     res.json({
       data: {
-        accountCreated: !!userLogin?.user,
+        accountCreated: !!user?.age,
       },
       message: 'Login successfully!',
     });
@@ -73,21 +75,22 @@ export class AuthController {
   @Get(USER_AUTH)
   @UseGuards(JwtAuthenticationGuard)
   getUserAuth(@Req() req: Request) {
-    const userLogin = req.user as UserLogin;
+    const user = req.user as User;
 
-    return this.authService.getUserAuth(userLogin.id);
+    return this.authService.getUserAuth(user._id);
   }
 
   @Get(REFRESH_ROUTE)
   @UseGuards(JwtRefreshTokenGuard)
   refresh(@Req() req: Request, @Res() res: Response) {
-    const userLogin = req.user as UserLogin;
+    const user = req.user as User;
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken({
-      userLoginId: userLogin._id,
+      userId: user.id,
+      userLoginId: user.userLogin.id,
     });
 
     res.setHeader('Set-Cookie', accessTokenCookie);
-    return res.json({ data: userLogin });
+    return res.json({ data: user });
   }
 
   @Post(LOGOUT_ROUTE)

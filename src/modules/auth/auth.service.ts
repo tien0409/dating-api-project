@@ -71,9 +71,12 @@ export class AuthService {
       password: hashedPassword,
       confirmationCode,
     });
+    const newUser = await this.usersService.createUser({
+      userLogin: newUserLogin,
+    });
     await this.mailService.sendVerifyMail({ email, confirmationCode });
 
-    return newUserLogin;
+    return newUser;
   }
 
   async logout(userLoginId: string) {
@@ -84,25 +87,32 @@ export class AuthService {
     ];
   }
 
-  async getUserAuth(userLoginId: string) {
-    const userLogin = await this.userLoginsService.getById(userLoginId);
+  async getUserAuth(userId: string) {
+    const user = await this.usersService
+      .getById(userId)
+      .populate('userLogin', 'email')
+      .populate('photos');
+
     return {
-      ...userLogin.user,
-      email: userLogin.email,
+      ...user.toObject(),
+      email: user.userLogin.email,
+      userLogin: undefined,
     };
   }
 
   async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
     const { email, password } = authCredetialsDto;
-    const userLoginExists = await this.userLoginsService.getByEmail(email);
-    if (!userLoginExists) {
+    const userExist = await this.usersService
+      .getByEmail(email)
+      .populate('userLogin');
+    if (!userExist) {
       throw new UnauthorizedException(
         'Email or password is incorrect. Please try again.',
       );
     }
     const isMatchPassword = await bcrypt.compare(
       password,
-      userLoginExists.password,
+      userExist.userLogin.password,
     );
     if (!isMatchPassword) {
       throw new UnauthorizedException(
@@ -110,7 +120,7 @@ export class AuthService {
       );
     }
 
-    return userLoginExists;
+    return userExist;
   }
 
   async getUserLoginFromAuthenticationToken(authenticationToken: string) {

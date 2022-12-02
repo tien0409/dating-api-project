@@ -4,16 +4,17 @@ import { Document } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address, AddressSchema } from './address.schema';
 import { Gender, GenderSchema } from '../../genders/gender.schema';
+import { UserRole, UserRoleSchema } from './user-role.schema';
 import {
   UserLogin,
   UserLoginSchema,
 } from '../../user-logins/user-login.schema';
-import { UserRole, UserRoleSchema } from './user-role.schema';
 
 export type UserDocument = User & Document;
 
 @Schema({
-  toJSON: { virtuals: true },
+  toJSON: { virtuals: true, transform: true, getters: true },
+  toObject: { virtuals: true },
 })
 export class User extends BaseSchema {
   @Prop({ maxlength: 20 })
@@ -31,6 +32,10 @@ export class User extends BaseSchema {
   birthday?: Date;
 
   age?: number;
+
+  @Prop({ type: UserLoginSchema })
+  @Type(() => UserLogin)
+  userLogin: UserLogin;
 
   @Prop({ type: UserRoleSchema })
   @Type(() => UserRole)
@@ -53,7 +58,7 @@ UserSchema.virtual('fullName').get(function (this: UserDocument) {
 
 UserSchema.virtual('age').get(function (this: UserDocument) {
   return this.birthday
-    ? Math.floor((Date.now() - this.birthday.getTime()) / 3.15576e10)
+    ? Math.floor((new Date().getTime() - this.birthday.getTime()) / 3.15576e10)
     : null;
 });
 
@@ -90,11 +95,9 @@ UserSchema.virtual('participants', {
 UserSchema.set('toJSON', {
   transform: (doc, ret, opt) => {
     ret.id = ret._id;
-    ret.age = Date.now() - ret.birthday?.getTime();
 
-    delete ret.password;
     delete ret._id;
-    delete ret.dob;
+    delete ret._v;
     return ret;
   },
 });

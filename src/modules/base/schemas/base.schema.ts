@@ -4,12 +4,15 @@ import { Document } from 'mongoose';
 
 export type BaseDocument = BaseSchema & Document;
 
-@Schema()
+@Schema({
+  toJSON: { virtuals: true, transform: true },
+  toObject: { virtuals: true },
+})
 export class BaseSchema {
   @Transform(({ value }) => value.toString())
   _id?: string;
 
-  id: string;
+  id?: string;
 
   @Prop()
   createdAt?: Date;
@@ -23,6 +26,12 @@ export class BaseSchema {
 
 const _BaseSchema = SchemaFactory.createForClass(BaseSchema);
 
-_BaseSchema.virtual('id').get(function (this: BaseDocument) {
-  return this._id.toString();
+_BaseSchema.set('toJSON', {
+  transform: (doc, ret, opt) => {
+    ret.id = ret._id;
+
+    delete ret._id;
+    delete ret._v;
+    return ret;
+  },
 });

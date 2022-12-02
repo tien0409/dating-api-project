@@ -22,3 +22,5 @@ export const CREATE_PROFILE_ROUTE = 'create-profile';
 export const GENDERS_ROUTE = 'genders';
 
 export const USER_LOGINS_ROUTE = 'user-logins';
+
+export const USER_PHOTOS_ROUTE = 'user-photos';

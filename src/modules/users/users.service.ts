@@ -1,43 +1,61 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateProfileDTO } from './dtos/create-profile.dto';
-import { UsersRepository } from './users.repository';
 import { CreateUserDTO } from './dtos/create-user.dto';
-import { UserLoginsRepository } from '../user-logins/user-logins.repository';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import { UserLoginsService } from '../user-logins/user-logins.service';
+import { UserPhotosService } from '../user-photos/user-photos.service';
+import { UserPhoto } from '../user-photos/user-photo.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly userLoginsRepository: UserLoginsRepository,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly userLoginsService: UserLoginsService,
+    private readonly userPhotosService: UserPhotosService,
   ) {}
 
   async updateRefreshToken(refreshToken: string, userId: string) {
     const salt = await bcrypt.genSalt();
     const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
-    await this.usersRepository.findOneAndUpdate(
+    await this.userModel.findOneAndUpdate(
       { _id: userId },
       { $set: { 'userLogin.refreshToken': refreshTokenHashed } },
     );
   }
 
   getByUserLogin(userLoginId: string) {
-    return this.usersRepository.findOne({ 'userLogin._id': userLoginId });
+    return this.userModel.findOne({ 'userLogin._id': userLoginId });
+  }
+
+  getByEmail(email: string) {
+    return this.userModel.findOne({ 'userLogin.email': email });
   }
 
   getById(userId: string) {
-    return this.usersRepository.findOne({ _id: userId });
+    return this.userModel.findOne({ _id: userId });
   }
 
   async createUser(createUserDto: CreateUserDTO) {
-    return this.usersRepository.create(createUserDto);
+    return this.userModel.create(createUserDto);
   }
 
   async createProfile(userLoginId: string, createProfileDto: CreateProfileDTO) {
-    const newUser = await this.usersRepository.create(createProfileDto);
-    return await this.userLoginsRepository.updateOne(
-      { _id: userLoginId },
-      { $set: { user: newUser } },
+    const { userPhotos, ...createProfileData } = createProfileDto;
+    const newUser = await this.userModel.findOneAndUpdate(
+      { 'userLogin._id': userLoginId },
+      createProfileData,
     );
+
+    const userPhotosPayload = userPhotos.map<UserPhoto>((item) => ({
+      link: item,
+      user: newUser._id,
+    }));
+    await this.userPhotosService.createUserPhotos({
+      userPhotos: userPhotosPayload,
+    });
+    return this.userLoginsService.updateUserField(userLoginId, newUser);
   }
 }
