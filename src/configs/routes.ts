@@ -18,9 +18,4 @@ export const UPLOAD_MULTI_IMAGE = 'multi-image';
 export const USERS_ROUTE = 'users';
 export const UPDATE_PROFILE_ROUTE = 'update-profile';
 export const CREATE_PROFILE_ROUTE = 'create-profile';
-
 export const GENDERS_ROUTE = 'genders';
-
-export const USER_LOGINS_ROUTE = 'user-logins';
-
-export const USER_PHOTOS_ROUTE = 'user-photos';

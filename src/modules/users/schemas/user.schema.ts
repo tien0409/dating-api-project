@@ -1,42 +1,54 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { Document } from 'mongoose';
+
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address, AddressSchema } from './address.schema';
-import { Gender, GenderSchema } from '../../genders/gender.schema';
+import { Gender, GenderSchema } from './gender.schema';
 import { UserRole, UserRoleSchema } from './user-role.schema';
-import {
-  UserLogin,
-  UserLoginSchema,
-} from '../../user-logins/user-login.schema';
+import { UserPhoto } from './user-photo.schema';
+import { emailRegex } from '../../../utils/regexes';
 
 export type UserDocument = User & Document;
 
 @Schema({
-  toJSON: { virtuals: true, transform: true, getters: true },
-  toObject: { virtuals: true },
+  toJSON: { virtuals: true, getters: true, versionKey: false },
+  toObject: { virtuals: true, getters: true },
 })
 export class User extends BaseSchema {
+  fullName?: string;
+
+  age?: number;
+
+  @Prop({ required: true, unique: true, match: emailRegex })
+  email: string;
+
+  @Prop({ required: true, minlength: 8 })
+  password: string;
+
+  @Prop()
+  avatar?: string;
+
+  @Prop({ unique: true })
+  confirmationCode?: string;
+
+  @Prop({ default: null })
+  confirmationTime?: Date;
+
+  @Prop()
+  refreshToken?: string;
+
   @Prop({ maxlength: 20 })
   firstName?: string;
 
   @Prop({ maxlength: 15 })
   lastName?: string;
 
-  fullName: string;
-  avatar: string;
-
   @Prop()
   bio?: string;
 
   @Prop()
   birthday?: Date;
-
-  age?: number;
-
-  @Prop({ type: UserLoginSchema })
-  @Type(() => UserLogin)
-  userLogin: UserLogin;
 
   @Prop({ type: UserRoleSchema })
   @Type(() => UserRole)
@@ -91,14 +103,4 @@ UserSchema.virtual('participants', {
   ref: 'Participant',
   localField: '_id',
   foreignField: 'user',
-});
-
-UserSchema.set('toJSON', {
-  transform: (doc, ret, opt) => {
-    ret.id = ret._id;
-
-    delete ret._id;
-    delete ret._v;
-    return ret;
-  },
 });

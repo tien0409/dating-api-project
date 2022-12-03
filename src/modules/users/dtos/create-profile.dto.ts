@@ -9,9 +9,9 @@ import {
   MaxLength,
 } from 'class-validator';
 
-import { Gender } from '../../genders/gender.schema';
+import { Gender } from '../schemas/gender.schema';
 
-export class CreateProfileDTO {
+export class UpdateProfileDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)

@@ -7,7 +7,7 @@ import { TransformResponseInterceptor } from './interceptors/transform-response.
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: process.env.CLIENT_URL,
+    origin: ['http://localhost:3000'],
     credentials: true,
   });
   app.use(cookieParser());

@@ -18,10 +18,15 @@ import {
   SEND_ALL_MESSAGES,
   SEND_MESSAGE,
 } from './utils/socketType';
-import { ReceiverDto } from './dtos/receiver.dto';
+import { ReceiverDTO } from './dtos/receiver.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
 
-@WebSocketGateway()
+@WebSocketGateway(3002, {
+  cors: {
+    origin: ['http://localhost:3000'],
+    credentials: true,
+  },
+})
 export class ChatGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
@@ -42,20 +47,25 @@ export class ChatGateway implements OnGatewayConnection {
   async requestAllConversations(@ConnectedSocket() socket: Socket) {
     const user = await this.chatService.getUserFromSocket(socket);
     const conversations = await this.chatService.getAllConversations(user._id);
-    console.log('conversations', JSON.stringify(conversations));
-    socket.emit(SEND_ALL_CONVERSATIONS, conversations);
+    const res = conversations.map((conversation) => ({
+      ...conversation.toObject(),
+      receiver: conversation.participants?.[0],
+      participants: undefined,
+    }));
+    socket.emit(SEND_ALL_CONVERSATIONS, res);
   }
 
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
   async requestAllMessages(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() receiverDto: ReceiverDto,
+    @MessageBody() receiverDto: ReceiverDTO,
   ) {
     const user = await this.chatService.getUserFromSocket(socket);
     const messages = await this.chatService.getAllMessages(
       user?._id,
       receiverDto,
     );
+
     socket.emit(SEND_ALL_MESSAGES, messages);
   }
 

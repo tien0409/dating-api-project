@@ -7,12 +7,11 @@ import { UsersService } from '../users/users.service';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 import { MailService } from '../mail/mail.service';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { UserLoginsService } from '../user-logins/user-logins.service';
+import { CreateUserDTO } from '../users/dtos/create-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userLoginsService: UserLoginsService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -41,21 +40,8 @@ export class AuthService {
     return { cookie, token };
   }
 
-  async signIn(jwtPayload: JwtPayload) {
-    const { userLoginId } = jwtPayload;
-    const accessTokenCookie = this.getCookieWithJwtAccessToken(jwtPayload);
-
-    const { token, cookie } = await this.getCookieWithJwtRefreshToken(
-      jwtPayload,
-    );
-
-    await this.userLoginsService.updateRefreshToken(token, userLoginId);
-
-    return { accessTokenCookie, cookie };
-  }
-
-  async signUp(authCredetialsDto: AuthCredentialsDTO) {
-    const { email, password } = authCredetialsDto;
+  async signUp(authCredentialsDTO: AuthCredentialsDTO) {
+    const { email, password } = authCredentialsDTO;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     const confirmationCode = this.jwtService.sign(
@@ -66,54 +52,51 @@ export class AuthService {
       },
     );
 
-    const newUserLogin = await this.userLoginsService.createUserLogin({
+    const createUserDTO: CreateUserDTO = {
       email,
       password: hashedPassword,
       confirmationCode,
-    });
-    const newUser = await this.usersService.createUser({
-      userLogin: newUserLogin,
-    });
+    };
+    const newUser = await this.usersService.createUser(createUserDTO);
     await this.mailService.sendVerifyMail({ email, confirmationCode });
 
     return newUser;
   }
 
-  async logout(userLoginId: string) {
-    await this.userLoginsService.removeRefreshToken(userLoginId);
+  async signIn(jwtPayload: JwtPayload) {
+    const { userId } = jwtPayload;
+    const accessTokenCookie = this.getCookieWithJwtAccessToken(jwtPayload);
+
+    const { token, cookie } = await this.getCookieWithJwtRefreshToken(
+      jwtPayload,
+    );
+
+    await this.usersService.updateRefreshToken(token, userId);
+
+    return { accessTokenCookie, cookie };
+  }
+
+  async logout(userId: string) {
+    await this.usersService.removeRefreshToken(userId);
     return [
       'Authentication=; HttpOnly; Path=/; Max-Age=0',
       'Refresh=; HttpOnly; Path=/; Max-Age=0',
     ];
   }
 
-  async getUserAuth(userId: string) {
-    const user = await this.usersService
-      .getById(userId)
-      .populate('userLogin', 'email')
-      .populate('photos');
-
-    return {
-      ...user.toObject(),
-      email: user.userLogin.email,
-      userLogin: undefined,
-    };
+  getUserAuth(userId: string) {
+    return this.usersService.getById(userId).populate('photos');
   }
 
-  async getAuthenticatedUser(authCredetialsDto: AuthCredentialsDTO) {
-    const { email, password } = authCredetialsDto;
-    const userExist = await this.usersService
-      .getByEmail(email)
-      .populate('userLogin');
+  async getAuthenticatedUser(authCredentialsDto: AuthCredentialsDTO) {
+    const { email, password } = authCredentialsDto;
+    const userExist = await this.usersService.getByEmail(email);
     if (!userExist) {
       throw new UnauthorizedException(
         'Email or password is incorrect. Please try again.',
       );
     }
-    const isMatchPassword = await bcrypt.compare(
-      password,
-      userExist.userLogin.password,
-    );
+    const isMatchPassword = await bcrypt.compare(password, userExist.password);
     if (!isMatchPassword) {
       throw new UnauthorizedException(
         'Email or password is incorrect. Please try again.',
@@ -123,7 +106,7 @@ export class AuthService {
     return userExist;
   }
 
-  async getUserLoginFromAuthenticationToken(authenticationToken: string) {
+  async getUserFromAuthenticationToken(authenticationToken: string) {
     const payload: JwtPayload = this.jwtService.verify(authenticationToken, {
       secret: this.configService.get('jwt.accessSecret'),
     });

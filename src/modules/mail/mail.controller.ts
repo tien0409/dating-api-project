@@ -16,7 +16,7 @@ import {
   VERIFY_MAIL_ROUTE,
 } from 'src/configs/routes';
 import { MailService } from './mail.service';
-import { UserLogin } from '../user-logins/user-login.schema';
+import { User } from '../users/schemas/user.schema';
 
 @Controller(MAIL_ROUTE)
 export class MailController {
@@ -26,19 +26,18 @@ export class MailController {
   @UseGuards(JwtAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async sendVerifyMail(@Req() req: Request) {
-    const userLogin = req.user as UserLogin;
+    const user = req.user as User;
 
     return await this.mailService.sendVerifyMail({
-      email: (userLogin as UserLogin)?.email,
+      email: user?.email,
     });
   }
 
   @Post(VERIFY_MAIL_ROUTE)
   @HttpCode(HttpStatus.OK)
   async verifyMail(@Res() res: Response, @Param('token') token: string) {
-    const decodedConfirmationCode = this.mailService.decodeConfirmationCode(
-      token,
-    );
+    const decodedConfirmationCode =
+      this.mailService.decodeConfirmationCode(token);
 
     await this.mailService.verifyMail(decodedConfirmationCode);
 

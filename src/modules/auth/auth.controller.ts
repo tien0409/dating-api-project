@@ -26,7 +26,6 @@ import {
   SIGN_UP_ROUTE,
   USER_AUTH,
 } from 'src/configs/routes';
-import { UserLogin } from '../user-logins/user-login.schema';
 import { User } from '../users/schemas/user.schema';
 
 @Controller(AUTH_ROUTE)
@@ -42,8 +41,8 @@ export class AuthController {
         message:
           'Register successfully! Please check your email to verify account.',
       });
-    } catch (err) {
-      if (err.code === 11000) {
+    } catch (error) {
+      if (error.code === 11000) {
         throw new ConflictException('Email already exists.');
       }
       throw new InternalServerErrorException();
@@ -56,8 +55,7 @@ export class AuthController {
   async signIn(@Req() req: Request, @Res() res: Response) {
     const user = req.user as User;
     const jwtPayload: JwtPayload = {
-      userId: user.id,
-      userLoginId: user.userLogin.id,
+      userId: user._id,
     };
     const { accessTokenCookie, cookie } = await this.authService.signIn(
       jwtPayload,
@@ -66,7 +64,7 @@ export class AuthController {
     res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
     res.json({
       data: {
-        accountCreated: !!user?.age,
+        accountCreated: !!user?.firstName,
       },
       message: 'Login successfully!',
     });
@@ -84,10 +82,9 @@ export class AuthController {
   @UseGuards(JwtRefreshTokenGuard)
   refresh(@Req() req: Request, @Res() res: Response) {
     const user = req.user as User;
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken({
-      userId: user.id,
-      userLoginId: user.userLogin.id,
-    });
+    const jwtPayload: JwtPayload = { userId: user._id };
+    const accessTokenCookie =
+      this.authService.getCookieWithJwtAccessToken(jwtPayload);
 
     res.setHeader('Set-Cookie', accessTokenCookie);
     return res.json({ data: user });
@@ -97,8 +94,8 @@ export class AuthController {
   @UseGuards(JwtAuthenticationGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res() res: Response) {
-    const userLogin = req.user as UserLogin;
-    const cookie = await this.authService.logout(userLogin.id);
+    const user = req.user as User;
+    const cookie = await this.authService.logout(user._id);
 
     res.setHeader('Set-Cookie', cookie);
     res.json({});

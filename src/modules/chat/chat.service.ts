@@ -3,7 +3,7 @@ import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
-import { ReceiverDto } from './dtos/receiver.dto';
+import { ReceiverDTO } from './dtos/receiver.dto';
 import { Model, Types } from 'mongoose';
 import { Message, MessageDocument } from './schemas/message.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,7 +14,6 @@ import {
 } from './schemas/conversation.schema';
 import { Participant, ParticipantDocument } from './schemas/participant.schema';
 import { SendMessageDTO } from './dtos/send-message.dto';
-import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class ChatService {
@@ -33,7 +32,7 @@ export class ChatService {
     if (!cookie) throw new WsException('Invalid credentials.');
 
     const { Authentication: authenticationToken } = parse(cookie);
-    const user = await this.authService.getUserLoginFromAuthenticationToken(
+    const user = await this.authService.getUserFromAuthenticationToken(
       authenticationToken,
     );
 
@@ -44,26 +43,23 @@ export class ChatService {
   getAllConversations(userId: string) {
     return this.conversationModel
       .find({
-        participants: {
-          $contains: {
-            $elemMatch: { user: userId },
-          },
-        },
+        participants: [{ user: userId }],
       })
       .populate({
         path: 'participants',
         populate: {
-          path: 'userId',
+          path: 'user',
         },
+        match: { user: { $ne: { _id: userId } } },
       });
   }
 
-  async getAllMessages(userId: string, receiverDto: ReceiverDto) {
+  async getAllMessages(userId: string, receiverDTO: ReceiverDTO) {
     const conversation = await this.conversationModel.findOne({
       type: 'private',
       participants: {
         $all: [
-          { $elemMatch: { user: receiverDto.id } },
+          { $elemMatch: { user: receiverDTO.id } },
           { $elemMatch: { user: userId } },
         ],
       },
@@ -74,13 +70,13 @@ export class ChatService {
       const participantsPayload: Participant[] = [
         {
           timeJoined: new Date(),
-          conversationId: newConversation._id,
-          userId: new Types.ObjectId(userId),
+          conversation: newConversation._id,
+          user: new Types.ObjectId(userId),
         },
         {
           timeJoined: new Date(),
-          conversationId: newConversation._id,
-          userId: new Types.ObjectId(receiverDto.id),
+          conversation: newConversation._id,
+          user: new Types.ObjectId(receiverDTO.id),
         },
       ];
       await this.participantModel.insertMany(participantsPayload);
@@ -88,16 +84,30 @@ export class ChatService {
       return [];
     }
 
-    return this.messageModel.find({ conversation: conversation._id });
+    const participants = await this.participantModel.find({ conversation });
+
+    return this.messageModel
+      .find({
+        $or: [
+          { participant: participants[0]?._id },
+          { participant: participants[1]?._id },
+        ],
+      })
+      .populate({
+        path: 'participant',
+        populate: 'user',
+      });
   }
 
   async saveMessage(userId: string, sendMessageDto: SendMessageDTO) {
-    const participant = await this.participantModel.findOne({ userId });
-    const message = await this.messageModel.create({
-      conversationId: new Types.ObjectId(sendMessageDto.conversationId),
-      participantId: participant._id,
+    const participant = await this.participantModel.findOne({ user: userId });
+    const newMessage = await this.messageModel.create({
+      participant: participant._id,
       content: sendMessageDto.content,
     });
-    return message;
+    await this.conversationModel.updateOne({
+      lastMessage: newMessage,
+    });
+    return newMessage;
   }
 }

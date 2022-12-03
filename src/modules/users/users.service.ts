@@ -1,61 +1,89 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateProfileDTO } from './dtos/create-profile.dto';
-import { CreateUserDTO } from './dtos/create-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+
 import { User, UserDocument } from './schemas/user.schema';
-import { UserLoginsService } from '../user-logins/user-logins.service';
-import { UserPhotosService } from '../user-photos/user-photos.service';
-import { UserPhoto } from '../user-photos/user-photo.schema';
+import { UserPhoto, UserPhotoDocument } from './schemas/user-photo.schema';
+import { CreateUserDTO } from './dtos/create-user.dto';
+import { UpdateProfileDTO } from './dtos/create-profile.dto';
+import { Gender, GenderDocument } from './schemas/gender.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private readonly userLoginsService: UserLoginsService,
-    private readonly userPhotosService: UserPhotosService,
+    @InjectModel(UserPhoto.name)
+    private readonly userPhotoModel: Model<UserPhotoDocument>,
+    @InjectModel(Gender.name)
+    private readonly genderModel: Model<GenderDocument>,
   ) {}
 
-  async updateRefreshToken(refreshToken: string, userId: string) {
-    const salt = await bcrypt.genSalt();
-    const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
-    await this.userModel.findOneAndUpdate(
-      { _id: userId },
-      { $set: { 'userLogin.refreshToken': refreshTokenHashed } },
-    );
-  }
-
-  getByUserLogin(userLoginId: string) {
-    return this.userModel.findOne({ 'userLogin._id': userLoginId });
-  }
-
   getByEmail(email: string) {
-    return this.userModel.findOne({ 'userLogin.email': email });
+    return this.userModel.findOne({ email });
   }
 
   getById(userId: string) {
     return this.userModel.findOne({ _id: userId });
   }
 
-  createUser(createUserDto: CreateUserDTO) {
-    return this.userModel.create(createUserDto);
+  getGenders() {
+    return this.genderModel.find();
   }
 
-  async createProfile(userLoginId: string, createProfileDto: CreateProfileDTO) {
-    const { userPhotos, ...createProfileData } = createProfileDto;
+  createUser(createUserDTO: CreateUserDTO) {
+    return this.userModel.create(createUserDTO);
+  }
+
+  async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
+    const { userPhotos, ...updateProfileData } = updateProfileDTO;
     const newUser = await this.userModel.findOneAndUpdate(
-      { 'userLogin._id': userLoginId },
-      createProfileData,
+      { _id: userId },
+      updateProfileData,
     );
 
     const userPhotosPayload = userPhotos.map<UserPhoto>((item) => ({
       link: item,
       user: newUser._id,
     }));
-    await this.userPhotosService.createUserPhotos({
-      userPhotos: userPhotosPayload,
-    });
-    return this.userLoginsService.updateUserField(userLoginId, newUser);
+    const photos = await this.userPhotoModel.insertMany(userPhotosPayload);
+    await this.userModel.updateOne(
+      { _id: userId },
+      { $set: { avatar: photos[0]?.link } },
+    );
+    return {};
+  }
+
+  async updateRefreshToken(refreshToken: string, userId: string) {
+    const salt = await bcrypt.genSalt();
+    const refreshTokenHashed = await bcrypt.hash(refreshToken, salt);
+    await this.userModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: { refreshToken: refreshTokenHashed } },
+    );
+  }
+
+  markEmailConfirmed(email: string) {
+    return this.userModel.updateOne(
+      { email },
+      { $set: { confirmationTime: new Date() } },
+    );
+  }
+
+  async getByRefreshToken(refreshToken: string, userId: string) {
+    const user = await this.getById(userId);
+    const isMatchRefreshToken = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
+
+    if (isMatchRefreshToken) return user;
+  }
+
+  removeRefreshToken(userId: string) {
+    return this.userModel.findOneAndUpdate(
+      { id: userId },
+      { $set: { refreshToken: null } },
+    );
   }
 }

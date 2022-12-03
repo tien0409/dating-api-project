@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class ReceiverDto {
+export class ReceiverDTO {
   @IsNotEmpty()
   @IsString()
   id: string;

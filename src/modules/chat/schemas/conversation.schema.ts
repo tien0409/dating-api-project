@@ -1,7 +1,8 @@
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { SchemaTypes, Types, Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, SchemaType, SchemaTypes } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
-import { User } from 'src/modules/users/schemas/user.schema';
+import { Participant } from './participant.schema';
+import { Message, MessageSchema } from './message.schema';
 
 export type ConversationDocument = Conversation & Document;
 
@@ -14,6 +15,8 @@ export type ConversationDocument = Conversation & Document;
   },
 })
 export class Conversation extends BaseSchema {
+  participants?: Participant[];
+
   @Prop()
   timeStarted: Date;
 
@@ -22,6 +25,9 @@ export class Conversation extends BaseSchema {
 
   @Prop({ enum: ['private', 'group'], default: 'private' })
   type: string;
+
+  @Prop({ type: SchemaTypes.ObjectId, schema: MessageSchema })
+  lastMessage?: Message;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
@@ -29,11 +35,5 @@ export const ConversationSchema = SchemaFactory.createForClass(Conversation);
 ConversationSchema.virtual('participants', {
   ref: 'Participant',
   localField: '_id',
-  foreignField: 'conversationId',
-});
-
-ConversationSchema.virtual('messages', {
-  ref: 'Message',
-  localField: '_id',
-  foreignField: 'conversationId',
+  foreignField: 'conversation',
 });

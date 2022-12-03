@@ -3,15 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+
 import { UsersService } from 'src/modules/users/users.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
-import { UserLoginsService } from '../../user-logins/user-logins.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly usersService: UsersService,
-    private readonly userLoginsService: UserLoginsService,
     private readonly configService: ConfigService,
   ) {
     super({
@@ -26,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(jwtPayload: JwtPayload) {
     const { userId } = jwtPayload;
-    const user = await this.usersService.getById(userId).populate('userLogin');
+    const user = await this.usersService.getById(userId);
     if (!user) {
       throw new UnauthorizedException('Please check your login credetials');
     }

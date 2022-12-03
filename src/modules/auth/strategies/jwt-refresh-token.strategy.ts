@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+
 import { UsersService } from 'src/modules/users/users.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
-import { UserLoginsService } from '../../user-logins/user-logins.service';
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(
@@ -15,7 +15,6 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
   constructor(
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
-    private readonly userLoginsService: UserLoginsService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -30,13 +29,13 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
 
   validate(req: Request, payload: JwtPayload) {
     const refreshToken = req.cookies?.Refresh;
-    const userLogin = this.userLoginsService.getByRefreshToken(
+    const user = this.usersService.getByRefreshToken(
       refreshToken,
-      payload.userLoginId,
+      payload.userId,
     );
 
-    if (!userLogin)
-      throw new UnauthorizedException('Please check your login credetials');
-    return userLogin;
+    if (!user)
+      throw new UnauthorizedException('Please check your login credentials');
+    return user;
   }
 }

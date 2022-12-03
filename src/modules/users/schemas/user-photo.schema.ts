@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, Types } from 'mongoose';
+import mongoose, { Document, SchemaTypes, Types } from 'mongoose';
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
-import { User } from '../users/schemas/user.schema';
+import { User } from './user.schema';
 
 export type UserPhotoDocument = UserPhoto & Document;
 
 @Schema({
   collection: 'user-photos',
+  virtuals: true,
 })
 export class UserPhoto extends BaseSchema {
   @Prop({ required: true })
@@ -16,7 +17,7 @@ export class UserPhoto extends BaseSchema {
   active?: boolean;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: SchemaTypes.ObjectId,
     ref: User.name,
     required: true,
   })

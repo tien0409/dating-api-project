@@ -1,7 +1,17 @@
-import { UserLogin } from '../../user-logins/user-login.schema';
-import { IsNotEmptyObject } from 'class-validator';
+import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
+
+import { emailRegex } from '../../../utils/regexes';
 
 export class CreateUserDTO {
-  @IsNotEmptyObject()
-  userLogin: UserLogin;
+  @IsString()
+  @Matches(emailRegex)
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @IsString()
+  @IsOptional()
+  confirmationCode: string;
 }
