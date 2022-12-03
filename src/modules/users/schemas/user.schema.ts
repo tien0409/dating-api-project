@@ -24,6 +24,7 @@ export class User extends BaseSchema {
   lastName?: string;
 
   fullName: string;
+  avatar: string;
 
   @Prop()
   bio?: string;

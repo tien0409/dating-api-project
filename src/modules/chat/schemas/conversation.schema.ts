@@ -5,7 +5,14 @@ import { User } from 'src/modules/users/schemas/user.schema';
 
 export type ConversationDocument = Conversation & Document;
 
-@Schema()
+@Schema({
+  toJSON: {
+    virtuals: true,
+  },
+  toObject: {
+    virtuals: true,
+  },
+})
 export class Conversation extends BaseSchema {
   @Prop()
   timeStarted: Date;
@@ -22,11 +29,11 @@ export const ConversationSchema = SchemaFactory.createForClass(Conversation);
 ConversationSchema.virtual('participants', {
   ref: 'Participant',
   localField: '_id',
-  foreignField: 'conversation',
+  foreignField: 'conversationId',
 });
 
 ConversationSchema.virtual('messages', {
   ref: 'Message',
   localField: '_id',
-  foreignField: 'conversation',
+  foreignField: 'conversationId',
 });

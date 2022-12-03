@@ -14,6 +14,7 @@ import {
 } from './schemas/conversation.schema';
 import { Participant, ParticipantDocument } from './schemas/participant.schema';
 import { SendMessageDTO } from './dtos/send-message.dto';
+import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class ChatService {
@@ -40,10 +41,21 @@ export class ChatService {
     return user;
   }
 
-  getAllConversations() {
-    return this.conversationModel.find({
-      relations: ['user'],
-    });
+  getAllConversations(userId: string) {
+    return this.conversationModel
+      .find({
+        participants: {
+          $contains: {
+            $elemMatch: { user: userId },
+          },
+        },
+      })
+      .populate({
+        path: 'participants',
+        populate: {
+          path: 'userId',
+        },
+      });
   }
 
   async getAllMessages(userId: string, receiverDto: ReceiverDto) {

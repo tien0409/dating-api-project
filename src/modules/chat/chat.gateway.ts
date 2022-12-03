@@ -40,8 +40,10 @@ export class ChatGateway implements OnGatewayConnection {
 
   @SubscribeMessage(REQUEST_ALL_CONVERSATIONS)
   async requestAllConversations(@ConnectedSocket() socket: Socket) {
-    const conversations = await this.chatService.getAllConversations();
-    socket.emit(SEND_ALL_CONVERSATIONS);
+    const user = await this.chatService.getUserFromSocket(socket);
+    const conversations = await this.chatService.getAllConversations(user._id);
+    console.log('conversations', JSON.stringify(conversations));
+    socket.emit(SEND_ALL_CONVERSATIONS, conversations);
   }
 
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
