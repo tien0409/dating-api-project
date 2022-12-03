@@ -127,7 +127,10 @@ export class AuthService {
     const payload: JwtPayload = this.jwtService.verify(authenticationToken, {
       secret: this.configService.get('jwt.accessSecret'),
     });
-    if (payload.userLoginId)
-      return this.userLoginsService.getById(payload.userLoginId);
+    if (payload.userId) return this.usersService.getById(payload.userId);
+
+    new UnauthorizedException(
+      "You don't have permission to access this resource",
+    );
   }
 }

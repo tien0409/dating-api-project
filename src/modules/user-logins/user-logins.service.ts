@@ -39,7 +39,6 @@ export class UserLoginsService {
   }
 
   createUserLogin(createUserLoginDto: CreateUserLoginDTO) {
-    console.log("createUserLoginDto", createUserLoginDto);
     return this.userLoginModel.create({... createUserLoginDto });
   }
 

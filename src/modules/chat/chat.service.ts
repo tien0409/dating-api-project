@@ -1,17 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
-import { MessageRepository } from './repositories/message.repository';
-import { ConversationRepository } from './repositories/conversation.repository';
+import { ReceiverDto } from './dtos/receiver.dto';
+import { Model, Types } from 'mongoose';
+import { Message, MessageDocument } from './schemas/message.schema';
+import { InjectModel } from '@nestjs/mongoose';
+
+import {
+  Conversation,
+  ConversationDocument,
+} from './schemas/conversation.schema';
+import { Participant, ParticipantDocument } from './schemas/participant.schema';
+import { SendMessageDTO } from './dtos/send-message.dto';
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly authService: AuthService,
-    private readonly messageRepository: MessageRepository,
-    private readonly conversationRepository: ConversationRepository,
+    @InjectModel(Message.name)
+    private readonly messageModel: Model<MessageDocument>,
+    @InjectModel(Conversation.name)
+    private readonly conversationModel: Model<ConversationDocument>,
+    @InjectModel(Participant.name)
+    private readonly participantModel: Model<ParticipantDocument>,
   ) {}
 
   async getUserFromSocket(socket: Socket) {
@@ -23,19 +36,56 @@ export class ChatService {
       authenticationToken,
     );
 
-    if (!user) throw new WsException('Invalid credentials.');
+    if (!user) throw new UnauthorizedException('Invalid credentials.');
     return user;
   }
 
   getAllConversations() {
-    return this.conversationRepository.find({
+    return this.conversationModel.find({
       relations: ['user'],
     });
   }
 
-  getAllMessages() {
-    return this.messageRepository.find({
-      relations: ['user'],
+  async getAllMessages(userId: string, receiverDto: ReceiverDto) {
+    const conversation = await this.conversationModel.findOne({
+      type: 'private',
+      participants: {
+        $all: [
+          { $elemMatch: { user: receiverDto.id } },
+          { $elemMatch: { user: userId } },
+        ],
+      },
     });
+
+    if (!conversation) {
+      const newConversation = await this.conversationModel.create({});
+      const participantsPayload: Participant[] = [
+        {
+          timeJoined: new Date(),
+          conversationId: newConversation._id,
+          userId: new Types.ObjectId(userId),
+        },
+        {
+          timeJoined: new Date(),
+          conversationId: newConversation._id,
+          userId: new Types.ObjectId(receiverDto.id),
+        },
+      ];
+      await this.participantModel.insertMany(participantsPayload);
+
+      return [];
+    }
+
+    return this.messageModel.find({ conversation: conversation._id });
+  }
+
+  async saveMessage(userId: string, sendMessageDto: SendMessageDTO) {
+    const participant = await this.participantModel.findOne({ userId });
+    const message = await this.messageModel.create({
+      conversationId: new Types.ObjectId(sendMessageDto.conversationId),
+      participantId: participant._id,
+      content: sendMessageDto.content,
+    });
+    return message;
   }
 }

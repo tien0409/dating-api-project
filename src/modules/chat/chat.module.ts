@@ -9,8 +9,6 @@ import {
   ConversationSchema,
 } from './schemas/conversation.schema';
 import { Participant, ParticipantSchema } from './schemas/participant.schema';
-import { MessageRepository } from './repositories/message.repository';
-import { ConversationRepository } from './repositories/conversation.repository';
 
 @Module({
   imports: [
@@ -21,11 +19,6 @@ import { ConversationRepository } from './repositories/conversation.repository';
       { name: Participant.name, schema: ParticipantSchema },
     ]),
   ],
-  providers: [
-    ChatService,
-    ChatGateway,
-    MessageRepository,
-    ConversationRepository,
-  ],
+  providers: [ChatService, ChatGateway],
 })
 export class ChatModule {}

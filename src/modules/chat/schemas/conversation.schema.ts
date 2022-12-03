@@ -13,14 +13,20 @@ export class Conversation extends BaseSchema {
   @Prop()
   timeClosed: Date;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: User.name })
-  user: Types.ObjectId;
+  @Prop({ enum: ['private', 'group'], default: 'private' })
+  type: string;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
 
 ConversationSchema.virtual('participants', {
   ref: 'Participant',
+  localField: '_id',
+  foreignField: 'conversation',
+});
+
+ConversationSchema.virtual('messages', {
+  ref: 'Message',
   localField: '_id',
   foreignField: 'conversation',
 });

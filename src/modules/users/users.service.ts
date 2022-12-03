@@ -38,7 +38,7 @@ export class UsersService {
     return this.userModel.findOne({ _id: userId });
   }
 
-  async createUser(createUserDto: CreateUserDTO) {
+  createUser(createUserDto: CreateUserDTO) {
     return this.userModel.create(createUserDto);
   }
 

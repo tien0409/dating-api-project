@@ -11,20 +11,17 @@ export type ParticipantDocument = Participant & Document;
 
 @Schema()
 export class Participant extends BaseSchema {
-  @Prop({ required: true, unique: true })
-  hashedToken: string;
-
   @Prop({ required: true })
   timeJoined: Date;
 
-  @Prop({ required: true })
-  timeLeft: Date;
+  @Prop()
+  timeLeft?: Date;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: User.name })
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Conversation.name })
-  conversation: Types.ObjectId;
+  conversationId: Types.ObjectId;
 }
 
 export const ParticipantSchema = SchemaFactory.createForClass(Participant);

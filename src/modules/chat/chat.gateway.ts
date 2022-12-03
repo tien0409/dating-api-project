@@ -1,21 +1,28 @@
 import {
   ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
+
 import { ChatService } from './chat.service';
 import {
   REQUEST_ALL_CONVERSATIONS,
-  REQUEST_ALL_MESSASGES,
+  REQUEST_ALL_MESSAGES,
+  REQUEST_SEND_MESSAGE,
   SEND_ALL_CONVERSATIONS,
   SEND_ALL_MESSAGES,
+  SEND_MESSAGE,
 } from './utils/socketType';
+import { ReceiverDto } from './dtos/receiver.dto';
+import { SendMessageDTO } from './dtos/send-message.dto';
 
 @WebSocketGateway()
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
   private readonly logger: Logger = new Logger(ChatGateway.name);
@@ -37,9 +44,29 @@ export class ChatGateway {
     socket.emit(SEND_ALL_CONVERSATIONS);
   }
 
-  @SubscribeMessage(REQUEST_ALL_MESSASGES)
-  async requestAllMessages(@ConnectedSocket() socket: Socket) {
-    const messages = await this.chatService.getAllMessages();
+  @SubscribeMessage(REQUEST_ALL_MESSAGES)
+  async requestAllMessages(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() receiverDto: ReceiverDto,
+  ) {
+    const user = await this.chatService.getUserFromSocket(socket);
+    const messages = await this.chatService.getAllMessages(
+      user?._id,
+      receiverDto,
+    );
     socket.emit(SEND_ALL_MESSAGES, messages);
+  }
+
+  @SubscribeMessage(REQUEST_SEND_MESSAGE)
+  async sendMessage(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() sendMessageDto: SendMessageDTO,
+  ) {
+    const user = await this.chatService.getUserFromSocket(socket);
+    const message = await this.chatService.saveMessage(
+      user?._id,
+      sendMessageDto,
+    );
+    this.server.emit(SEND_MESSAGE, message);
   }
 }
