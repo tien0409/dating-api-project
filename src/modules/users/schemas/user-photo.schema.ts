@@ -7,9 +7,18 @@ export type UserPhotoDocument = UserPhoto & Document;
 
 @Schema({
   collection: 'user-photos',
-  virtuals: true,
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
 })
-export class UserPhoto extends BaseSchema {
+export class UserPhoto {
   @Prop({ required: true })
   link?: string;
 

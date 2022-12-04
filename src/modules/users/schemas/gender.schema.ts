@@ -4,8 +4,19 @@ import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 
 export type GenderDocument = Gender & Document;
 
-@Schema({ toJSON: { virtuals: true } })
-export class Gender extends BaseSchema {
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
+})
+export class Gender {
   @Prop({ required: true, unique: true })
   name: string;
 }

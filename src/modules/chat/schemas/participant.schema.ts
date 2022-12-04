@@ -8,6 +8,7 @@ import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 export type ParticipantDocument = Participant & Document;
 
 @Schema({
+  timestamps: true,
   toJSON: {
     virtuals: true,
     versionKey: false,
@@ -18,7 +19,7 @@ export type ParticipantDocument = Participant & Document;
     getters: true,
   },
 })
-export class Participant extends BaseSchema {
+export class Participant {
   @Prop({ required: true })
   timeJoined: Date;
 

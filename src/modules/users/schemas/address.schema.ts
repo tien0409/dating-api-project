@@ -4,8 +4,19 @@ import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 
 export type AddressDocument = Address & Document;
 
-@Schema()
-export class Address extends BaseSchema {
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
+})
+export class Address {
   @Prop({ required: true })
   city?: string;
 

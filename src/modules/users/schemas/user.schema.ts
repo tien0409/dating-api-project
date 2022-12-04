@@ -12,8 +12,16 @@ import { emailRegex } from '../../../utils/regexes';
 export type UserDocument = User & Document;
 
 @Schema({
-  toJSON: { virtuals: true, getters: true, versionKey: false },
-  toObject: { virtuals: true, getters: true },
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
 })
 export class User extends BaseSchema {
   fullName?: string;

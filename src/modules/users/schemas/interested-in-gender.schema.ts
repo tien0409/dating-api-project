@@ -7,8 +7,18 @@ import { User } from './user.schema';
 
 @Schema({
   collection: 'interested-in-genders',
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
 })
-export class InterestedInGender extends BaseSchema {
+export class InterestedInGender {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   @Type(() => User)
   user: Types.ObjectId;

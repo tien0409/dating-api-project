@@ -8,8 +8,18 @@ import { User } from './user.schema';
 
 @Schema({
   collection: 'interested-in-relations',
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
 })
-export class InterestedInRelation extends BaseSchema {
+export class InterestedInRelation {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   @Type(() => User)
   user: Types.ObjectId;

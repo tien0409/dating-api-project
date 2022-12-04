@@ -6,6 +6,16 @@ export type UserRoleDocument = UserRole & Document;
 
 @Schema({
   collection: 'user-roles',
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
 })
 export class UserRole extends BaseSchema {
   @Prop({ required: true, unique: true })

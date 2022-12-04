@@ -7,6 +7,7 @@ import { Participant } from './participant.schema';
 export type MessageDocument = Message & Document;
 
 @Schema({
+  timestamps: true,
   toJSON: {
     virtuals: true,
     versionKey: false,
@@ -15,7 +16,7 @@ export type MessageDocument = Message & Document;
     virtuals: true,
   },
 })
-export class Message extends BaseSchema {
+export class Message {
   @Prop({ required: true })
   content: string;
 

@@ -8,6 +8,7 @@ import { Message } from './message.schema';
 export type ConversationDocument = Conversation & Document;
 
 @Schema({
+  timestamps: true,
   toJSON: {
     virtuals: true,
     versionKey: false,
@@ -16,7 +17,7 @@ export type ConversationDocument = Conversation & Document;
     virtuals: true,
   },
 })
-export class Conversation extends BaseSchema {
+export class Conversation {
   participants?: Participant[];
 
   @Prop()

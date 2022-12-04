@@ -7,7 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { Inject, Logger } from '@nestjs/common';
 
 import { ChatService } from './chat.service';
@@ -19,7 +19,7 @@ import {
   SEND_ALL_MESSAGES,
   SEND_MESSAGE,
 } from './utils/socketType';
-import { ReceiverDTO } from './dtos/receiver.dto';
+import { ConversationDTO } from './dtos/conversation.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
 import { ChatSessionManager } from './chat.session';
@@ -58,7 +58,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
     const res = conversations.map((conversation) => ({
       ...conversation.toObject(),
-      receiver: conversation.participants?.[0],
+      participant: conversation.participants?.[0],
       participants: undefined,
     }));
     socket.emit(SEND_ALL_CONVERSATIONS, res);
@@ -67,14 +67,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
   async requestAllMessages(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() receiverDto: ReceiverDTO,
+    @MessageBody() conversationDTO: ConversationDTO,
   ) {
-    const messages = await this.chatService.getAllMessages(
-      socket.user?._id,
-      receiverDto,
-    );
+    const { messages, receiverParticipant, senderParticipant } =
+      await this.chatService.getAllMessages(socket.user._id, conversationDTO);
 
-    socket.emit(SEND_ALL_MESSAGES, messages);
+    socket.emit(SEND_ALL_MESSAGES, {
+      messages,
+      receiverParticipant,
+      senderParticipant,
+    });
   }
 
   @SubscribeMessage(REQUEST_SEND_MESSAGE)
@@ -82,14 +84,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() sendMessageDTO: SendMessageDTO,
   ) {
-    const { newMessage, receiver } = await this.chatService.saveMessage(
+    const { message, receiverParticipant } = await this.chatService.saveMessage(
       socket.user?._id,
       sendMessageDTO,
     );
 
     const sender = this.chatSessionManager.getUserSocket(socket.user._id);
-    const receiverSocket = this.chatSessionManager.getUserSocket(receiver.user);
-    sender.emit(SEND_MESSAGE, newMessage);
-    receiverSocket.emit(SEND_MESSAGE, newMessage);
+    const receiverSocket = this.chatSessionManager.getUserSocket(
+      receiverParticipant.user,
+    );
+
+    sender &&
+      sender.emit(SEND_MESSAGE, {
+        message,
+        conversationIdUpdated: sendMessageDTO.conversationId,
+      });
+    receiverSocket &&
+      receiverSocket.emit(SEND_MESSAGE, {
+        message,
+        conversationIdUpdated: sendMessageDTO.conversationId,
+      });
   }
 }

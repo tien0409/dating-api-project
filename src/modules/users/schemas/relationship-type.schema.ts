@@ -6,15 +6,24 @@ export type RelationshipTypeDocument = RelationshipType & Document;
 
 @Schema({
   collection: 'relationship-types',
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+    getters: true,
+  },
 })
-export class RelationshipType extends BaseSchema {
+export class RelationshipType {
   @Prop({ required: true, unique: true })
   name?: string;
 }
 
-export const RelationshipTypeSchema = SchemaFactory.createForClass(
-  RelationshipType,
-);
+export const RelationshipTypeSchema =
+  SchemaFactory.createForClass(RelationshipType);
 
 RelationshipTypeSchema.virtual('interestedInRelations', {
   ref: 'InterestedInRelation',
