@@ -114,6 +114,7 @@ export class ChatService {
   deleteMessage(messageDeleteDTO: MessageDeleteDTO) {
     return this.messageModel.deleteOne({
       _id: messageDeleteDTO.message.id,
+      participant: messageDeleteDTO.senderParticipantId,
     });
   }
 }
