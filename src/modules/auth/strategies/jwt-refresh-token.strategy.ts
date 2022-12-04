@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UsersService } from 'src/modules/users/users.service';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(
@@ -27,7 +27,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  validate(req: Request, payload: JwtPayload) {
+  validate(req: Request, payload: IJwtPayload) {
     const refreshToken = req.cookies?.Refresh;
     const user = this.usersService.getByRefreshToken(
       refreshToken,

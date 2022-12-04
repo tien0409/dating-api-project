@@ -27,19 +27,6 @@ export class ChatService {
     private readonly participantModel: Model<ParticipantDocument>,
   ) {}
 
-  async getUserFromSocket(socket: Socket) {
-    const cookie = socket.handshake.headers.cookie;
-    if (!cookie) throw new WsException('Invalid credentials.');
-
-    const { Authentication: authenticationToken } = parse(cookie);
-    const user = await this.authService.getUserFromAuthenticationToken(
-      authenticationToken,
-    );
-
-    if (!user) throw new UnauthorizedException('Invalid credentials.');
-    return user;
-  }
-
   getAllConversations(userId: string) {
     return this.conversationModel
       .find({
@@ -51,7 +38,8 @@ export class ChatService {
           path: 'user',
         },
         match: { user: { $ne: { _id: userId } } },
-      });
+      })
+      .populate('lastMessage');
   }
 
   async getAllMessages(userId: string, receiverDTO: ReceiverDTO) {
@@ -99,15 +87,21 @@ export class ChatService {
       });
   }
 
-  async saveMessage(userId: string, sendMessageDto: SendMessageDTO) {
+  async saveMessage(userId: string, sendMessageDTO: SendMessageDTO) {
     const participant = await this.participantModel.findOne({ user: userId });
+    const receiver = await this.participantModel.findOne({
+      $and: [
+        { conversation: sendMessageDTO.conversationId },
+        { user: { $ne: userId } },
+      ],
+    });
     const newMessage = await this.messageModel.create({
       participant: participant._id,
-      content: sendMessageDto.content,
+      content: sendMessageDTO.content,
     });
     await this.conversationModel.updateOne({
       lastMessage: newMessage,
     });
-    return newMessage;
+    return { newMessage, receiver };
   }
 }

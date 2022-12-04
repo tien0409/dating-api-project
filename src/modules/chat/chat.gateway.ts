@@ -2,12 +2,13 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 
 import { ChatService } from './chat.service';
 import {
@@ -20,6 +21,8 @@ import {
 } from './utils/socketType';
 import { ReceiverDTO } from './dtos/receiver.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
+import { IAuthSocket } from './interfaces/auth-socket.interface';
+import { ChatSessionManager } from './chat.session';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -27,26 +30,32 @@ import { SendMessageDTO } from './dtos/send-message.dto';
     credentials: true,
   },
 })
-export class ChatGateway implements OnGatewayConnection {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(
+    @Inject(ChatSessionManager.name)
+    private readonly chatSessionManager: ChatSessionManager,
+    private readonly chatService: ChatService,
+  ) {}
+
   @WebSocketServer()
   server: Server;
   private readonly logger: Logger = new Logger(ChatGateway.name);
 
-  constructor(private readonly chatService: ChatService) {}
-
-  async handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: IAuthSocket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
-    await this.chatService.getUserFromSocket(client);
+    this.chatSessionManager.setUserSocket(client.user._id, client);
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: IAuthSocket) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    this.chatSessionManager.removeUserSocket(client.user._id);
   }
 
   @SubscribeMessage(REQUEST_ALL_CONVERSATIONS)
-  async requestAllConversations(@ConnectedSocket() socket: Socket) {
-    const user = await this.chatService.getUserFromSocket(socket);
-    const conversations = await this.chatService.getAllConversations(user._id);
+  async requestAllConversations(@ConnectedSocket() socket: IAuthSocket) {
+    const conversations = await this.chatService.getAllConversations(
+      socket.user._id,
+    );
     const res = conversations.map((conversation) => ({
       ...conversation.toObject(),
       receiver: conversation.participants?.[0],
@@ -57,12 +66,11 @@ export class ChatGateway implements OnGatewayConnection {
 
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
   async requestAllMessages(
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() receiverDto: ReceiverDTO,
   ) {
-    const user = await this.chatService.getUserFromSocket(socket);
     const messages = await this.chatService.getAllMessages(
-      user?._id,
+      socket.user?._id,
       receiverDto,
     );
 
@@ -71,14 +79,17 @@ export class ChatGateway implements OnGatewayConnection {
 
   @SubscribeMessage(REQUEST_SEND_MESSAGE)
   async sendMessage(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() sendMessageDto: SendMessageDTO,
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() sendMessageDTO: SendMessageDTO,
   ) {
-    const user = await this.chatService.getUserFromSocket(socket);
-    const message = await this.chatService.saveMessage(
-      user?._id,
-      sendMessageDto,
+    const { newMessage, receiver } = await this.chatService.saveMessage(
+      socket.user?._id,
+      sendMessageDTO,
     );
-    this.server.emit(SEND_MESSAGE, message);
+
+    const sender = this.chatSessionManager.getUserSocket(socket.user._id);
+    const receiverSocket = this.chatSessionManager.getUserSocket(receiver.user);
+    sender.emit(SEND_MESSAGE, newMessage);
+    receiverSocket.emit(SEND_MESSAGE, newMessage);
   }
 }

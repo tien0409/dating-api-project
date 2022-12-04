@@ -17,7 +17,7 @@ import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard';
 import JwtRefreshTokenGuard from './guards/jwt-refresh-token.guard';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import {
   AUTH_ROUTE,
   LOGOUT_ROUTE,
@@ -54,7 +54,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signIn(@Req() req: Request, @Res() res: Response) {
     const user = req.user as User;
-    const jwtPayload: JwtPayload = {
+    const jwtPayload: IJwtPayload = {
       userId: user._id,
     };
     const { accessTokenCookie, cookie } = await this.authService.signIn(
@@ -82,7 +82,7 @@ export class AuthController {
   @UseGuards(JwtRefreshTokenGuard)
   refresh(@Req() req: Request, @Res() res: Response) {
     const user = req.user as User;
-    const jwtPayload: JwtPayload = { userId: user._id };
+    const jwtPayload: IJwtPayload = { userId: user._id };
     const accessTokenCookie =
       this.authService.getCookieWithJwtAccessToken(jwtPayload);
 

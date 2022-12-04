@@ -9,6 +9,7 @@ import {
   ConversationSchema,
 } from './schemas/conversation.schema';
 import { Participant, ParticipantSchema } from './schemas/participant.schema';
+import { ChatSessionManager } from './chat.session';
 
 @Module({
   imports: [
@@ -19,6 +20,13 @@ import { Participant, ParticipantSchema } from './schemas/participant.schema';
       { name: Participant.name, schema: ParticipantSchema },
     ]),
   ],
-  providers: [ChatService, ChatGateway],
+  providers: [
+    ChatService,
+    ChatGateway,
+    {
+      provide: ChatSessionManager.name,
+      useClass: ChatSessionManager,
+    },
+  ],
 })
 export class ChatModule {}

@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 import { MailService } from '../mail/mail.service';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { CreateUserDTO } from '../users/dtos/create-user.dto';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  getCookieWithJwtAccessToken(jwtPayload: JwtPayload) {
+  getCookieWithJwtAccessToken(jwtPayload: IJwtPayload) {
     const token = this.jwtService.sign(jwtPayload, {
       secret: this.configService.get('jwt.accessSecret'),
       expiresIn: this.configService.get('jwt.accessExpiresIn'),
@@ -28,7 +28,7 @@ export class AuthService {
     )}`;
   }
 
-  async getCookieWithJwtRefreshToken(jwtPayload: JwtPayload) {
+  async getCookieWithJwtRefreshToken(jwtPayload: IJwtPayload) {
     const token = this.jwtService.sign(jwtPayload, {
       secret: this.configService.get('jwt.refreshSecret'),
       expiresIn: this.configService.get('jwt.refreshExpiresIn') + 's',
@@ -63,7 +63,7 @@ export class AuthService {
     return newUser;
   }
 
-  async signIn(jwtPayload: JwtPayload) {
+  async signIn(jwtPayload: IJwtPayload) {
     const { userId } = jwtPayload;
     const accessTokenCookie = this.getCookieWithJwtAccessToken(jwtPayload);
 
@@ -107,7 +107,7 @@ export class AuthService {
   }
 
   async getUserFromAuthenticationToken(authenticationToken: string) {
-    const payload: JwtPayload = this.jwtService.verify(authenticationToken, {
+    const payload: IJwtPayload = this.jwtService.verify(authenticationToken, {
       secret: this.configService.get('jwt.accessSecret'),
     });
     if (payload.userId) return this.usersService.getById(payload.userId);

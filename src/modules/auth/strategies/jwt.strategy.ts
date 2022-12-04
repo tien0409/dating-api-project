@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UsersService } from 'src/modules/users/users.service';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(jwtPayload: JwtPayload) {
+  async validate(jwtPayload: IJwtPayload) {
     const { userId } = jwtPayload;
     const user = await this.usersService.getById(userId);
     if (!user) {
