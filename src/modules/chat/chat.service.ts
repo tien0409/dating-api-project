@@ -11,6 +11,7 @@ import { SendMessageDTO } from './dtos/send-message.dto';
 import { Message, MessageDocument } from './schemas/message.schema';
 import { AuthService } from '../auth/auth.service';
 import { ConversationDTO } from './dtos/conversation.dto';
+import { MessageDeleteDTO } from './dtos/message-delete.dto';
 
 @Injectable()
 export class ChatService {
@@ -108,5 +109,11 @@ export class ChatService {
       lastMessage: newMessage,
     });
     return { message: newMessage, receiverParticipant };
+  }
+
+  deleteMessage(messageDeleteDTO: MessageDeleteDTO) {
+    return this.messageModel.deleteOne({
+      _id: messageDeleteDTO.message.id,
+    });
   }
 }

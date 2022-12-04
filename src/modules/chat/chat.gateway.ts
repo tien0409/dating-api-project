@@ -14,15 +14,19 @@ import { ChatService } from './chat.service';
 import {
   REQUEST_ALL_CONVERSATIONS,
   REQUEST_ALL_MESSAGES,
+  REQUEST_DELETE_MESSAGE,
   REQUEST_SEND_MESSAGE,
   SEND_ALL_CONVERSATIONS,
   SEND_ALL_MESSAGES,
+  SEND_DELETE_MESSAGE,
+  SEND_DELETE_MESSAGE_FAILURE,
   SEND_MESSAGE,
 } from './utils/socketType';
 import { ConversationDTO } from './dtos/conversation.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
 import { ChatSessionManager } from './chat.session';
+import { MessageDeleteDTO } from './dtos/message-delete.dto';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -104,5 +108,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message,
         conversationIdUpdated: sendMessageDTO.conversationId,
       });
+  }
+
+  @SubscribeMessage(REQUEST_DELETE_MESSAGE)
+  async deleteMessage(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() messageDeleteDTO: MessageDeleteDTO,
+  ) {
+    const sender = this.chatSessionManager.getUserSocket(socket.user._id);
+    const receiver = this.chatSessionManager.getUserSocket(
+      messageDeleteDTO.receiverId,
+    );
+
+    try {
+      await this.chatService.deleteMessage(messageDeleteDTO);
+      sender && sender.emit(SEND_DELETE_MESSAGE);
+      receiver && receiver.emit(SEND_DELETE_MESSAGE);
+    } catch (error) {
+      sender && sender.emit(SEND_DELETE_MESSAGE_FAILURE, messageDeleteDTO);
+    }
   }
 }

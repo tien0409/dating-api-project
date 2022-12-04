@@ -16,7 +16,7 @@ export type MessageDocument = Message & Document;
     virtuals: true,
   },
 })
-export class Message {
+export class Message extends BaseSchema {
   @Prop({ required: true })
   content: string;
 
