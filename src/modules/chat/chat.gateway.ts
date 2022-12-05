@@ -125,10 +125,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     try {
       await this.chatService.deleteMessage(messageDeleteDTO);
-      sender && sender.emit(SEND_DELETE_MESSAGE);
-      receiver && receiver.emit(SEND_DELETE_MESSAGE);
+      const conversationDTO: ConversationDTO = {
+        id: messageDeleteDTO.conversationId,
+      };
+      const messages = await this.chatService.getAllMessages(
+        socket.user._id,
+        conversationDTO,
+      );
+      sender && sender.emit(SEND_DELETE_MESSAGE, { messages });
+      receiver && receiver.emit(SEND_DELETE_MESSAGE, { messages });
     } catch (error) {
-      sender && sender.emit(SEND_DELETE_MESSAGE_FAILURE, messageDeleteDTO);
+      sender &&
+        sender.emit(SEND_DELETE_MESSAGE_FAILURE, {
+          ...messageDeleteDTO,
+          errorMessage: error?.message,
+        });
     }
   }
 }

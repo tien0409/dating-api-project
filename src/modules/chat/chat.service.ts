@@ -55,6 +55,7 @@ export class ChatService {
       })
       .find({
         conversation: conversationDTO.id,
+        active: true,
       });
 
     const receiverParticipant = participants.find(
@@ -119,10 +120,16 @@ export class ChatService {
     return { message: newMessage, receiverParticipant };
   }
 
-  deleteMessage(messageDeleteDTO: MessageDeleteDTO) {
-    return this.messageModel.deleteOne({
-      _id: messageDeleteDTO.message.id,
-      participant: messageDeleteDTO.senderParticipantId,
-    });
+  async deleteMessage(messageDeleteDTO: MessageDeleteDTO) {
+    const { message } = messageDeleteDTO;
+
+    await this.messageModel.updateOne(
+      {
+        _id: message.id,
+      },
+      {
+        $set: { active: false },
+      },
+    );
   }
 }

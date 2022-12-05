@@ -23,6 +23,9 @@ export class Message extends BaseSchema {
   @Prop({ default: false })
   isEdited?: boolean;
 
+  @Prop({ default: true })
+  active?: boolean;
+
   @Prop({ type: SchemaTypes.ObjectId, ref: Message.name })
   replyTo?: Types.ObjectId;
 

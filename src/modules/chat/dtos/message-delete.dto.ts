@@ -14,6 +14,10 @@ export class MessageDeleteDTO {
 
   @IsNotEmpty()
   @IsString()
+  conversationId: string;
+
+  @IsNotEmpty()
+  @IsString()
   senderParticipantId: string;
 
   @IsNotEmpty()
