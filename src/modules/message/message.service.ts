@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { MessageDeleteDTO } from './dtos/message-delete.dto';
 import { Message, MessageDocument } from './message.schema';
-import { GetMessagesDTO } from './dtos/get-messages.dto';
-import { ParticipantService } from '../participant/participant.service';
 import { CreateMessageDTO } from './dtos/create-message.dto';
 import { ConversationService } from '../conversation/conversation.service';
 import { UpdateLastMessageDTO } from '../conversation/dtos/update-last-message.dto';
@@ -15,7 +12,6 @@ export class MessageService {
   constructor(
     @InjectModel(Message.name)
     private readonly messageModel: Model<MessageDocument>,
-    private readonly participantService: ParticipantService,
     private readonly conversationService: ConversationService,
   ) {}
 
@@ -52,7 +48,7 @@ export class MessageService {
   }
 
   deleteMessage(messageId: string) {
-    return this.messageModel.updateOne(
+    return this.messageModel.findOneAndDelete(
       {
         _id: messageId,
       },
