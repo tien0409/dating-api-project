@@ -73,8 +73,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() conversationDTO: ConversationDTO,
   ) {
-    const { messages, receiverParticipant, senderParticipant } =
-      await this.chatService.getAllMessages(socket.user._id, conversationDTO);
+    const {
+      messages,
+      receiverParticipant,
+      senderParticipant,
+    } = await this.chatService.getAllMessages(socket.user._id, conversationDTO);
 
     socket.emit(SEND_ALL_MESSAGES, {
       messages,

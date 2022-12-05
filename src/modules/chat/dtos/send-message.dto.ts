@@ -1,4 +1,6 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsObject, IsString } from 'class-validator';
+
+import { Message } from '../schemas/message.schema';
 
 export class SendMessageDTO {
   @IsNotEmpty()
@@ -16,4 +18,7 @@ export class SendMessageDTO {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @IsObject()
+  replyTo?: Message;
 }

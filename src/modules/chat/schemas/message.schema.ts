@@ -23,6 +23,9 @@ export class Message extends BaseSchema {
   @Prop({ default: false })
   isEdited?: boolean;
 
+  @Prop({ type: SchemaTypes.ObjectId, ref: Message.name })
+  replyTo?: Types.ObjectId;
+
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
@@ -32,3 +35,13 @@ export class Message extends BaseSchema {
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
+
+const autoPopulateReplyTo = function (next) {
+  this.populate('replyTo');
+  next();
+};
+
+MessageSchema.pre('find', autoPopulateReplyTo).pre(
+  'findOne',
+  autoPopulateReplyTo,
+);

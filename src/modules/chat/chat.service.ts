@@ -89,12 +89,20 @@ export class ChatService {
   }
 
   async saveMessage(userId: string, sendMessageDTO: SendMessageDTO) {
+    const {
+      replyTo,
+      content,
+      receiverParticipantId,
+      senderParticipantId,
+    } = sendMessageDTO;
+
     const receiverParticipantPromise = this.participantModel.findById(
-      sendMessageDTO.receiverParticipantId,
+      receiverParticipantId,
     );
     const messagePromise = this.messageModel.create({
-      participant: sendMessageDTO.senderParticipantId,
-      content: sendMessageDTO.content,
+      participant: senderParticipantId,
+      content: content,
+      replyTo: replyTo,
     });
 
     const [receiverParticipant, message] = await Promise.all([
