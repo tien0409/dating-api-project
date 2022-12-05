@@ -10,7 +10,6 @@ import {
 import { Server } from 'socket.io';
 import { Inject, Logger } from '@nestjs/common';
 
-import { ChatService } from './chat.service';
 import {
   REQUEST_ALL_CONVERSATIONS,
   REQUEST_ALL_MESSAGES,
@@ -22,11 +21,14 @@ import {
   SEND_DELETE_MESSAGE_FAILURE,
   SEND_MESSAGE,
 } from './utils/socketType';
-import { ConversationDTO } from './dtos/conversation.dto';
+import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
 import { ChatSessionManager } from './chat.session';
-import { MessageDeleteDTO } from './dtos/message-delete.dto';
+import { MessageDeleteDTO } from '../message/dtos/message-delete.dto';
+import { MessageService } from '../message/message.service';
+import { ConversationService } from '../conversation/conversation.service';
+import { CreateMessageDTO } from '../message/dtos/create-message.dto';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -38,7 +40,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     @Inject(ChatSessionManager.name)
     private readonly chatSessionManager: ChatSessionManager,
-    private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
+    private readonly conversationService: ConversationService,
   ) {}
 
   @WebSocketServer()
@@ -57,7 +60,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage(REQUEST_ALL_CONVERSATIONS)
   async requestAllConversations(@ConnectedSocket() socket: IAuthSocket) {
-    const conversations = await this.chatService.getAllConversations(
+    const conversations = await this.conversationService.getConversations(
       socket.user._id,
     );
     const res = conversations.map((conversation) => ({
@@ -71,13 +74,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
   async requestAllMessages(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() conversationDTO: ConversationDTO,
+    @MessageBody() conversationDTO: GetMessagesDTO,
   ) {
     const {
       messages,
       receiverParticipant,
       senderParticipant,
-    } = await this.chatService.getAllMessages(socket.user._id, conversationDTO);
+    } = await this.messageService.getMessages(socket.user._id, conversationDTO);
 
     socket.emit(SEND_ALL_MESSAGES, {
       messages,
@@ -91,24 +94,35 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() sendMessageDTO: SendMessageDTO,
   ) {
-    const { message, receiverParticipant } = await this.chatService.saveMessage(
-      socket.user?._id,
-      sendMessageDTO,
+    const {
+      replyTo,
+      content,
+      receiverId,
+      senderParticipantId,
+      conversationId,
+    } = sendMessageDTO;
+
+    const payloadCreateMessage: CreateMessageDTO = {
+      conversationId,
+      content,
+      replyTo,
+      participant: senderParticipantId,
+    };
+    const newMessage = await this.messageService.createMessage(
+      payloadCreateMessage,
     );
 
     const sender = this.chatSessionManager.getUserSocket(socket.user._id);
-    const receiverSocket = this.chatSessionManager.getUserSocket(
-      receiverParticipant.user,
-    );
+    const receiverSocket = this.chatSessionManager.getUserSocket(receiverId);
 
     sender &&
       sender.emit(SEND_MESSAGE, {
-        message,
+        message: newMessage,
         conversationIdUpdated: sendMessageDTO.conversationId,
       });
     receiverSocket &&
       receiverSocket.emit(SEND_MESSAGE, {
-        message,
+        message: newMessage,
         conversationIdUpdated: sendMessageDTO.conversationId,
       });
   }
@@ -118,19 +132,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() messageDeleteDTO: MessageDeleteDTO,
   ) {
+    const { receiverId, conversationId } = messageDeleteDTO;
+
     const sender = this.chatSessionManager.getUserSocket(socket.user._id);
-    const receiver = this.chatSessionManager.getUserSocket(
-      messageDeleteDTO.receiverId,
-    );
+    const receiver = this.chatSessionManager.getUserSocket(receiverId);
 
     try {
-      await this.chatService.deleteMessage(messageDeleteDTO);
-      const conversationDTO: ConversationDTO = {
-        id: messageDeleteDTO.conversationId,
-      };
-      const messages = await this.chatService.getAllMessages(
-        socket.user._id,
-        conversationDTO,
+      await this.messageService.deleteMessage(messageDeleteDTO);
+      const messages = await this.messageService.getMessagesByConversationId(
+        conversationId,
       );
       sender && sender.emit(SEND_DELETE_MESSAGE, { messages });
       receiver && receiver.emit(SEND_DELETE_MESSAGE, { messages });

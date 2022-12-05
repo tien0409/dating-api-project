@@ -1,11 +1,11 @@
 import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 
-import { Message } from '../schemas/message.schema';
+import { Message } from '../../message/message.schema';
 
 export class SendMessageDTO {
   @IsNotEmpty()
   @IsString()
-  receiverParticipantId: string;
+  receiverId: string;
 
   @IsNotEmpty()
   @IsString()
