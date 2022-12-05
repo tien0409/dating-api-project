@@ -26,25 +26,16 @@ export class Message extends BaseSchema {
   @Prop({ default: true })
   active?: boolean;
 
-  @Prop({ type: SchemaTypes.ObjectId, ref: Message.name })
+  @Prop({ type: SchemaTypes.ObjectId, ref: Message.name, autopopulate: true })
   replyTo?: Types.ObjectId;
 
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
     ref: Participant.name,
+    autopopulate: true,
   })
   participant: Types.ObjectId;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
-
-const autoPopulateReplyTo = function (next) {
-  this.populate('replyTo');
-  next();
-};
-
-MessageSchema.pre('find', autoPopulateReplyTo).pre(
-  'findOne',
-  autoPopulateReplyTo,
-);

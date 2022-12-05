@@ -18,7 +18,6 @@ import {
   SEND_ALL_CONVERSATIONS,
   SEND_ALL_MESSAGES,
   SEND_DELETE_MESSAGE,
-  SEND_DELETE_MESSAGE_FAILURE,
   SEND_MESSAGE,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
@@ -29,6 +28,7 @@ import { MessageDeleteDTO } from '../message/dtos/message-delete.dto';
 import { MessageService } from '../message/message.service';
 import { ConversationService } from '../conversation/conversation.service';
 import { CreateMessageDTO } from '../message/dtos/create-message.dto';
+import { ParticipantService } from '../participant/participant.service';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -42,6 +42,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly chatSessionManager: ChatSessionManager,
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
+    private readonly participantService: ParticipantService,
   ) {}
 
   @WebSocketServer()
@@ -74,18 +75,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
   async requestAllMessages(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() conversationDTO: GetMessagesDTO,
+    @MessageBody() getMessageDTO: GetMessagesDTO,
   ) {
-    const {
-      messages,
-      receiverParticipant,
-      senderParticipant,
-    } = await this.messageService.getMessages(socket.user._id, conversationDTO);
+    const { conversationId } = getMessageDTO;
+
+    const conversationConversation = this.conversationService.getById(
+      conversationId,
+    );
+    const participantsPromise = this.participantService.getByConversationId(
+      conversationId,
+    );
+    const messagesPromise = this.messageService.getMessagesByConversationId(
+      conversationId,
+    );
+
+    const [conversation, participants, messages] = await Promise.all([
+      conversationConversation,
+      participantsPromise,
+      messagesPromise,
+    ]);
 
     socket.emit(SEND_ALL_MESSAGES, {
+      conversation,
       messages,
-      receiverParticipant,
-      senderParticipant,
+      receiverParticipant: participants.find(
+        (participant) =>
+          participant.user._id.toString() !== socket.user._id.toString(),
+      ),
+      senderParticipant: participants.find(
+        (participant) =>
+          participant.user._id.toString() === socket.user._id.toString(),
+      ),
     });
   }
 
@@ -132,24 +152,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() messageDeleteDTO: MessageDeleteDTO,
   ) {
-    const { receiverId, conversationId } = messageDeleteDTO;
+    const { receiverId, messageId, conversation } = messageDeleteDTO;
 
     const sender = this.chatSessionManager.getUserSocket(socket.user._id);
     const receiver = this.chatSessionManager.getUserSocket(receiverId);
 
-    try {
-      await this.messageService.deleteMessage(messageDeleteDTO);
-      const messages = await this.messageService.getMessagesByConversationId(
-        conversationId,
-      );
-      sender && sender.emit(SEND_DELETE_MESSAGE, { messages });
-      receiver && receiver.emit(SEND_DELETE_MESSAGE, { messages });
-    } catch (error) {
-      sender &&
-        sender.emit(SEND_DELETE_MESSAGE_FAILURE, {
-          ...messageDeleteDTO,
-          errorMessage: error?.message,
-        });
+    await this.messageService.deleteMessage(messageId);
+    const messages = await this.messageService
+      .getMessagesByConversationId(conversation._id)
+      .sort({ createdAt: 1 });
+
+    let lastMessageConversation;
+    if (
+      messages?.length > 0 &&
+      conversation.lastMessage._id.toString() === messageId
+    ) {
+      await this.conversationService.updateLastMessage({
+        conversationId: conversation._id,
+        lastMessage: messages[messages.length - 1],
+      });
+      lastMessageConversation = messages[messages.length - 1];
     }
+
+    sender &&
+      sender.emit(SEND_DELETE_MESSAGE, { messages, lastMessageConversation });
+    receiver &&
+      receiver.emit(SEND_DELETE_MESSAGE, { messages, lastMessageConversation });
   }
 }

@@ -12,6 +12,10 @@ export class ConversationService {
     private readonly conversationModel: Model<ConversationDocument>,
   ) {}
 
+  getById(conversationId: string) {
+    return this.conversationModel.findById(conversationId);
+  }
+
   getConversations(userId: string) {
     return this.conversationModel
       .find({

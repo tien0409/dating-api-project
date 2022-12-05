@@ -30,10 +30,16 @@ export class Participant extends BaseSchema {
     required: true,
     type: SchemaTypes.ObjectId,
     ref: User.name,
+    autopopulate: true,
   })
   user: Types.ObjectId;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Conversation.name })
+  @Prop({
+    required: true,
+    type: SchemaTypes.ObjectId,
+    ref: Conversation.name,
+    autopopulate: true,
+  })
   conversation: Types.ObjectId;
 }
 

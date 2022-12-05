@@ -19,45 +19,15 @@ export class MessageService {
     private readonly conversationService: ConversationService,
   ) {}
 
-  async getMessages(userId: string, getMessagesDTO: GetMessagesDTO) {
-    const { conversationId } = getMessagesDTO;
-
-    const participants = await this.participantService.getByConversationId(
-      conversationId,
-    );
-
-    const messages = await this.messageModel
-      .find()
-      .populate({
-        path: 'participant',
-        populate: 'user',
-      })
-      .find({
-        conversation: getMessagesDTO.conversationId,
-        active: true,
-      });
-
-    const receiverParticipant = participants.find(
-      (participant) => participant.user?._id?.toString() !== userId.toString(),
-    );
-
-    const senderParticipant = participants.find(
-      (participant) => participant.user?._id?.toString() === userId.toString(),
-    );
-
-    return { messages, receiverParticipant, senderParticipant };
-  }
-
   getMessagesByConversationId(conversationId: string) {
     return this.messageModel
-      .find()
+      .find({
+        active: true,
+        conversation: conversationId,
+      })
       .populate({
         path: 'participant',
         populate: 'user',
-      })
-      .find({
-        conversation: conversationId,
-        active: true,
       });
   }
 
@@ -81,15 +51,15 @@ export class MessageService {
     return newMessage;
   }
 
-  deleteMessage(messageDeleteDTO: MessageDeleteDTO) {
-    const { message } = messageDeleteDTO;
-
+  deleteMessage(messageId: string) {
     return this.messageModel.updateOne(
       {
-        _id: message.id,
+        _id: messageId,
       },
       {
-        $set: { active: false },
+        $set: {
+          active: false,
+        },
       },
     );
   }

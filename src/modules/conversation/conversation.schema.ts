@@ -3,7 +3,6 @@ import { Document, SchemaTypes, Types } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Participant } from '../participant/participant.schema';
-import { Message } from '../message/message.schema';
 
 export type ConversationDocument = Conversation & Document;
 
@@ -29,7 +28,11 @@ export class Conversation extends BaseSchema {
   @Prop({ enum: ['private', 'group'], default: 'private' })
   type: string;
 
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'Message' })
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'Message',
+    autopopulate: true,
+  })
   lastMessage?: Types.ObjectId;
 }
 
