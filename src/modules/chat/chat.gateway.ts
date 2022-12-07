@@ -15,10 +15,14 @@ import {
   REQUEST_ALL_MESSAGES,
   REQUEST_DELETE_MESSAGE,
   REQUEST_SEND_MESSAGE,
+  REQUEST_STOP_TYPING_MESSAGE,
+  REQUEST_TYPING_MESSAGE,
   SEND_ALL_CONVERSATIONS,
   SEND_ALL_MESSAGES,
   SEND_DELETE_MESSAGE,
   SEND_MESSAGE,
+  SEND_STOP_TYPING_MESSAGE,
+  SEND_TYPING_MESSAGE,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
@@ -29,6 +33,7 @@ import { MessageService } from '../message/message.service';
 import { ConversationService } from '../conversation/conversation.service';
 import { CreateMessageDTO } from '../message/dtos/create-message.dto';
 import { ParticipantService } from '../participant/participant.service';
+import { TypingMessageDTO } from './dtos/typing-message.dto';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -69,6 +74,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       participant: conversation.participants?.[0],
       participants: undefined,
     }));
+
+    conversations.forEach((conversation) => {
+      socket.join(conversation._id.toString());
+    });
     socket.emit(SEND_ALL_CONVERSATIONS, res);
   }
 
@@ -79,15 +88,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { conversationId } = getMessageDTO;
 
-    const conversationConversation = this.conversationService.getById(
-      conversationId,
-    );
-    const participantsPromise = this.participantService.getByConversationId(
-      conversationId,
-    );
-    const messagesPromise = this.messageService.getMessagesByConversationId(
-      conversationId,
-    );
+    const conversationConversation =
+      this.conversationService.getById(conversationId);
+    const participantsPromise =
+      this.participantService.getByConversationId(conversationId);
+    const messagesPromise =
+      this.messageService.getMessagesByConversationId(conversationId);
 
     const [conversation, participants, messages] = await Promise.all([
       conversationConversation,
@@ -107,6 +113,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           participant.user._id.toString() === socket.user._id.toString(),
       ),
     });
+  }
+
+  @SubscribeMessage(REQUEST_TYPING_MESSAGE)
+  typingMessage(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() typingMessageDTO: TypingMessageDTO,
+  ) {
+    const { conversationId } = typingMessageDTO;
+    socket.to(conversationId).emit(SEND_TYPING_MESSAGE, { conversationId });
+  }
+
+  @SubscribeMessage(REQUEST_STOP_TYPING_MESSAGE)
+  stopTypingMessage(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() typingMessageDTO: TypingMessageDTO,
+  ) {
+    const { conversationId } = typingMessageDTO;
+    socket
+      .to(conversationId)
+      .emit(SEND_STOP_TYPING_MESSAGE, { conversationId });
   }
 
   @SubscribeMessage(REQUEST_SEND_MESSAGE)
