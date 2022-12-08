@@ -6,6 +6,7 @@ import { Message, MessageDocument } from './message.schema';
 import { CreateMessageDTO } from './dtos/create-message.dto';
 import { ConversationService } from '../conversation/conversation.service';
 import { UpdateLastMessageDTO } from '../conversation/dtos/update-last-message.dto';
+import { UpdateMessageDTO } from './dtos/update-message.dto';
 
 @Injectable()
 export class MessageService {
@@ -45,6 +46,20 @@ export class MessageService {
     };
     await this.conversationService.updateLastMessage(payload);
     return newMessage;
+  }
+
+  updateMessage(updateMessageDTO: UpdateMessageDTO) {
+    const { messageId, content } = updateMessageDTO;
+
+    return this.messageModel.findOneAndUpdate(
+      { _id: messageId },
+      {
+        $set: {
+          content,
+        },
+      },
+      { new: true },
+    );
   }
 
   deleteMessage(messageId: string) {

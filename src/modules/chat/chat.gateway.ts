@@ -17,12 +17,14 @@ import {
   REQUEST_SEND_MESSAGE,
   REQUEST_STOP_TYPING_MESSAGE,
   REQUEST_TYPING_MESSAGE,
+  REQUEST_UPDATE_MESSAGE,
   SEND_ALL_CONVERSATIONS,
   SEND_ALL_MESSAGES,
   SEND_DELETE_MESSAGE,
   SEND_MESSAGE,
   SEND_STOP_TYPING_MESSAGE,
   SEND_TYPING_MESSAGE,
+  SEND_UPDATE_MESSAGE,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
 import { SendMessageDTO } from './dtos/send-message.dto';
@@ -34,6 +36,7 @@ import { ConversationService } from '../conversation/conversation.service';
 import { CreateMessageDTO } from '../message/dtos/create-message.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { TypingMessageDTO } from './dtos/typing-message.dto';
+import { UpdateMessagePayload } from './payloads/update-message.payload';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -171,6 +174,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message: newMessage,
         conversationIdUpdated: sendMessageDTO.conversationId,
       });
+  }
+
+  @SubscribeMessage(REQUEST_UPDATE_MESSAGE)
+  async updateMessage(
+    @MessageBody() updateMessagePayload: UpdateMessagePayload,
+  ) {
+    const { messageId, conversationId, content } = updateMessagePayload;
+
+    const messageUpdatedPromise = this.messageService.updateMessage({
+      messageId,
+      content,
+    });
+    const conversationPromise = this.conversationService
+      .getById(conversationId)
+      .sort({ createdAt: -1 });
+    const [messageUpdated, conversation] = await Promise.all([
+      messageUpdatedPromise,
+      conversationPromise,
+    ]);
+    const conversationIdRes =
+      conversation.lastMessage._id.toString() === messageId
+        ? conversationId
+        : undefined;
+
+    this.server.in(conversationId).emit(SEND_UPDATE_MESSAGE, {
+      message: messageUpdated,
+      conversationId: conversationIdRes,
+    });
   }
 
   @SubscribeMessage(REQUEST_DELETE_MESSAGE)
