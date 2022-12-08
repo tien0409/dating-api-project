@@ -48,7 +48,7 @@ export class MessageService {
   }
 
   deleteMessage(messageId: string) {
-    return this.messageModel.findOneAndDelete(
+    return this.messageModel.updateOne(
       {
         _id: messageId,
       },
