@@ -58,17 +58,17 @@ export class User extends BaseSchema {
   @Prop()
   birthday?: Date;
 
-  @Prop({ type: UserRoleSchema })
+  @Prop({ type: UserRoleSchema, default: null })
   @Type(() => UserRole)
-  userRole: UserRole;
+  role?: UserRole;
 
-  @Prop({ type: GenderSchema })
+  @Prop({ type: GenderSchema, default: null })
   @Type(() => Gender)
-  gender: Gender;
+  gender?: Gender;
 
-  @Prop({ type: AddressSchema })
+  @Prop({ type: AddressSchema, default: null })
   @Type(() => Address)
-  address: Address;
+  address?: Address;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

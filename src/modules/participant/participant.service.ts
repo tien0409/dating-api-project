@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Participant, ParticipantDocument } from './participant.schema';
+import { CreateParticipantDTO } from './dtos/create-participant.dto';
 
 @Injectable()
 export class ParticipantService {
@@ -21,5 +22,15 @@ export class ParticipantService {
         conversation: conversationId,
       })
       .populate('user');
+  }
+
+  createParticipant(createParticipantDTO: CreateParticipantDTO) {
+    const { conversationId, userId } = createParticipantDTO;
+
+    return this.participantModel.create({
+      timeJoined: new Date(),
+      user: userId,
+      conversation: conversationId,
+    });
   }
 }
