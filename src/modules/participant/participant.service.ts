@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 
 import { Participant, ParticipantDocument } from './participant.schema';
 import { CreateParticipantDTO } from './dtos/create-participant.dto';
+import { LeftConversationDTO } from './dtos/left-conversation.dto';
+import { GetParticipantConversationsDTO } from './dtos/get-participant-conversations.dto';
 
 @Injectable()
 export class ParticipantService {
@@ -14,6 +16,24 @@ export class ParticipantService {
 
   getById(_id: string) {
     return this.participantModel.findById(_id).populate('user');
+  }
+
+  getParticipantConversations(
+    getParticipantConversationsDTO: GetParticipantConversationsDTO,
+  ) {
+    const { userId } = getParticipantConversationsDTO;
+
+    return this.participantModel.find({
+      $and: [
+        { user: userId },
+        {
+          $or: [
+            { $expr: { $gt: ['$timeJoined', '$timeLeft'] } },
+            { timeLeft: null },
+          ],
+        },
+      ],
+    });
   }
 
   getByConversationId(conversationId: string) {
@@ -32,5 +52,22 @@ export class ParticipantService {
       user: userId,
       conversation: conversationId,
     });
+  }
+
+  leftConversation(leftConversationDTO: LeftConversationDTO) {
+    const { conversationId, userId } = leftConversationDTO;
+
+    return this.participantModel.findOneAndUpdate(
+      {
+        conversation: conversationId,
+        user: userId,
+      },
+      {
+        $set: {
+          timeLeft: new Date(),
+        },
+      },
+      { new: true },
+    );
   }
 }

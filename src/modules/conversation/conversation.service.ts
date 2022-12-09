@@ -7,7 +7,8 @@ import { UpdateLastMessageDTO } from './dtos/update-last-message.dto';
 import { CreateConversationDTO } from './dtos/create-conversation.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/schemas/user.schema';
+import { GetByParticipantIdDTO } from './dtos/get-by-participant-id.dto';
+import { GetByUserIdDTO } from './dtos/get-by-user-id.dto';
 
 @Injectable()
 export class ConversationService {
@@ -22,19 +23,31 @@ export class ConversationService {
     return this.conversationModel.findById(conversationId);
   }
 
-  getConversations(userId: string) {
+  async getByUserId(getByUserIdDTO: GetByUserIdDTO) {
+    const { userId } = getByUserIdDTO;
+
+    const participantInConversations = await this.participantService.getParticipantConversations(
+      { userId },
+    );
+
+    const conversationIds = participantInConversations?.map(
+      (item) => item.conversation?._id,
+    );
+
     return this.conversationModel
       .find({
-        participants: [{ user: userId }],
+        _id: { $in: conversationIds },
       })
-      .populate({
-        path: 'participants',
-        populate: {
-          path: 'user',
-        },
-        match: { user: { $ne: { _id: userId } } },
-      })
-      .populate('lastMessage');
+      .populate({ path: 'participants', populate: { path: 'user' } });
+  }
+
+  getByParticipantId(getByParticipantIdDTO: GetByParticipantIdDTO) {
+    const { participantId, conversationId } = getByParticipantIdDTO;
+
+    return this.conversationModel.find({
+      _id: conversationId,
+      participants: { $elemMatch: { user: '23123' } },
+    });
   }
 
   async createConversation(
@@ -51,11 +64,12 @@ export class ConversationService {
       conversationId: conversation._id,
       userId: userAuthId,
     });
-    const receiverParticipantPromise =
-      this.participantService.createParticipant({
+    const receiverParticipantPromise = this.participantService.createParticipant(
+      {
         conversationId: conversation._id,
         userId: receiverId,
-      });
+      },
+    );
     await Promise.all([senderParticipantPromise, receiverParticipantPromise]);
     return conversation;
   }

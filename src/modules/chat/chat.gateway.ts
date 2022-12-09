@@ -13,6 +13,7 @@ import { Inject, Logger } from '@nestjs/common';
 import {
   REQUEST_ALL_CONVERSATIONS,
   REQUEST_ALL_MESSAGES,
+  REQUEST_DELETE_CONVERSATION,
   REQUEST_DELETE_MESSAGE,
   REQUEST_SEND_MESSAGE,
   REQUEST_STOP_TYPING_MESSAGE,
@@ -20,6 +21,7 @@ import {
   REQUEST_UPDATE_MESSAGE,
   SEND_ALL_CONVERSATIONS,
   SEND_ALL_MESSAGES,
+  SEND_DELETE_CONVERSATION,
   SEND_DELETE_MESSAGE,
   SEND_MESSAGE,
   SEND_STOP_TYPING_MESSAGE,
@@ -37,6 +39,7 @@ import { CreateMessageDTO } from '../message/dtos/create-message.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { TypingMessageDTO } from './dtos/typing-message.dto';
 import { UpdateMessagePayload } from './payloads/update-message.payload';
+import { DeleteConversationPayload } from './payloads/delete-conversation.payload';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -69,19 +72,52 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage(REQUEST_ALL_CONVERSATIONS)
   async requestAllConversations(@ConnectedSocket() socket: IAuthSocket) {
-    const conversations = await this.conversationService.getConversations(
-      socket.user._id,
-    );
+    // conversation for user (exclude conversation deleted)
+    const conversationsResPromise = this.conversationService.getByUserId({
+      userId: socket.user._id,
+    });
+    // conversation for socket on event (include conversation deleted)
+    const conversationsSocketPromise = this.conversationService.getByUserId({
+      userId: socket.user._id,
+    });
+
+    const [conversationsRes, conversationsSocket] = await Promise.all([
+      conversationsResPromise,
+      conversationsSocketPromise,
+    ]);
+    const res = conversationsRes.map((conversation) => ({
+      ...conversation.toObject(),
+      participant: conversation.participants?.[0],
+      participants: undefined,
+    }));
+
+    conversationsSocket.forEach((conversation) => {
+      socket.join(conversation._id.toString());
+    });
+    socket.emit(SEND_ALL_CONVERSATIONS, res);
+  }
+
+  @SubscribeMessage(REQUEST_DELETE_CONVERSATION)
+  async deleteConversation(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() deleteConversationPayload: DeleteConversationPayload,
+  ) {
+    const { conversationId } = deleteConversationPayload;
+
+    await this.participantService.leftConversation({
+      conversationId,
+      userId: socket.user._id,
+    });
+    const conversations = await this.conversationService.getByUserId({
+      userId: socket.user._id,
+    });
     const res = conversations.map((conversation) => ({
       ...conversation.toObject(),
       participant: conversation.participants?.[0],
       participants: undefined,
     }));
 
-    conversations.forEach((conversation) => {
-      socket.join(conversation._id.toString());
-    });
-    socket.emit(SEND_ALL_CONVERSATIONS, res);
+    socket.emit(SEND_DELETE_CONVERSATION, { conversations: res });
   }
 
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
@@ -91,12 +127,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { conversationId } = getMessageDTO;
 
-    const conversationConversation =
-      this.conversationService.getById(conversationId);
-    const participantsPromise =
-      this.participantService.getByConversationId(conversationId);
-    const messagesPromise =
-      this.messageService.getMessagesByConversationId(conversationId);
+    const conversationConversation = this.conversationService.getById(
+      conversationId,
+    );
+    const participantsPromise = this.participantService.getByConversationId(
+      conversationId,
+    );
+    const messagesPromise = this.messageService.getMessagesByConversationId(
+      conversationId,
+    );
 
     const [conversation, participants, messages] = await Promise.all([
       conversationConversation,
