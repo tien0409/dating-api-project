@@ -5,8 +5,8 @@ import { Model } from 'mongoose';
 import { Message, MessageDocument } from './message.schema';
 import { CreateMessageDTO } from './dtos/create-message.dto';
 import { ConversationService } from '../conversation/conversation.service';
-import { UpdateLastMessageDTO } from '../conversation/dtos/update-last-message.dto';
 import { UpdateMessageDTO } from './dtos/update-message.dto';
+import { ParticipantService } from '../participant/participant.service';
 
 @Injectable()
 export class MessageService {
@@ -14,6 +14,7 @@ export class MessageService {
     @InjectModel(Message.name)
     private readonly messageModel: Model<MessageDocument>,
     private readonly conversationService: ConversationService,
+    private readonly participantService: ParticipantService,
   ) {}
 
   getMessagesByConversationId(conversationId: string) {
@@ -29,23 +30,38 @@ export class MessageService {
   }
 
   async createMessage(createMessageDTO: CreateMessageDTO) {
-    const { conversationId, content, replyTo, participant } = createMessageDTO;
+    const {
+      conversationId,
+      content,
+      replyTo,
+      senderParticipantId,
+    } = createMessageDTO;
 
     const message = await this.messageModel.create({
       content,
       replyTo,
-      participant,
+      participant: senderParticipantId,
     });
     const newMessage = await this.messageModel
       .findById(message._id)
       .populate({ path: 'participant', populate: 'user' });
 
-    const payload: UpdateLastMessageDTO = {
-      conversationId: conversationId,
-      lastMessage: newMessage,
-    };
-    await this.conversationService.updateLastMessage(payload);
-    return newMessage;
+    const conversationUpdateLastMessagePromise = this.conversationService.updateLastMessage(
+      {
+        conversationId: conversationId,
+        lastMessage: newMessage,
+      },
+    );
+    const updateParticipantTimeJoinedPromise = this.participantService.updateManyTimeJoined(
+      { conversationId },
+      senderParticipantId,
+    );
+
+    const [conversationUpdateLastMessage] = await Promise.all([
+      conversationUpdateLastMessagePromise,
+      updateParticipantTimeJoinedPromise,
+    ]);
+    return { newMessage, conversationUpdated: conversationUpdateLastMessage };
   }
 
   updateMessage(updateMessageDTO: UpdateMessageDTO) {

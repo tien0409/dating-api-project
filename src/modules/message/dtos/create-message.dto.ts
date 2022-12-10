@@ -9,7 +9,7 @@ export class CreateMessageDTO {
 
   @IsString()
   @IsNotEmpty()
-  participant: string;
+  senderParticipantId: string;
 
   @IsString()
   @IsNotEmpty()

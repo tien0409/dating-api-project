@@ -77,9 +77,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userId: socket.user._id,
     });
     // conversation for socket on event (include conversation deleted)
-    const conversationsSocketPromise = this.conversationService.getByUserId({
-      userId: socket.user._id,
-    });
+    const conversationsSocketPromise = this.conversationService.getByUserIdIncludeConversationDeleted(
+      {
+        userId: socket.user._id,
+      },
+    );
 
     const [conversationsRes, conversationsSocket] = await Promise.all([
       conversationsResPromise,
@@ -90,6 +92,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       participant: conversation.participants?.[0],
       participants: undefined,
     }));
+    console.log('conversationRes', conversationsRes);
+    console.log('conversationSockete', conversationsSocket);
 
     conversationsSocket.forEach((conversation) => {
       socket.join(conversation._id.toString());
@@ -163,6 +167,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() typingMessageDTO: TypingMessageDTO,
   ) {
     const { conversationId } = typingMessageDTO;
+    console.log('conversationId', conversationId);
     socket.to(conversationId).emit(SEND_TYPING_MESSAGE, { conversationId });
   }
 
@@ -185,34 +190,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const {
       replyTo,
       content,
-      receiverId,
       senderParticipantId,
       conversationId,
     } = sendMessageDTO;
 
-    const payloadCreateMessage: CreateMessageDTO = {
+    const {
+      newMessage,
+      conversationUpdated,
+    } = await this.messageService.createMessage({
       conversationId,
       content,
       replyTo,
-      participant: senderParticipantId,
-    };
-    const newMessage = await this.messageService.createMessage(
-      payloadCreateMessage,
-    );
+      senderParticipantId,
+    });
 
-    const sender = this.chatSessionManager.getUserSocket(socket.user._id);
-    const receiverSocket = this.chatSessionManager.getUserSocket(receiverId);
-
-    sender &&
-      sender.emit(SEND_MESSAGE, {
-        message: newMessage,
-        conversationIdUpdated: sendMessageDTO.conversationId,
-      });
-    receiverSocket &&
-      receiverSocket.emit(SEND_MESSAGE, {
-        message: newMessage,
-        conversationIdUpdated: sendMessageDTO.conversationId,
-      });
+    this.server.in(conversationId).emit(SEND_MESSAGE, {
+      message: newMessage,
+      conversationUpdated,
+    });
   }
 
   @SubscribeMessage(REQUEST_UPDATE_MESSAGE)
@@ -225,21 +220,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       messageId,
       content,
     });
-    const conversationPromise = this.conversationService
-      .getById(conversationId)
-      .sort({ createdAt: -1 });
+    const conversationPromise = this.conversationService.getById(
+      conversationId,
+    );
     const [messageUpdated, conversation] = await Promise.all([
       messageUpdatedPromise,
       conversationPromise,
     ]);
-    const conversationIdRes =
-      conversation.lastMessage._id.toString() === messageId
-        ? conversationId
-        : undefined;
+    const isLastMessageChange =
+      conversation.lastMessage._id.toString() === messageId;
+    let conversationUpdated;
+    if (isLastMessageChange) {
+      conversationUpdated = await this.conversationService.updateLastMessage({
+        conversationId,
+        lastMessage: messageUpdated,
+      });
+    }
 
     this.server.in(conversationId).emit(SEND_UPDATE_MESSAGE, {
       message: messageUpdated,
-      conversationId: conversationIdRes,
+      conversationUpdated,
     });
   }
 
@@ -258,21 +258,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .getMessagesByConversationId(conversation._id)
       .sort({ createdAt: 1 });
 
-    let lastMessageConversation;
+    let conversationUpdated;
     if (
       messages?.length > 0 &&
       conversation.lastMessage._id.toString() === messageId
     ) {
-      await this.conversationService.updateLastMessage({
+      conversationUpdated = await this.conversationService.updateLastMessage({
         conversationId: conversation._id,
         lastMessage: messages[messages.length - 1],
       });
-      lastMessageConversation = messages[messages.length - 1];
     }
 
     sender &&
-      sender.emit(SEND_DELETE_MESSAGE, { messages, lastMessageConversation });
+      sender.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
     receiver &&
-      receiver.emit(SEND_DELETE_MESSAGE, { messages, lastMessageConversation });
+      receiver.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
   }
 }

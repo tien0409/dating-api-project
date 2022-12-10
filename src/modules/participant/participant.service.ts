@@ -6,6 +6,7 @@ import { Participant, ParticipantDocument } from './participant.schema';
 import { CreateParticipantDTO } from './dtos/create-participant.dto';
 import { LeftConversationDTO } from './dtos/left-conversation.dto';
 import { GetParticipantConversationsDTO } from './dtos/get-participant-conversations.dto';
+import { UpdateTimeJoinedDTO } from './dtos/update-time-joined.dto';
 
 @Injectable()
 export class ParticipantService {
@@ -13,10 +14,6 @@ export class ParticipantService {
     @InjectModel(Participant.name)
     private readonly participantModel: Model<ParticipantDocument>,
   ) {}
-
-  getById(_id: string) {
-    return this.participantModel.findById(_id).populate('user');
-  }
 
   getParticipantConversations(
     getParticipantConversationsDTO: GetParticipantConversationsDTO,
@@ -52,6 +49,25 @@ export class ParticipantService {
       user: userId,
       conversation: conversationId,
     });
+  }
+
+  // update time joined for users deleted conversation (fire on another user send message)
+  updateManyTimeJoined(
+    updateTimeJoinedDTO: UpdateTimeJoinedDTO,
+    participantIdExclude: string,
+  ) {
+    const { conversationId } = updateTimeJoinedDTO;
+
+    return this.participantModel.updateMany(
+      {
+        _id: { $ne: participantIdExclude },
+        conversation: conversationId,
+        timeLeft: { $ne: null },
+      },
+      {
+        timeJoined: new Date(),
+      },
+    );
   }
 
   leftConversation(leftConversationDTO: LeftConversationDTO) {
