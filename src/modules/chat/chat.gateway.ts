@@ -29,16 +29,16 @@ import {
   SEND_UPDATE_MESSAGE,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
-import { SendMessageDTO } from './dtos/send-message.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
 import { ChatSessionManager } from './chat.session';
 import { MessageDeleteDTO } from '../message/dtos/message-delete.dto';
 import { MessageService } from '../message/message.service';
 import { ConversationService } from '../conversation/conversation.service';
 import { ParticipantService } from '../participant/participant.service';
-import { TypingMessageDTO } from './dtos/typing-message.dto';
 import { UpdateMessagePayload } from './payloads/update-message.payload';
 import { DeleteConversationPayload } from './payloads/delete-conversation.payload';
+import { SendMessagePayload } from './payloads/send-message.payload';
+import { TypingMessagePayload } from './payloads/typing-message.payload';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -152,9 +152,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(REQUEST_TYPING_MESSAGE)
   typingMessage(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() typingMessageDTO: TypingMessageDTO,
+    @MessageBody() typingMessagePayload: TypingMessagePayload,
   ) {
-    const { conversationId } = typingMessageDTO;
+    const { conversationId } = typingMessagePayload;
 
     socket.to(conversationId).emit(SEND_TYPING_MESSAGE, { conversationId });
   }
@@ -162,7 +162,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(REQUEST_STOP_TYPING_MESSAGE)
   stopTypingMessage(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() typingMessageDTO: TypingMessageDTO,
+    @MessageBody() typingMessageDTO: TypingMessagePayload,
   ) {
     const { conversationId } = typingMessageDTO;
     socket
@@ -173,14 +173,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(REQUEST_SEND_MESSAGE)
   async sendMessage(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() sendMessageDTO: SendMessageDTO,
+    @MessageBody() sendMessagePayload: SendMessagePayload,
   ) {
     const {
       replyTo,
       content,
       senderParticipantId,
       conversationId,
-    } = sendMessageDTO;
+    } = sendMessagePayload;
 
     const {
       newMessage,
