@@ -17,11 +17,17 @@ export class MessageService {
     private readonly participantService: ParticipantService,
   ) {}
 
-  getMessagesByConversationId(conversationId: string) {
+  async getMessagesByConversationIdAndUserId(
+    conversationId: string,
+    userId: string,
+  ) {
+    const userParticipant = await this.participantService.getByUserId(userId);
+
     return this.messageModel
       .find({
         active: true,
         conversation: conversationId,
+        createdAt: { $gte: userParticipant.timeJoined },
       })
       .populate({
         path: 'participant',
@@ -37,30 +43,28 @@ export class MessageService {
       senderParticipantId,
     } = createMessageDTO;
 
+    // note: update time joined another participant before create message
+    const updateParticipantTimeJoined = await this.participantService.updateManyTimeJoined(
+      { conversationId },
+    );
+
     const message = await this.messageModel.create({
       content,
       replyTo,
       participant: senderParticipantId,
     });
+
     const newMessage = await this.messageModel
       .findById(message._id)
       .populate({ path: 'participant', populate: 'user' });
 
-    const conversationUpdateLastMessagePromise = this.conversationService.updateLastMessage(
+    const conversationUpdateLastMessage = await this.conversationService.updateLastMessage(
       {
         conversationId: conversationId,
         lastMessage: newMessage,
       },
     );
-    const updateParticipantTimeJoinedPromise = this.participantService.updateManyTimeJoined(
-      { conversationId },
-      senderParticipantId,
-    );
 
-    const [conversationUpdateLastMessage] = await Promise.all([
-      conversationUpdateLastMessagePromise,
-      updateParticipantTimeJoinedPromise,
-    ]);
     return { newMessage, conversationUpdated: conversationUpdateLastMessage };
   }
 

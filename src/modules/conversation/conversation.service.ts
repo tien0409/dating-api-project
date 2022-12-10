@@ -77,8 +77,8 @@ export class ConversationService {
     const { conversationId, lastMessage } = updateLastMessageDTO;
 
     return this.conversationModel
-      .findOneAndUpdate(
-        { _id: conversationId },
+      .findByIdAndUpdate(
+        conversationId,
         {
           lastMessage: lastMessage,
         },

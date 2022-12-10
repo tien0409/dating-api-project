@@ -15,6 +15,12 @@ export class ParticipantService {
     private readonly participantModel: Model<ParticipantDocument>,
   ) {}
 
+  getByUserId(userId: string) {
+    return this.participantModel.findOne({
+      user: userId,
+    });
+  }
+
   getParticipantConversations(
     getParticipantConversationsDTO: GetParticipantConversationsDTO,
   ) {
@@ -52,20 +58,17 @@ export class ParticipantService {
   }
 
   // update time joined for users deleted conversation (fire on another user send message)
-  updateManyTimeJoined(
-    updateTimeJoinedDTO: UpdateTimeJoinedDTO,
-    participantIdExclude: string,
-  ) {
+  updateManyTimeJoined(updateTimeJoinedDTO: UpdateTimeJoinedDTO) {
     const { conversationId } = updateTimeJoinedDTO;
 
     return this.participantModel.updateMany(
       {
-        _id: { $ne: participantIdExclude },
         conversation: conversationId,
         timeLeft: { $ne: null },
       },
       {
         timeJoined: new Date(),
+        timeLeft: null,
       },
     );
   }

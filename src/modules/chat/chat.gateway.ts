@@ -35,7 +35,6 @@ import { ChatSessionManager } from './chat.session';
 import { MessageDeleteDTO } from '../message/dtos/message-delete.dto';
 import { MessageService } from '../message/message.service';
 import { ConversationService } from '../conversation/conversation.service';
-import { CreateMessageDTO } from '../message/dtos/create-message.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { TypingMessageDTO } from './dtos/typing-message.dto';
 import { UpdateMessagePayload } from './payloads/update-message.payload';
@@ -87,18 +86,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       conversationsResPromise,
       conversationsSocketPromise,
     ]);
-    const res = conversationsRes.map((conversation) => ({
-      ...conversation.toObject(),
-      participant: conversation.participants?.[0],
-      participants: undefined,
-    }));
-    console.log('conversationRes', conversationsRes);
-    console.log('conversationSockete', conversationsSocket);
 
     conversationsSocket.forEach((conversation) => {
       socket.join(conversation._id.toString());
     });
-    socket.emit(SEND_ALL_CONVERSATIONS, res);
+    socket.emit(SEND_ALL_CONVERSATIONS, { conversations: conversationsRes });
   }
 
   @SubscribeMessage(REQUEST_DELETE_CONVERSATION)
@@ -115,13 +107,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const conversations = await this.conversationService.getByUserId({
       userId: socket.user._id,
     });
-    const res = conversations.map((conversation) => ({
-      ...conversation.toObject(),
-      participant: conversation.participants?.[0],
-      participants: undefined,
-    }));
 
-    socket.emit(SEND_DELETE_CONVERSATION, { conversations: res });
+    socket.emit(SEND_DELETE_CONVERSATION, { conversations });
   }
 
   @SubscribeMessage(REQUEST_ALL_MESSAGES)
@@ -137,8 +124,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const participantsPromise = this.participantService.getByConversationId(
       conversationId,
     );
-    const messagesPromise = this.messageService.getMessagesByConversationId(
+    const messagesPromise = this.messageService.getMessagesByConversationIdAndUserId(
       conversationId,
+      socket.user._id,
     );
 
     const [conversation, participants, messages] = await Promise.all([
@@ -167,7 +155,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() typingMessageDTO: TypingMessageDTO,
   ) {
     const { conversationId } = typingMessageDTO;
-    console.log('conversationId', conversationId);
+
     socket.to(conversationId).emit(SEND_TYPING_MESSAGE, { conversationId });
   }
 
@@ -254,9 +242,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const receiver = this.chatSessionManager.getUserSocket(receiverId);
 
     await this.messageService.deleteMessage(messageId);
-    const messages = await this.messageService
-      .getMessagesByConversationId(conversation._id)
-      .sort({ createdAt: 1 });
+    const messages = await this.messageService.getMessagesByConversationIdAndUserId(
+      conversation._id,
+      socket.user._id,
+    );
 
     let conversationUpdated;
     if (
@@ -265,7 +254,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {
       conversationUpdated = await this.conversationService.updateLastMessage({
         conversationId: conversation._id,
-        lastMessage: messages[messages.length - 1],
+        lastMessage: messages[0],
       });
     }
 
