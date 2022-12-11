@@ -1,13 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
-import { Document } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
-import { Address, AddressSchema } from './address.schema';
-import { Gender, GenderSchema } from '../../gender/gender.schema';
-import { UserRole, UserRoleSchema } from './user-role.schema';
+import { Address } from './address.schema';
+import { UserRole } from './user-role.schema';
 import { UserPhoto } from './user-photo.schema';
 import { emailRegex } from '../../../utils/regexes';
+import { UserGender } from '../../user-gender/user-gender.schema';
 
 export type UserDocument = User & Document;
 
@@ -58,17 +57,18 @@ export class User extends BaseSchema {
   @Prop()
   birthday?: Date;
 
-  @Prop({ type: UserRoleSchema, default: null })
-  @Type(() => UserRole)
-  role?: UserRole;
+  @Prop({ type: SchemaTypes.ObjectId, ref: UserRole.name, autopopulate: true })
+  role?: Types.ObjectId;
 
-  @Prop({ type: GenderSchema, default: null })
-  @Type(() => Gender)
-  gender?: Gender;
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: UserGender.name,
+    autopopulate: true,
+  })
+  userGender?: Types.ObjectId;
 
-  @Prop({ type: AddressSchema, default: null })
-  @Type(() => Address)
-  address?: Address;
+  @Prop({ type: SchemaTypes.ObjectId, ref: Address.name, autopopulate: true })
+  address?: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -15,6 +15,7 @@ import { ConversationModule } from './modules/conversation/conversation.module';
 import { ParticipantModule } from './modules/participant/participant.module';
 import { GenderModule } from './modules/gender/gender.module';
 import { InterestedInGenderModule } from './modules/interested-in-gender/interested-in-gender.module';
+import { UserGenderModule } from './modules/user-gender/user-gender.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { InterestedInGenderModule } from './modules/interested-in-gender/interes
     ParticipantModule,
     GenderModule,
     InterestedInGenderModule,
+    UserGenderModule,
   ],
   controllers: [],
 })

@@ -18,7 +18,7 @@ export type UserRoleDocument = UserRole & Document;
   },
 })
 export class UserRole extends BaseSchema {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   roleName: string;
 
   @Prop()

@@ -7,6 +7,7 @@ import { UsersService } from './users.service';
 import { UserPhoto, UserPhotoSchema } from './schemas/user-photo.schema';
 import { Gender, GenderSchema } from '../gender/gender.schema';
 import { InterestedInGenderModule } from '../interested-in-gender/interested-in-gender.module';
+import { UserGenderModule } from '../user-gender/user-gender.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { InterestedInGenderModule } from '../interested-in-gender/interested-in-
       { name: Gender.name, schema: GenderSchema },
     ]),
     InterestedInGenderModule,
+    UserGenderModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

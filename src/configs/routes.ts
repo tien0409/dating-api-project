@@ -21,6 +21,8 @@ export const CREATE_PROFILE_ROUTE = 'create-profile';
 
 export const GENDERS_ROUTE = 'genders';
 
+export const USER_GENDERS_ROUTE = 'user-genders';
+
 export const INTERESTED_IN_GENDERS_ROUTE = 'interested-in-gender';
 
 export const MESSAGES_ROUTE = 'messages';

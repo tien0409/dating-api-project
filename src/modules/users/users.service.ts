@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { User, UserDocument } from './schemas/user.schema';
 import { UserPhoto, UserPhotoDocument } from './schemas/user-photo.schema';
 import { CreateUserDTO } from './dtos/create-user.dto';
 import { UpdateProfileDTO } from './dtos/create-profile.dto';
 import { InterestedInGenderService } from '../interested-in-gender/interested-in-gender.service';
+import { UserGenderService } from '../user-gender/user-gender.service';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,7 @@ export class UsersService {
     @InjectModel(UserPhoto.name)
     private readonly userPhotoModel: Model<UserPhotoDocument>,
     private readonly interestedInGenderService: InterestedInGenderService,
+    private readonly userGenderService: UserGenderService,
   ) {}
 
   getByEmail(email: string) {
@@ -33,7 +35,8 @@ export class UsersService {
   async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
     const {
       userPhotos,
-      interestedInGenders,
+      interestedInGender,
+      userGender,
       ...updateProfileData
     } = updateProfileDTO;
     const newUser = await this.userModel.findOneAndUpdate(
@@ -41,14 +44,16 @@ export class UsersService {
       updateProfileData,
     );
 
-    const genderIds = interestedInGenders.map((item) => item.id);
+    const genderIds = [interestedInGender].map((item) => item.id);
     const userPhotosPayload = userPhotos.map<UserPhoto>((item) => ({
       link: item,
       user: newUser._id,
     }));
+    userGender.user = new Types.ObjectId(userId);
     const [photos] = await Promise.all([
       this.userPhotoModel.insertMany(userPhotosPayload),
       this.interestedInGenderService.createMany(userId, { genderIds }),
+      this.userGenderService.create(userGender),
     ]);
 
     await this.userModel.updateOne(

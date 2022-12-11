@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 
 import { Gender } from '../../gender/gender.schema';
+import { UserGender } from '../../user-gender/user-gender.schema';
 
 export class UpdateProfileDTO {
   @IsString()
@@ -28,11 +29,11 @@ export class UpdateProfileDTO {
 
   @IsObject()
   @IsNotEmptyObject()
-  gender: Gender;
+  userGender: UserGender;
 
   @IsObject()
   @IsNotEmptyObject()
-  interestedInGenders: Gender[];
+  interestedInGender: Gender;
 
   @IsArray()
   @IsNotEmpty()
