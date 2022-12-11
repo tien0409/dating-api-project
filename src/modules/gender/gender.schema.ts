@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Types } from 'mongoose';
 
+import { BaseSchema } from '../base/schemas/base.schema';
+
 export type GenderDocument = Gender & Document;
 
 @Schema({
@@ -15,7 +17,7 @@ export type GenderDocument = Gender & Document;
     getters: true,
   },
 })
-export class Gender {
+export class Gender extends BaseSchema {
   @Prop({ required: true })
   name: string;
 

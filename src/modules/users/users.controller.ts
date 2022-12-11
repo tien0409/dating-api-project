@@ -9,11 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import {
-  CREATE_PROFILE_ROUTE,
-  GENDERS_ROUTE,
-  USERS_ROUTE,
-} from 'src/configs/routes';
+import { CREATE_PROFILE_ROUTE, USERS_ROUTE } from 'src/configs/routes';
 import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard';
 import { UpdateProfileDTO } from './dtos/create-profile.dto';
 import { UsersService } from './users.service';
@@ -28,11 +24,6 @@ export class UsersController {
   getMyProfile(@Req() req: Request) {
     const { user } = req;
     return user;
-  }
-
-  @Get(GENDERS_ROUTE)
-  getGenders() {
-    return this.usersService.getGenders();
   }
 
   @Post(CREATE_PROFILE_ROUTE)

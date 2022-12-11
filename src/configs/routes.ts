@@ -18,10 +18,13 @@ export const UPLOAD_MULTI_IMAGE = 'multi-image';
 export const USERS_ROUTE = 'users';
 export const UPDATE_PROFILE_ROUTE = 'update-profile';
 export const CREATE_PROFILE_ROUTE = 'create-profile';
+
 export const GENDERS_ROUTE = 'genders';
+
+export const INTERESTED_IN_GENDERS_ROUTE = 'interested-in-gender';
 
 export const MESSAGES_ROUTE = 'messages';
 
-export const PARTICIPAINTS_ROUTE = 'participants';
+export const PARTICIPANTS_ROUTE = 'participants';
 
 export const CONVERSATIONS_ROUTE = 'conversations';

@@ -13,6 +13,8 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { MessageModule } from './modules/message/message.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { ParticipantModule } from './modules/participant/participant.module';
+import { GenderModule } from './modules/gender/gender.module';
+import { InterestedInGenderModule } from './modules/interested-in-gender/interested-in-gender.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { ParticipantModule } from './modules/participant/participant.module';
     MessageModule,
     ConversationModule,
     ParticipantModule,
+    GenderModule,
+    InterestedInGenderModule,
   ],
   controllers: [],
 })

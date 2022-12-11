@@ -42,7 +42,6 @@ export class AuthController {
           'Register successfully! Please check your email to verify account.',
       });
     } catch (error) {
-      console.log('error', error);
       if (error.code === 11000) {
         throw new ConflictException('Email already exists.');
       }
@@ -84,8 +83,9 @@ export class AuthController {
   refresh(@Req() req: Request, @Res() res: Response) {
     const user = req.user as User;
     const jwtPayload: IJwtPayload = { userId: user._id };
-    const accessTokenCookie =
-      this.authService.getCookieWithJwtAccessToken(jwtPayload);
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      jwtPayload,
+    );
 
     res.setHeader('Set-Cookie', accessTokenCookie);
     return res.json({ data: user });

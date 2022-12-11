@@ -7,7 +7,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { UserPhoto, UserPhotoDocument } from './schemas/user-photo.schema';
 import { CreateUserDTO } from './dtos/create-user.dto';
 import { UpdateProfileDTO } from './dtos/create-profile.dto';
-import { Gender, GenderDocument } from './schemas/gender.schema';
+import { InterestedInGenderService } from '../interested-in-gender/interested-in-gender.service';
 
 @Injectable()
 export class UsersService {
@@ -15,8 +15,7 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(UserPhoto.name)
     private readonly userPhotoModel: Model<UserPhotoDocument>,
-    @InjectModel(Gender.name)
-    private readonly genderModel: Model<GenderDocument>,
+    private readonly interestedInGenderService: InterestedInGenderService,
   ) {}
 
   getByEmail(email: string) {
@@ -27,26 +26,31 @@ export class UsersService {
     return this.userModel.findOne({ _id: userId });
   }
 
-  getGenders() {
-    return this.genderModel.find();
-  }
-
   createUser(createUserDTO: CreateUserDTO) {
     return this.userModel.create(createUserDTO);
   }
 
   async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
-    const { userPhotos, ...updateProfileData } = updateProfileDTO;
+    const {
+      userPhotos,
+      interestedInGenders,
+      ...updateProfileData
+    } = updateProfileDTO;
     const newUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
       updateProfileData,
     );
 
+    const genderIds = interestedInGenders.map((item) => item.id);
     const userPhotosPayload = userPhotos.map<UserPhoto>((item) => ({
       link: item,
       user: newUser._id,
     }));
-    const photos = await this.userPhotoModel.insertMany(userPhotosPayload);
+    const [photos] = await Promise.all([
+      this.userPhotoModel.insertMany(userPhotosPayload),
+      this.interestedInGenderService.createMany(userId, { genderIds }),
+    ]);
+
     await this.userModel.updateOne(
       { _id: userId },
       { $set: { avatar: photos[0]?.link } },

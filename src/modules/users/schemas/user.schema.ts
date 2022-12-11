@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address, AddressSchema } from './address.schema';
-import { Gender, GenderSchema } from './gender.schema';
+import { Gender, GenderSchema } from '../../gender/gender.schema';
 import { UserRole, UserRoleSchema } from './user-role.schema';
 import { UserPhoto } from './user-photo.schema';
 import { emailRegex } from '../../../utils/regexes';

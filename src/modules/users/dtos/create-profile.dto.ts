@@ -9,7 +9,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-import { Gender } from '../schemas/gender.schema';
+import { Gender } from '../../gender/gender.schema';
 
 export class UpdateProfileDTO {
   @IsString()
@@ -20,19 +20,23 @@ export class UpdateProfileDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(15)
-  lastName?: string;
+  lastName: string;
 
   @IsDateString()
   @IsNotEmpty()
-  birthday?: Date;
+  birthday: Date;
 
   @IsObject()
   @IsNotEmptyObject()
-  gender?: Gender;
+  gender: Gender;
+
+  @IsObject()
+  @IsNotEmptyObject()
+  interestedInGenders: Gender[];
 
   @IsArray()
   @IsNotEmpty()
-  userPhotos?: string[];
+  userPhotos: string[];
 
   @IsOptional()
   bio?: string;

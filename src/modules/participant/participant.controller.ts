@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 
-import { PARTICIPAINTS_ROUTE } from '../../configs/routes';
+import { PARTICIPANTS_ROUTE } from '../../configs/routes';
 
-@Controller(PARTICIPAINTS_ROUTE)
+@Controller(PARTICIPANTS_ROUTE)
 export class ParticipantController {}
