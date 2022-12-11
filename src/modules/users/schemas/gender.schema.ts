@@ -1,6 +1,5 @@
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { BaseSchema } from 'src/modules/base/schemas/base.schema';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 
 export type GenderDocument = Gender & Document;
 
@@ -17,8 +16,17 @@ export type GenderDocument = Gender & Document;
   },
 })
 export class Gender {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   name: string;
+
+  @Prop()
+  describe?: string;
+
+  @Prop({ default: false })
+  isPrivacy: boolean;
+
+  @Prop({ type: SchemaTypes.ObjectId, ref: Gender.name, autopopulate: true })
+  showMeInSearchesAs?: Types.ObjectId;
 }
 
 export const GenderSchema = SchemaFactory.createForClass(Gender);
