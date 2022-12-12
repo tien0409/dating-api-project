@@ -7,7 +7,6 @@ import { UpdateLastMessageDTO } from './dtos/update-last-message.dto';
 import { CreateConversationDTO } from './dtos/create-conversation.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { GetByUserIdDTO } from './dtos/get-by-user-id.dto';
-import { Participant } from '../participant/participant.schema';
 
 @Injectable()
 export class ConversationService {

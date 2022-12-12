@@ -28,17 +28,19 @@ export class UsersService {
     return this.userModel.findOne({ _id: userId });
   }
 
+  getUsersExplore() {
+    return this.userModel
+      .find({})
+      .populate({ path: 'photos', model: UserPhoto.name });
+  }
+
   createUser(createUserDTO: CreateUserDTO) {
     return this.userModel.create(createUserDTO);
   }
 
   async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
-    const {
-      userPhotos,
-      interestedInGender,
-      userGender,
-      ...updateProfileData
-    } = updateProfileDTO;
+    const { userPhotos, interestedInGender, userGender, ...updateProfileData } =
+      updateProfileDTO;
     const newUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
       updateProfileData,

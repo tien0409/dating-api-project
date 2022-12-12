@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, SchemaTypes, Types } from 'mongoose';
-import { BaseSchema } from 'src/modules/base/schemas/base.schema';
+import { Document, SchemaTypes, Types } from 'mongoose';
 import { User } from './user.schema';
 
 export type UserPhotoDocument = UserPhoto & Document;
@@ -27,7 +26,7 @@ export class UserPhoto {
 
   @Prop({
     type: SchemaTypes.ObjectId,
-    ref: User.name,
+    ref: 'User',
     required: true,
   })
   user: Types.ObjectId;

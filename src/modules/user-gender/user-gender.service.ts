@@ -12,6 +12,7 @@ export class UserGenderService {
   ) {}
 
   create(userGender: UserGender) {
+    delete userGender._id;
     return this.userGenderModel.create(userGender);
   }
 }

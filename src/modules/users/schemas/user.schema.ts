@@ -7,14 +7,15 @@ import { UserRole } from './user-role.schema';
 import { UserPhoto } from './user-photo.schema';
 import { emailRegex } from '../../../utils/regexes';
 import { UserGender } from '../../user-gender/user-gender.schema';
+import { Type } from 'class-transformer';
 
 export type UserDocument = User & Document;
 
 @Schema({
   timestamps: true,
   toJSON: {
+    transform: true,
     virtuals: true,
-    versionKey: false,
     getters: true,
   },
   toObject: {
@@ -26,6 +27,9 @@ export class User extends BaseSchema {
   fullName?: string;
 
   age?: number;
+
+  @Type(() => UserPhoto)
+  photos: UserPhoto[];
 
   @Prop({ required: true, unique: true, match: emailRegex })
   email: string;
@@ -111,4 +115,14 @@ UserSchema.virtual('participants', {
   ref: 'Participant',
   localField: '_id',
   foreignField: 'user',
+});
+
+UserSchema.set('toJSON', {
+  transform: function (doc: any, ret: any, options: any) {
+    delete ret.password;
+    delete ret.confirmationCode;
+    delete ret.confirmationTime;
+    return ret;
+  },
+  virtuals: true,
 });
