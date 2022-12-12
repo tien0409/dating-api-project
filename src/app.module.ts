@@ -16,6 +16,7 @@ import { ParticipantModule } from './modules/participant/participant.module';
 import { GenderModule } from './modules/gender/gender.module';
 import { InterestedInGenderModule } from './modules/interested-in-gender/interested-in-gender.module';
 import { UserGenderModule } from './modules/user-gender/user-gender.module';
+import { MessageAttachmentModule } from './modules/message-attachment/message-attachment.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UserGenderModule } from './modules/user-gender/user-gender.module';
     GenderModule,
     InterestedInGenderModule,
     UserGenderModule,
+    MessageAttachmentModule,
   ],
   controllers: [],
 })

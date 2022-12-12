@@ -27,6 +27,8 @@ export const INTERESTED_IN_GENDERS_ROUTE = 'interested-in-gender';
 
 export const MESSAGES_ROUTE = 'messages';
 
+export const MESSAGE_ATTACHMENTS_ROUTE = 'message-attachments';
+
 export const PARTICIPANTS_ROUTE = 'participants';
 
 export const CONVERSATIONS_ROUTE = 'conversations';
