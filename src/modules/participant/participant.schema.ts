@@ -12,11 +12,9 @@ export type ParticipantDocument = Participant & Document;
   toJSON: {
     virtuals: true,
     versionKey: false,
-    getters: true,
   },
   toObject: {
     virtuals: true,
-    getters: true,
   },
 })
 export class Participant extends BaseSchema {
@@ -38,7 +36,6 @@ export class Participant extends BaseSchema {
     required: true,
     type: SchemaTypes.ObjectId,
     ref: Conversation.name,
-    autopopulate: true,
   })
   conversation: Types.ObjectId;
 }

@@ -7,6 +7,7 @@ import { UpdateLastMessageDTO } from './dtos/update-last-message.dto';
 import { CreateConversationDTO } from './dtos/create-conversation.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { GetByUserIdDTO } from './dtos/get-by-user-id.dto';
+import { Participant } from '../participant/participant.schema';
 
 @Injectable()
 export class ConversationService {
@@ -17,17 +18,26 @@ export class ConversationService {
   ) {}
 
   getById(conversationId: string) {
-    return this.conversationModel.findById(conversationId);
+    return this.conversationModel
+      .findById(conversationId)
+      .populate({ path: 'participants', populate: { path: 'user' } })
+      .populate({
+        path: 'lastMessage',
+        populate: 'attachments',
+      });
   }
 
   getByUserIdIncludeConversationDeleted(getByUserIdDTO: GetByUserIdDTO) {
     const { userId } = getByUserIdDTO;
 
-    return this.conversationModel.find({}).populate({
-      path: 'participants',
-      populate: { path: 'user' },
-      match: { user: userId },
-    });
+    return this.conversationModel
+      .find({})
+      .populate({
+        path: 'participants',
+        populate: { path: 'user' },
+        match: { user: userId },
+      })
+      .populate({ path: 'lastMessage', populate: 'attachments' });
   }
 
   // exclude conversation deleted
@@ -46,7 +56,15 @@ export class ConversationService {
       .find({
         _id: { $in: conversationIds },
       })
-      .populate({ path: 'participants', populate: { path: 'user' } });
+      .populate({
+        path: 'participants',
+        populate: 'user',
+        select: '-participants.conversation',
+      })
+      .populate({
+        path: 'lastMessage',
+        populate: 'attachments',
+      });
   }
 
   async createConversation(
@@ -84,6 +102,10 @@ export class ConversationService {
         },
         { new: true },
       )
-      .populate({ path: 'participants', populate: { path: 'user' } });
+      .populate({ path: 'participants', populate: { path: 'user' } })
+      .populate({
+        path: 'lastMessage',
+        populate: 'attachments',
+      });
   }
 }

@@ -10,11 +10,13 @@ import {
   ConversationSchema,
 } from '../conversation/conversation.schema';
 import { ConversationModule } from '../conversation/conversation.module';
+import { MessageAttachmentModule } from '../message-attachment/message-attachment.module';
 
 @Module({
   imports: [
     ConversationModule,
     ParticipantModule,
+    MessageAttachmentModule,
     MongooseModule.forFeature([
       { name: Message.name, schema: MessageSchema },
       { name: Conversation.name, schema: ConversationSchema },

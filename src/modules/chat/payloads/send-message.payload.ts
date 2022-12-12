@@ -6,4 +6,5 @@ export type SendMessagePayload = {
   conversationId: string;
   content: string;
   replyTo?: Message;
+  attachments?: string[];
 };

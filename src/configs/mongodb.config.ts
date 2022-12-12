@@ -4,7 +4,6 @@ import {
   MongooseModuleOptions,
   MongooseOptionsFactory,
 } from '@nestjs/mongoose';
-import * as mongooseAutoPopulate from 'mongoose-autopopulate';
 
 @Injectable()
 export class MongoConfig implements MongooseOptionsFactory {
@@ -15,7 +14,8 @@ export class MongoConfig implements MongooseOptionsFactory {
     | Promise<MongooseModuleOptions> {
     return {
       connectionFactory: (connection) => {
-      connection.plugin(mongooseAutoPopulate);
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        connection.plugin(require('mongoose-autopopulate'));
         return connection;
       },
       uri: this.configService.get('database.uri'),

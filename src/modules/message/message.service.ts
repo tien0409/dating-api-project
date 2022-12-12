@@ -7,6 +7,8 @@ import { CreateMessageDTO } from './dtos/create-message.dto';
 import { ConversationService } from '../conversation/conversation.service';
 import { UpdateMessageDTO } from './dtos/update-message.dto';
 import { ParticipantService } from '../participant/participant.service';
+import { MessageAttachmentService } from '../message-attachment/message-attachment.service';
+import { CreateMessageAttachmentDTO } from '../message-attachment/dtos/create-message-attachment.dto';
 
 @Injectable()
 export class MessageService {
@@ -15,6 +17,7 @@ export class MessageService {
     private readonly messageModel: Model<MessageDocument>,
     private readonly conversationService: ConversationService,
     private readonly participantService: ParticipantService,
+    private readonly messageAttachmentService: MessageAttachmentService,
   ) {}
 
   async getMessagesByConversationIdAndUserId(
@@ -32,21 +35,21 @@ export class MessageService {
       .populate({
         path: 'participant',
         populate: 'user',
-      });
+      })
+      .populate('attachments');
   }
 
-  async createMessage(createMessageDTO: CreateMessageDTO) {
+  async create(createMessageDTO: CreateMessageDTO) {
     const {
       conversationId,
       content,
       replyTo,
       senderParticipantId,
+      attachments,
     } = createMessageDTO;
 
     // note: update time joined another participant before create message
-    const updateParticipantTimeJoined = await this.participantService.updateManyTimeJoined(
-      { conversationId },
-    );
+    await this.participantService.updateManyTimeJoined({ conversationId });
 
     const message = await this.messageModel.create({
       content,
@@ -54,9 +57,20 @@ export class MessageService {
       participant: senderParticipantId,
     });
 
+    if (attachments) {
+      const attachmentsCreate: CreateMessageAttachmentDTO[] = attachments.map(
+        (item) => ({
+          link: item,
+          messageId: message._id,
+        }),
+      );
+
+      await this.messageAttachmentService.createMany(attachmentsCreate);
+    }
     const newMessage = await this.messageModel
       .findById(message._id)
-      .populate({ path: 'participant', populate: 'user' });
+      .populate({ path: 'participant', populate: 'user' })
+      .populate('attachments');
 
     const conversationUpdateLastMessage = await this.conversationService.updateLastMessage(
       {

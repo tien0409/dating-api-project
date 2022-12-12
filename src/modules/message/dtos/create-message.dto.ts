@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsObject, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 import { Message } from '../message.schema';
 
@@ -16,5 +22,10 @@ export class CreateMessageDTO {
   content: string;
 
   @IsObject()
+  @IsOptional()
   replyTo?: Message;
+
+  @IsArray()
+  @IsOptional()
+  attachments?: string[];
 }

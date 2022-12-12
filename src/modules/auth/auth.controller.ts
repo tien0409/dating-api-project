@@ -42,7 +42,6 @@ export class AuthController {
           'Register successfully! Please check your email to verify account.',
       });
     } catch (error) {
-      console.log('error', error);
       if (error.code === 11000) {
         throw new ConflictException('Email already exists.');
       }

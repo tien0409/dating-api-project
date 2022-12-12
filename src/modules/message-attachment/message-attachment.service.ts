@@ -16,6 +16,11 @@ export class MessageAttachmentService {
   ) {}
 
   createMany(createMessageAttachmentDTO: CreateMessageAttachmentDTO[]) {
-    return this.messageAttachmentModel.insertMany(createMessageAttachmentDTO);
+    const documents = createMessageAttachmentDTO.map((item) => ({
+      link: item.link,
+      message: item.messageId,
+    }));
+
+    return this.messageAttachmentModel.insertMany(documents);
   }
 }

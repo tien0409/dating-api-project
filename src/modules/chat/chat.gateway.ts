@@ -6,6 +6,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Inject, Logger } from '@nestjs/common';
@@ -180,16 +181,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       content,
       senderParticipantId,
       conversationId,
+      attachments,
     } = sendMessagePayload;
+
+    if (!attachments && !content?.trim())
+      throw new WsException("Message can't be empty");
 
     const {
       newMessage,
       conversationUpdated,
-    } = await this.messageService.createMessage({
+    } = await this.messageService.create({
       conversationId,
       content,
       replyTo,
       senderParticipantId,
+      attachments,
     });
 
     this.server.in(conversationId).emit(SEND_MESSAGE, {
