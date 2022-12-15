@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
-import mongoose, { SchemaTypes, Types } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Gender } from '../gender/gender.schema';
@@ -23,7 +22,6 @@ export type InterestedInGenderDocument = InterestedInGender & Document;
 })
 export class InterestedInGender extends BaseSchema {
   @Prop({ type: SchemaTypes.ObjectId, ref: User.name, autopopulate: true })
-  @Type(() => User)
   user: Types.ObjectId;
 
   @Prop({ type: SchemaTypes.ObjectId, ref: Gender.name, autopopulate: true })
