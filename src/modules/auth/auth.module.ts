@@ -11,6 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token.strategy';
 import { MailService } from '../mail/mail.service';
+import { RoleGuard } from './guards/role.guard';
 
 @Module({
   imports: [

@@ -24,5 +24,5 @@ export class CreateUserDTO {
 
   @IsObject()
   @IsOptional()
-  role: Role;
+  role?: Role;
 }

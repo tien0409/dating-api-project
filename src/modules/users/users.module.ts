@@ -8,6 +8,7 @@ import { UserPhoto, UserPhotoSchema } from './schemas/user-photo.schema';
 import { Gender, GenderSchema } from '../gender/gender.schema';
 import { InterestedInGenderModule } from '../interested-in-gender/interested-in-gender.module';
 import { UserGenderModule } from '../user-gender/user-gender.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserGenderModule } from '../user-gender/user-gender.module';
     ]),
     InterestedInGenderModule,
     UserGenderModule,
+    RoleModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

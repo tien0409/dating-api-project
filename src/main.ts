@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
+
 import { AppModule } from './app.module';
 import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
 import { ChatAdapter } from './modules/chat/chat.adapter';
@@ -19,4 +20,5 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   await app.listen(3001);
 }
+
 bootstrap();
