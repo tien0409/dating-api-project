@@ -7,6 +7,7 @@ import { UpdateLastMessageDTO } from './dtos/update-last-message.dto';
 import { CreateConversationDTO } from './dtos/create-conversation.dto';
 import { ParticipantService } from '../participant/participant.service';
 import { GetByUserIdDTO } from './dtos/get-by-user-id.dto';
+import { IsCreatedDTO } from './dtos/is-created.dto';
 
 @Injectable()
 export class ConversationService {
@@ -64,6 +65,14 @@ export class ConversationService {
         path: 'lastMessage',
         populate: 'attachments',
       });
+  }
+
+  isCreated(isCreatedDTO: IsCreatedDTO) {
+    const { senderId, receiverId } = isCreatedDTO;
+
+    return this.conversationModel.findOne({
+      participants: { $all: [senderId, receiverId] },
+    });
   }
 
   async createConversation(

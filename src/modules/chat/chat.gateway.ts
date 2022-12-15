@@ -12,6 +12,12 @@ import { Server } from 'socket.io';
 import { Inject, Logger } from '@nestjs/common';
 
 import {
+  ON_USER_UNAVAILABLE,
+  ON_VIDEO_CALL,
+  ON_VIDEO_CALL_ACCEPT,
+  ON_VIDEO_CALL_ACCEPTED,
+  ON_VIDEO_CALL_INIT,
+  ON_VIDEO_CALL_REJECTED,
   REQUEST_ALL_CONVERSATIONS,
   REQUEST_ALL_MESSAGES,
   REQUEST_DELETE_CONVERSATION,
@@ -40,6 +46,9 @@ import { UpdateMessagePayload } from './payloads/update-message.payload';
 import { DeleteConversationPayload } from './payloads/delete-conversation.payload';
 import { SendMessagePayload } from './payloads/send-message.payload';
 import { TypingMessagePayload } from './payloads/typing-message.payload';
+import { VideoCallPayload } from './payloads/video-call.payload';
+import { VideoCallAcceptedPayload } from './payloads/video-call-accepted-payload';
+import { VideoCallRejectedPayload } from './payloads/video-call-rejected.payload';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -268,5 +277,57 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       sender.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
     receiver &&
       receiver.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
+  }
+
+  @SubscribeMessage(ON_VIDEO_CALL_INIT)
+  handleVideoCall(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() payload: VideoCallPayload,
+  ) {
+    const { receiverId, conversationId } = payload;
+
+    const caller = socket.user;
+    const receiverSocket = this.chatSessionManager.getUserSocket(receiverId);
+
+    if (receiverSocket) socket.emit(ON_USER_UNAVAILABLE);
+    receiverSocket.emit(ON_VIDEO_CALL, { conversationId, receiverId, caller });
+  }
+
+  @SubscribeMessage(ON_VIDEO_CALL_ACCEPTED)
+  async handleVideoCallAccepted(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() payload: VideoCallAcceptedPayload,
+  ) {
+    const { caller } = payload;
+
+    const conversation = await this.conversationService.isCreated({
+      receiverId: caller._id,
+      senderId: socket.user._id,
+    });
+    if (!conversation) throw new WsException('Conversation not found');
+
+    const callerSocket = this.chatSessionManager.getUserSocket(caller._id);
+    if (callerSocket) {
+      const _payload = { acceptor: socket.user, caller };
+      callerSocket.emit(ON_VIDEO_CALL_ACCEPT, _payload);
+      socket.emit(ON_VIDEO_CALL_ACCEPT, _payload);
+    }
+  }
+
+  @SubscribeMessage(ON_VIDEO_CALL_REJECTED)
+  async handleVideoCallRejected(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() payload: VideoCallRejectedPayload,
+  ) {
+    const { caller } = payload;
+
+    const callerSocket = this.chatSessionManager.getUserSocket(caller._id);
+    const receiverSocket = this.chatSessionManager.getUserSocket(
+      socket.user._id,
+    );
+
+    callerSocket &&
+      callerSocket.emit(ON_VIDEO_CALL_REJECTED, { receiver: socket.user });
+    receiverSocket && receiverSocket.emit(ON_VIDEO_CALL_REJECTED);
   }
 }
