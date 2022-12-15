@@ -20,6 +20,7 @@ import { MessageAttachmentModule } from './modules/message-attachment/message-at
 import { NotificationModule } from './modules/notification/notification.module';
 import { NotificationObjectModule } from './modules/notification-object/notification-object.module';
 import { NotificationTypeModule } from './modules/notification-type/notification-type.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { NotificationTypeModule } from './modules/notification-type/notification
     NotificationModule,
     NotificationObjectModule,
     NotificationTypeModule,
+    RoleModule,
   ],
   controllers: [],
 })

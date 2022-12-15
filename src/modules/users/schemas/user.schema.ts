@@ -3,7 +3,7 @@ import { Document, SchemaTypes, Types } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address } from './address.schema';
-import { UserRole } from './user-role.schema';
+import { Role } from '../../role/role.schema';
 import { UserPhoto } from './user-photo.schema';
 import { emailRegex } from '../../../utils/regexes';
 import { UserGender } from '../../user-gender/user-gender.schema';
@@ -61,7 +61,7 @@ export class User extends BaseSchema {
   @Prop()
   birthday?: Date;
 
-  @Prop({ type: SchemaTypes.ObjectId, ref: UserRole.name, autopopulate: true })
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'Role', autopopulate: true })
   role?: Types.ObjectId;
 
   @Prop({

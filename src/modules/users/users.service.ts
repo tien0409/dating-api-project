@@ -9,6 +9,7 @@ import { CreateUserDTO } from './dtos/create-user.dto';
 import { UpdateProfileDTO } from './dtos/create-profile.dto';
 import { InterestedInGenderService } from '../interested-in-gender/interested-in-gender.service';
 import { UserGenderService } from '../user-gender/user-gender.service';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,7 @@ export class UsersService {
     private readonly userPhotoModel: Model<UserPhotoDocument>,
     private readonly interestedInGenderService: InterestedInGenderService,
     private readonly userGenderService: UserGenderService,
+    private readonly roleService: RoleService,
   ) {}
 
   getByEmail(email: string) {
@@ -34,13 +36,23 @@ export class UsersService {
       .populate({ path: 'photos', model: UserPhoto.name });
   }
 
-  createUser(createUserDTO: CreateUserDTO) {
+  async createUser(createUserDTO: CreateUserDTO) {
+    const { role } = createUserDTO;
+
+    if (!role) {
+      createUserDTO.role = await this.roleService.getByName({ name: 'USER' });
+    }
+
     return this.userModel.create(createUserDTO);
   }
 
   async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
-    const { userPhotos, interestedInGender, userGender, ...updateProfileData } =
-      updateProfileDTO;
+    const {
+      userPhotos,
+      interestedInGender,
+      userGender,
+      ...updateProfileData
+    } = updateProfileDTO;
     const newUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
       updateProfileData,
