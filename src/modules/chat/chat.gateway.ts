@@ -16,6 +16,7 @@ import {
   ON_VIDEO_CALL,
   ON_VIDEO_CALL_ACCEPT,
   ON_VIDEO_CALL_ACCEPTED,
+  ON_VIDEO_CALL_HANG_UP,
   ON_VIDEO_CALL_INIT,
   ON_VIDEO_CALL_REJECTED,
   REQUEST_ALL_CONVERSATIONS,
@@ -34,6 +35,7 @@ import {
   SEND_STOP_TYPING_MESSAGE,
   SEND_TYPING_MESSAGE,
   SEND_UPDATE_MESSAGE,
+  VIDEO_CALL_HANG_UP,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
@@ -49,6 +51,7 @@ import { TypingMessagePayload } from './payloads/typing-message.payload';
 import { VideoCallPayload } from './payloads/video-call.payload';
 import { VideoCallAcceptedPayload } from './payloads/video-call-accepted-payload';
 import { VideoCallRejectedPayload } from './payloads/video-call-rejected.payload';
+import { VideoCallHangUpPayload } from './payloads/video-call-hang-up.payload';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -329,5 +332,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     callerSocket &&
       callerSocket.emit(ON_VIDEO_CALL_REJECTED, { receiver: socket.user });
     receiverSocket && receiverSocket.emit(ON_VIDEO_CALL_REJECTED);
+  }
+
+  @SubscribeMessage(VIDEO_CALL_HANG_UP)
+  handleVideoCallHangUp(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() payload: VideoCallHangUpPayload,
+  ) {
+    const { receiver, caller } = payload;
+
+    if (socket?.user?.id === caller?.id) {
+      const receiverSocket = this.chatSessionManager.getUserSocket(receiver.id);
+      socket.emit(ON_VIDEO_CALL_HANG_UP);
+      receiverSocket && receiverSocket?.emit(ON_VIDEO_CALL_HANG_UP);
+      return;
+    }
+
+    socket.emit(ON_VIDEO_CALL_HANG_UP);
+    const callerSocket = this.chatSessionManager.getUserSocket(caller.id);
+    callerSocket && callerSocket.emit(ON_VIDEO_CALL_HANG_UP);
   }
 }
