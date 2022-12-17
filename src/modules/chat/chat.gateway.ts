@@ -13,11 +13,10 @@ import { Inject, Logger } from '@nestjs/common';
 
 import {
   ON_USER_UNAVAILABLE,
-  ON_VIDEO_CALL,
-  ON_VIDEO_CALL_ACCEPT,
   ON_VIDEO_CALL_ACCEPTED,
+  VIDEO_CALL_ACCEPTED,
   ON_VIDEO_CALL_HANG_UP,
-  ON_VIDEO_CALL_INIT,
+  VIDEO_CALL_INIT,
   ON_VIDEO_CALL_REJECTED,
   REQUEST_ALL_CONVERSATIONS,
   REQUEST_ALL_MESSAGES,
@@ -36,6 +35,8 @@ import {
   SEND_TYPING_MESSAGE,
   SEND_UPDATE_MESSAGE,
   VIDEO_CALL_HANG_UP,
+  VIDEO_CALL_REJECTED,
+  ON_VIDEO_CALL_INIT,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
@@ -282,7 +283,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       receiver.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
   }
 
-  @SubscribeMessage(ON_VIDEO_CALL_INIT)
+  @SubscribeMessage(VIDEO_CALL_INIT)
   handleVideoCall(
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() payload: VideoCallPayload,
@@ -292,11 +293,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const caller = socket.user;
     const receiverSocket = this.chatSessionManager.getUserSocket(receiverId);
 
-    if (receiverSocket) socket.emit(ON_USER_UNAVAILABLE);
-    receiverSocket.emit(ON_VIDEO_CALL, { conversationId, receiverId, caller });
+    if (!receiverSocket) socket.emit(ON_USER_UNAVAILABLE);
+
+    receiverSocket.emit(ON_VIDEO_CALL_INIT, {
+      conversationId,
+      receiverId,
+      caller,
+    });
   }
 
-  @SubscribeMessage(ON_VIDEO_CALL_ACCEPTED)
+  @SubscribeMessage(VIDEO_CALL_ACCEPTED)
   async handleVideoCallAccepted(
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() payload: VideoCallAcceptedPayload,
@@ -312,12 +318,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const callerSocket = this.chatSessionManager.getUserSocket(caller._id);
     if (callerSocket) {
       const _payload = { acceptor: socket.user, caller };
-      callerSocket.emit(ON_VIDEO_CALL_ACCEPT, _payload);
-      socket.emit(ON_VIDEO_CALL_ACCEPT, _payload);
+      callerSocket.emit(ON_VIDEO_CALL_ACCEPTED, _payload);
+      socket.emit(ON_VIDEO_CALL_ACCEPTED, _payload);
     }
   }
 
-  @SubscribeMessage(ON_VIDEO_CALL_REJECTED)
+  @SubscribeMessage(VIDEO_CALL_REJECTED)
   async handleVideoCallRejected(
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() payload: VideoCallRejectedPayload,
