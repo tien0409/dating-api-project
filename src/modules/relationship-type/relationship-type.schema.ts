@@ -25,6 +25,9 @@ export class RelationshipType extends BaseSchema {
   userRelationshipTypes: User[];
 
   @Prop({ required: true, unique: true })
+  code?: string;
+
+  @Prop({ required: true, unique: true })
   name?: string;
 
   @Prop({ default: false })

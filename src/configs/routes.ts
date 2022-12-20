@@ -27,6 +27,9 @@ export const CREATE_PROFILE_ROUTE = 'create-profile';
 export const GENDERS_ROUTE = 'genders';
 export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 
+export const RELATIONSHIP_TYPES_ROUTE = 'relationship-types';
+export const RELATIONSHIP_TYPES_ADMIN_ROUTE = 'admin/relationship-types';
+
 export const USER_GENDERS_ROUTE = 'user-genders';
 
 export const INTERESTED_IN_GENDERS_ROUTE = 'interested-in-gender';

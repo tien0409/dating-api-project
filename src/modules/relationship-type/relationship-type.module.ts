@@ -7,6 +7,7 @@ import {
   RelationshipType,
   RelationshipTypeSchema,
 } from './relationship-type.schema';
+import { RelationshipTypeAdminController } from './relationship-type.admin.controller';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import {
     ]),
   ],
   providers: [RelationshipTypeService],
-  controllers: [RelationshipTypeController],
+  controllers: [RelationshipTypeController, RelationshipTypeAdminController],
 })
 export class RelationshipTypeModule {}
