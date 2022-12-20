@@ -21,8 +21,10 @@ export class GenderService {
     return this.genderModel.find({}).populate('userGenders');
   }
 
-  async checkNameExist(name: string) {
-    const existName = await this.genderModel.findOne({ name });
+  async checkNameExist(name: string, ignoreId?: string) {
+    const existName = await this.genderModel.findOne({
+      $and: [{ name }, { _id: { $ne: ignoreId } }],
+    });
     if (existName) throw new BadRequestException('Gender name already exist');
   }
 
@@ -41,7 +43,7 @@ export class GenderService {
   async update(updateGenderDTO: UpdateGenderDTO) {
     const { name, id } = updateGenderDTO;
 
-    await this.checkNameExist(name);
+    await this.checkNameExist(name, id);
 
     return this.genderModel.findByIdAndUpdate(
       { _id: id },
