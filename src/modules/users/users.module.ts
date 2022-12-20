@@ -9,6 +9,7 @@ import { Gender, GenderSchema } from '../gender/gender.schema';
 import { InterestedInGenderModule } from '../interested-in-gender/interested-in-gender.module';
 import { UserGenderModule } from '../user-gender/user-gender.module';
 import { RoleModule } from '../role/role.module';
+import { RelationshipTypeModule } from '../relationship-type/relationship-type.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RoleModule } from '../role/role.module';
     InterestedInGenderModule,
     UserGenderModule,
     RoleModule,
+    RelationshipTypeModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

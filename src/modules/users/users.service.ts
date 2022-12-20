@@ -10,6 +10,7 @@ import { UpdateProfileDTO } from './dtos/create-profile.dto';
 import { InterestedInGenderService } from '../interested-in-gender/interested-in-gender.service';
 import { UserGenderService } from '../user-gender/user-gender.service';
 import { RoleService } from '../role/role.service';
+import { RelationshipTypeService } from '../relationship-type/relationship-type.service';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,7 @@ export class UsersService {
     private readonly interestedInGenderService: InterestedInGenderService,
     private readonly userGenderService: UserGenderService,
     private readonly roleService: RoleService,
+    private readonly relationshipTypeService: RelationshipTypeService,
   ) {}
 
   getByEmail(email: string) {
@@ -46,16 +48,24 @@ export class UsersService {
     return this.userModel.create(createUserDTO);
   }
 
-  async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
+  async createProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
     const {
       userPhotos,
       interestedInGender,
       userGender,
       ...updateProfileData
     } = updateProfileDTO;
+
+    const defaultRelationshipType = await this.relationshipTypeService.getDefault();
+
     const newUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
-      updateProfileData,
+      {
+        $set: {
+          ...updateProfileData,
+          relationshipType: defaultRelationshipType,
+        },
+      },
     );
 
     const genderIds = [interestedInGender].map((item) => item.id);

@@ -17,5 +17,6 @@ import { RelationshipTypeAdminController } from './relationship-type.admin.contr
   ],
   providers: [RelationshipTypeService],
   controllers: [RelationshipTypeController, RelationshipTypeAdminController],
+  exports: [RelationshipTypeService],
 })
 export class RelationshipTypeModule {}

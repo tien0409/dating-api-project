@@ -37,7 +37,7 @@ export class UsersController {
     @Res() res: Response,
   ) {
     const user = req.user as User;
-    await this.usersService.updateProfile(user._id, updateProfileDTO);
+    await this.usersService.createProfile(user._id, updateProfileDTO);
     return res.json();
   }
 

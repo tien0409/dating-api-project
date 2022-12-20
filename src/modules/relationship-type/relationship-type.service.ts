@@ -18,6 +18,10 @@ export class RelationshipTypeService {
     private readonly relationshipTypeModel: Model<RelationshipTypeDocument>,
   ) {}
 
+  getDefault() {
+    return this.relationshipTypeModel.findOne({ isDefault: true });
+  }
+
   async getAdminAll(getRelationshipTypesDTO: GetRelationshipTypesDTO) {
     const { page = 1, search = '' } = getRelationshipTypesDTO;
 
