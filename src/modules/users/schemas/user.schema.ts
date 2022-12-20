@@ -71,6 +71,13 @@ export class User extends BaseSchema {
   })
   userGender?: Types.ObjectId;
 
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'RelationshipType',
+    default: null,
+  })
+  relationshipType?: Types.ObjectId;
+
   @Prop({ type: SchemaTypes.ObjectId, ref: Address.name, autopopulate: true })
   address?: Types.ObjectId;
 }

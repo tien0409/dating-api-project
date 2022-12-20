@@ -4,7 +4,7 @@ import mongoose, { Types } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Gender } from '../../gender/gender.schema';
-import { RelationshipType } from './relationship-type.schema';
+import { RelationshipType } from '../../relationship-type/relationship-type.schema';
 import { User } from './user.schema';
 
 @Schema({

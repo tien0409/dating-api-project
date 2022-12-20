@@ -23,6 +23,7 @@ import { NotificationTypeModule } from './modules/notification-type/notification
 import { RoleModule } from './modules/role/role.module';
 import { BlockUserModule } from './modules/block-user/block-user.module';
 import { UserPreferenceModule } from './modules/user-preference/user-preference.module';
+import { RelationshipTypeModule } from './modules/relationship-type/relationship-type.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { UserPreferenceModule } from './modules/user-preference/user-preference.
     RoleModule,
     BlockUserModule,
     UserPreferenceModule,
+    RelationshipTypeModule,
   ],
   controllers: [],
 })
