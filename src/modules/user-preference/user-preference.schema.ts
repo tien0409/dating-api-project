@@ -6,6 +6,7 @@ import { BaseSchema } from '../base/schemas/base.schema';
 export type UserPreferenceDocument = UserPreference & Document;
 
 @Schema({
+  collection: "user-preferences",
   timestamps: true,
   toJSON: {
     transform: true,

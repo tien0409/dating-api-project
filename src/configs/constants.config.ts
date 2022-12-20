@@ -4,3 +4,6 @@ export const USER_ROLE = 'USER';
 
 // guard
 export const ROLE_GUARD = 'ROLE_GUARD';
+
+// pagination
+export const LIMIT = 12;
