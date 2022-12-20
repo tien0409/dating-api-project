@@ -62,7 +62,7 @@ import { ToggleMicPayload } from './payloads/toggle-mic.payload';
 
 @WebSocketGateway(3002, {
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'http://localhost:3003'],
     credentials: true,
   },
 })

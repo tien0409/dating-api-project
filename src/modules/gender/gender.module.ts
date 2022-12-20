@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { GenderService } from './gender.service';
 import { GenderController } from './gender.controller';
-import { MongooseModule } from '@nestjs/mongoose';
 import { Gender, GenderSchema } from './gender.schema';
+import { GenderAdminController } from './gender.admin.controller';
 
 @Module({
   imports: [
@@ -14,6 +16,6 @@ import { Gender, GenderSchema } from './gender.schema';
     ]),
   ],
   providers: [GenderService],
-  controllers: [GenderController],
+  controllers: [GenderController, GenderAdminController],
 })
 export class GenderModule {}

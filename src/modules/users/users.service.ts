@@ -64,6 +64,7 @@ export class UsersService {
       user: newUser._id,
     }));
     userGender.user = new Types.ObjectId(userId);
+
     const [photos] = await Promise.all([
       this.userPhotoModel.insertMany(userPhotosPayload),
       this.interestedInGenderService.createMany(userId, { genderIds }),

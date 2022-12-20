@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { UserGender, UserGenderDocument } from './user-gender.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,7 +12,9 @@ export class UserGenderService {
   ) {}
 
   create(userGender: UserGender) {
+    userGender.gender = new Types.ObjectId(userGender._id);
     delete userGender._id;
+    delete userGender.id;
     return this.userGenderModel.create(userGender);
   }
 }

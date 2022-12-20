@@ -11,7 +11,7 @@ async function bootstrap() {
   const adapter = new ChatAdapter(app);
   app.useWebSocketAdapter(adapter);
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'http://localhost:3003'],
     credentials: true,
   });
   app.use(cookieParser());

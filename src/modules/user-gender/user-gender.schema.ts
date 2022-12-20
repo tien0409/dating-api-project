@@ -29,8 +29,11 @@ export class UserGender extends BaseSchema {
   })
   user: Types.ObjectId;
 
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'Gender', autopopulate: true })
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'genders' })
   showMeInSearchesAs?: Types.ObjectId;
+
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'genders' })
+  gender: Types.ObjectId;
 }
 
 export const UserGenderSchema = SchemaFactory.createForClass(UserGender);

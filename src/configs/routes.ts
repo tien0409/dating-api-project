@@ -1,3 +1,7 @@
+export const ADMIN_ROUTE = 'admin';
+
+export const CREATE_ROUTE = 'create';
+
 export const AUTH_ROUTE = 'auth';
 export const SIGN_UP_ROUTE = 'signup';
 export const SIGN_IN_ROUTE = 'signin';
@@ -21,6 +25,7 @@ export const UPDATE_PROFILE_ROUTE = 'update-profile';
 export const CREATE_PROFILE_ROUTE = 'create-profile';
 
 export const GENDERS_ROUTE = 'genders';
+export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 
 export const USER_GENDERS_ROUTE = 'user-genders';
 
