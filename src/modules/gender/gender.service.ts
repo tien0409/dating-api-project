@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 
 import { Gender, GenderDocument } from './gender.schema';
 import { CreateGenderDTO } from './dtos/create-gender.dto';
+import { UpdateGenderDTO } from './dtos/update-gender.dto';
 
 @Injectable()
 export class GenderService {
@@ -20,17 +21,37 @@ export class GenderService {
     return this.genderModel.find({}).populate('userGenders');
   }
 
+  async checkNameExist(name: string) {
+    const existName = await this.genderModel.findOne({ name });
+    if (existName) throw new BadRequestException('Gender name already exist');
+  }
+
   async create(createGenderDTO: CreateGenderDTO) {
     const { name } = createGenderDTO;
 
-    const existName = await this.genderModel.findOne({ name });
-    if (existName) throw new BadRequestException('Gender name already exist');
+    await this.checkNameExist(name);
 
     const lastGender = await this.genderModel.findOne().sort({ createdAt: -1 });
     const lastNumber = parseInt(lastGender?.code?.split('T')[1]) || 0;
     const code = 'GT' + (lastNumber + 1).toString().padStart(3, '0');
 
     return this.genderModel.create({ code, ...createGenderDTO });
+  }
+
+  async update(updateGenderDTO: UpdateGenderDTO) {
+    const { name, id } = updateGenderDTO;
+
+    await this.checkNameExist(name);
+
+    return this.genderModel.findByIdAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          ...updateGenderDTO,
+        },
+      },
+      { new: true, populate: 'userGenders' },
+    );
   }
 
   delete(id: string) {
