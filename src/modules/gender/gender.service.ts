@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -21,9 +21,19 @@ export class GenderService {
   }
 
   async create(createGenderDTO: CreateGenderDTO) {
-    const count = await this.genderModel.countDocuments({});
-    const code = 'GT' + (count + 1).toString().padStart(3, '0');
+    const { name } = createGenderDTO;
+
+    const existName = await this.genderModel.findOne({ name });
+    if (existName) throw new BadRequestException('Gender name already exist');
+
+    const lastGender = await this.genderModel.findOne().sort({ createdAt: -1 });
+    const lastNumber = parseInt(lastGender?.code?.split('T')[1]) || 0;
+    const code = 'GT' + (lastNumber + 1).toString().padStart(3, '0');
 
     return this.genderModel.create({ code, ...createGenderDTO });
+  }
+
+  delete(id: string) {
+    return this.genderModel.findByIdAndDelete(id);
   }
 }

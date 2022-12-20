@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post} from '@nestjs/common';
 
 import {
   ADMIN_ROUTE,
@@ -20,5 +20,10 @@ export class GenderAdminController {
   @Post(CREATE_ROUTE)
   create(@Body() createGenderDTO: CreateGenderDTO) {
     return this.genderService.create(createGenderDTO);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.genderService.delete(id);
   }
 }
