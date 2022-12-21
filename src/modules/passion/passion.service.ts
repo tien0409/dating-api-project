@@ -14,6 +14,10 @@ export class PassionService {
     @InjectModel(Passion.name) private passionModel: Model<PassionDocument>,
   ) {}
 
+  async getAll() {
+    return this.passionModel.find();
+  }
+
   async getAdminAll(getPassionsDTO: GetPassionsDTO) {
     const { page = 1, search = '' } = getPassionsDTO;
 

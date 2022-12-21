@@ -12,7 +12,7 @@ import {
 import { Gender } from '../../gender/gender.schema';
 import { UserGender } from '../../user-gender/user-gender.schema';
 
-export class UpdateProfileDTO {
+export class CreateProfileDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)
@@ -38,6 +38,10 @@ export class UpdateProfileDTO {
   @IsArray()
   @IsNotEmpty()
   userPhotos: string[];
+
+  @IsArray()
+  @IsNotEmpty()
+  passions: string[];
 
   @IsOptional()
   bio?: string;

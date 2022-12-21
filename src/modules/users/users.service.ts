@@ -6,7 +6,7 @@ import { Model, Types } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { UserPhoto, UserPhotoDocument } from './schemas/user-photo.schema';
 import { CreateUserDTO } from './dtos/create-user.dto';
-import { UpdateProfileDTO } from './dtos/create-profile.dto';
+import { CreateProfileDTO } from './dtos/create-profile.dto';
 import { InterestedInGenderService } from '../interested-in-gender/interested-in-gender.service';
 import { UserGenderService } from '../user-gender/user-gender.service';
 import { RoleService } from '../role/role.service';
@@ -48,7 +48,7 @@ export class UsersService {
     return this.userModel.create(createUserDTO);
   }
 
-  async createProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
+  async createProfile(userId: string, updateProfileDTO: CreateProfileDTO) {
     const {
       userPhotos,
       interestedInGender,
@@ -77,8 +77,8 @@ export class UsersService {
 
     const [photos] = await Promise.all([
       this.userPhotoModel.insertMany(userPhotosPayload),
-      this.interestedInGenderService.createMany(userId, { genderIds }),
       this.userGenderService.create(userGender),
+      this.interestedInGenderService.createMany(userId, { genderIds }),
     ]);
 
     await this.userModel.updateOne(

@@ -61,6 +61,13 @@ export class User extends BaseSchema {
   @Prop()
   birthday?: Date;
 
+  @Prop({
+    type: [SchemaTypes.ObjectId],
+    ref: 'Passion',
+    validators: [(v) => v.length <= 5, '{PATH} exceeds the limit of 5'],
+  })
+  passions: Types.ObjectId[];
+
   @Prop({ type: SchemaTypes.ObjectId, ref: 'Role', autopopulate: true })
   role?: Types.ObjectId;
 

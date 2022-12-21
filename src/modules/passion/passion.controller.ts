@@ -1,4 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
-@Controller('passion')
-export class PassionController {}
+import { PASSIONS_ROUTE } from '../../configs/routes';
+import { PassionService } from './passion.service';
+
+@Controller(PASSIONS_ROUTE)
+export class PassionController {
+  constructor(private readonly passionService: PassionService) {}
+
+  @Get()
+  getAll() {
+    return this.passionService.getAll();
+  }
+}

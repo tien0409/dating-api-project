@@ -15,7 +15,7 @@ import {
   USERS_ROUTE,
 } from 'src/configs/routes';
 import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard';
-import { UpdateProfileDTO } from './dtos/create-profile.dto';
+import { CreateProfileDTO } from './dtos/create-profile.dto';
 import { UsersService } from './users.service';
 import { User } from './schemas/user.schema';
 
@@ -32,7 +32,7 @@ export class UsersController {
 
   @Post(CREATE_PROFILE_ROUTE)
   async createProfile(
-    @Body() updateProfileDTO: UpdateProfileDTO,
+    @Body() updateProfileDTO: CreateProfileDTO,
     @Req() req: Request,
     @Res() res: Response,
   ) {
