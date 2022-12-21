@@ -24,6 +24,7 @@ import { RoleModule } from './modules/role/role.module';
 import { BlockUserModule } from './modules/block-user/block-user.module';
 import { UserPreferenceModule } from './modules/user-preference/user-preference.module';
 import { RelationshipTypeModule } from './modules/relationship-type/relationship-type.module';
+import { PassionModule } from './modules/passion/passion.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { RelationshipTypeModule } from './modules/relationship-type/relationship
     BlockUserModule,
     UserPreferenceModule,
     RelationshipTypeModule,
+    PassionModule,
   ],
   controllers: [],
 })

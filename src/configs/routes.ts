@@ -30,6 +30,9 @@ export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 export const RELATIONSHIP_TYPES_ROUTE = 'relationship-types';
 export const RELATIONSHIP_TYPES_ADMIN_ROUTE = 'admin/relationship-types';
 
+export const PASSIONS_ROUTE = 'passions';
+export const PASSIONS_ADMIN_ROUTE = 'admin/passions';
+
 export const USER_GENDERS_ROUTE = 'user-genders';
 
 export const INTERESTED_IN_GENDERS_ROUTE = 'interested-in-gender';
