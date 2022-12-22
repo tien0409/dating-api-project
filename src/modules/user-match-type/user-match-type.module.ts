@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserMatchTypeService } from './user-match-type.service';
 import { UserMatchType, UserMatchTypeSchema } from './user-match-type.schema';
+import { UserMatchTypeAdminController } from './user-match-type.admin.controller';
 
 @Module({
   imports: [
@@ -11,5 +12,6 @@ import { UserMatchType, UserMatchTypeSchema } from './user-match-type.schema';
     ]),
   ],
   providers: [UserMatchTypeService],
+  controllers: [UserMatchTypeAdminController],
 })
 export class UserMatchTypeModule {}

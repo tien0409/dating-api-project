@@ -24,6 +24,8 @@ export const GET_USERS_EXPLORE_ROUTE = 'explore';
 export const UPDATE_PROFILE_ROUTE = 'update-profile';
 export const CREATE_PROFILE_ROUTE = 'create-profile';
 
+export const USER_MATCH_TYPES_ADMIN_ROUTE = 'admin/user-match-types';
+
 export const GENDERS_ROUTE = 'genders';
 export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 

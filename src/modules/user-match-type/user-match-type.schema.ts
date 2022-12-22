@@ -24,7 +24,7 @@ export class UserMatchType extends BaseSchema {
   description: string;
 
   @Prop()
-  bgColor: string;
+  color: string;
 }
 
 export const UserMatchTypeSchema = SchemaFactory.createForClass(UserMatchType);
