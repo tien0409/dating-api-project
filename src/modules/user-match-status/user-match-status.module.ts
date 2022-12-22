@@ -6,6 +6,7 @@ import {
   UserMatchStatus,
   UserMatchStatusSchema,
 } from './user-match.status.schema';
+import { UserMatchStatusAdminController } from './user-match-status.admin.controller';
 
 @Module({
   imports: [
@@ -14,5 +15,6 @@ import {
     ]),
   ],
   providers: [UserMatchStatusService],
+  controllers: [UserMatchStatusAdminController],
 })
 export class UserMatchStatusModule {}

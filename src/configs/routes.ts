@@ -26,6 +26,8 @@ export const CREATE_PROFILE_ROUTE = 'create-profile';
 
 export const USER_MATCH_TYPES_ADMIN_ROUTE = 'admin/user-match-types';
 
+export const USER_MATCH_STATUSES_ADMIN_ROUTE = 'admin/user-match-statuses';
+
 export const GENDERS_ROUTE = 'genders';
 export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 
