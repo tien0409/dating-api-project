@@ -25,6 +25,9 @@ import { BlockUserModule } from './modules/block-user/block-user.module';
 import { UserPreferenceModule } from './modules/user-preference/user-preference.module';
 import { RelationshipTypeModule } from './modules/relationship-type/relationship-type.module';
 import { PassionModule } from './modules/passion/passion.module';
+import { UserMatchModule } from './modules/user-match/user-match.module';
+import { UserMatchStatusModule } from './modules/user-match-status/user-match-status.module';
+import { UserMatchTypeModule } from './modules/user-match-type/user-match-type.module';
 
 @Module({
   imports: [
@@ -57,6 +60,9 @@ import { PassionModule } from './modules/passion/passion.module';
     UserPreferenceModule,
     RelationshipTypeModule,
     PassionModule,
+    UserMatchModule,
+    UserMatchStatusModule,
+    UserMatchTypeModule,
   ],
   controllers: [],
 })

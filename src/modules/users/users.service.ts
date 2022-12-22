@@ -32,10 +32,10 @@ export class UsersService {
     return this.userModel.findOne({ _id: userId });
   }
 
-  getUsersExplore() {
+  getUsersExplore(user: User) {
     return this.userModel
-      .find({})
-      .populate({ path: 'photos', model: UserPhoto.name });
+      .find({ fullName: { $ne: null } })
+      .populate('photos passions');
   }
 
   async createUser(createUserDTO: CreateUserDTO) {
