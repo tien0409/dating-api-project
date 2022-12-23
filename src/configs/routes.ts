@@ -28,6 +28,8 @@ export const USER_MATCH_TYPES_ADMIN_ROUTE = 'admin/user-match-types';
 
 export const USER_MATCH_STATUSES_ADMIN_ROUTE = 'admin/user-match-statuses';
 
+export const USER_MATCHES_ROUTE = 'user-matches';
+
 export const GENDERS_ROUTE = 'genders';
 export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 

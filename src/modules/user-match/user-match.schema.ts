@@ -5,6 +5,10 @@ import { BaseSchema } from '../base/schemas/base.schema';
 
 export type UserMatchDocument = UserMatch & Document;
 
+export const UserMatchStatusEnum = ['pending', 'accepted', 'rejected'];
+
+export const UserMatchTypeEnum = ['like', 'dislike', 'super-like'];
+
 @Schema({
   collection: 'user-matches',
   timestamps: true,
@@ -23,14 +27,14 @@ export class UserMatch extends BaseSchema {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   userMatch: Types.ObjectId;
 
-  @Prop({ required: true, type: Types.ObjectId, ref: 'UserMatchStatus' })
-  status: Types.ObjectId;
+  @Prop({ default: 'pending', enum: UserMatchStatusEnum })
+  status: string;
 
-  @Prop({ required: true, type: Types.ObjectId, ref: 'UserMatchType' })
-  type: Types.ObjectId;
+  @Prop({ required: true, enum: UserMatchTypeEnum })
+  type: string;
 
   @Prop()
-  matchedAt: Date;
+  matchedAt?: Date;
 }
 
 export const UserMatchSchema = SchemaFactory.createForClass(UserMatch);
