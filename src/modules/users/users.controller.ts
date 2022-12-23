@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -18,6 +19,7 @@ import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard'
 import { CreateProfileDTO } from './dtos/create-profile.dto';
 import { UsersService } from './users.service';
 import { User } from './schemas/user.schema';
+import { GetUsersExploreDTO } from './dtos/get-users-explore.dto';
 
 @Controller(USERS_ROUTE)
 @UseGuards(JwtAuthenticationGuard)
@@ -42,9 +44,7 @@ export class UsersController {
   }
 
   @Get(GET_USERS_EXPLORE_ROUTE)
-  getUsersExplore(@Req() req: Request) {
-    const user = req.user as User;
-
-    return this.usersService.getUsersExplore(user);
+  getUsersExplore(@Query() getUsersExploreDTO: GetUsersExploreDTO) {
+    return this.usersService.getUsersExplore(getUsersExploreDTO);
   }
 }

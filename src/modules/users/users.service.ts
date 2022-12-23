@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { User, UserDocument } from './schemas/user.schema';
 import { UserPhoto, UserPhotoDocument } from './schemas/user-photo.schema';
@@ -11,6 +11,7 @@ import { InterestedInGenderService } from '../interested-in-gender/interested-in
 import { UserGenderService } from '../user-gender/user-gender.service';
 import { RoleService } from '../role/role.service';
 import { RelationshipTypeService } from '../relationship-type/relationship-type.service';
+import { GetUsersExploreDTO } from './dtos/get-users-explore.dto';
 
 @Injectable()
 export class UsersService {
@@ -32,10 +33,26 @@ export class UsersService {
     return this.userModel.findOne({ _id: userId });
   }
 
-  getUsersExplore(user: User) {
-    return this.userModel
-      .find({ fullName: { $ne: null } })
-      .populate('photos passions');
+  async getUsersExplore(getUsersExploreDTO: GetUsersExploreDTO) {
+    const { page } = getUsersExploreDTO;
+
+    const filter: FilterQuery<UserDocument> = { fullName: { $ne: null } };
+    const userExplores = await this.userModel
+      .find(filter)
+      .populate('photos passions')
+      .skip((page - 1) * 2)
+      .limit(2);
+
+    const total = await this.userModel.countDocuments(filter);
+
+    return {
+      userExplores,
+      pagination: {
+        perPage: 2,
+        currentPage: page,
+        totalPage: Math.ceil(total / 2),
+      },
+    };
   }
 
   async createUser(createUserDTO: CreateUserDTO) {
