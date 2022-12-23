@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-import { IChatSession } from './interfaces/chat-session.interface';
+import { IGatewaySession } from './interfaces/gateway-session.interface';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
 
 @Injectable()
-export class ChatSessionManager implements IChatSession {
+export class GatewaySessionManager implements IGatewaySession {
   private readonly sessions = new Map<string, IAuthSocket>();
 
   getUserSocket(userId: string | Types.ObjectId) {

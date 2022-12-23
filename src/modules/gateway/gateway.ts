@@ -12,11 +12,18 @@ import { Server } from 'socket.io';
 import { Inject, Logger } from '@nestjs/common';
 
 import {
-  ON_USER_UNAVAILABLE,
-  VIDEO_CALL_ACCEPTED,
+  CALL_HANG_UP,
+  CALL_REJECTED,
+  CREATE_USER_MATCH,
   ON_CALL_HANG_UP,
-  VIDEO_CALL_INIT,
   ON_CALL_REJECTED,
+  ON_CREATE_USER_MATCH,
+  ON_TOGGLE_MIC,
+  ON_USER_MATCHED,
+  ON_USER_UNAVAILABLE,
+  ON_VIDEO_CALL_ACCEPTED,
+  ON_VIDEO_CALL_INIT,
+  ON_VOICE_CALL_ACCEPTED,
   REQUEST_ALL_CONVERSATIONS,
   REQUEST_ALL_MESSAGES,
   REQUEST_DELETE_CONVERSATION,
@@ -33,19 +40,15 @@ import {
   SEND_STOP_TYPING_MESSAGE,
   SEND_TYPING_MESSAGE,
   SEND_UPDATE_MESSAGE,
-  CALL_HANG_UP,
-  CALL_REJECTED,
-  ON_VIDEO_CALL_INIT,
-  VOICE_CALL_INIT,
-  VOICE_CALL_ACCEPTED,
-  ON_VOICE_CALL_ACCEPTED,
-  ON_VIDEO_CALL_ACCEPTED,
   TOGGLE_MIC,
-  ON_TOGGLE_MIC,
+  VIDEO_CALL_ACCEPTED,
+  VIDEO_CALL_INIT,
+  VOICE_CALL_ACCEPTED,
+  VOICE_CALL_INIT,
 } from './utils/socketType';
 import { GetMessagesDTO } from '../message/dtos/get-messages.dto';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
-import { ChatSessionManager } from './chat.session';
+import { GatewaySessionManager } from './gateway.session';
 import { MessageDeleteDTO } from '../message/dtos/message-delete.dto';
 import { MessageService } from '../message/message.service';
 import { ConversationService } from '../conversation/conversation.service';
@@ -59,6 +62,8 @@ import { VideoCallAcceptedPayload } from './payloads/video-call-accepted-payload
 import { VideoCallRejectedPayload } from './payloads/video-call-rejected.payload';
 import { VideoCallHangUpPayload } from './payloads/video-call-hang-up.payload';
 import { ToggleMicPayload } from './payloads/toggle-mic.payload';
+import { CreateUserMatchPayload } from './payloads/create-user-match.payload';
+import { UserMatchService } from '../user-match/user-match.service';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -66,29 +71,31 @@ import { ToggleMicPayload } from './payloads/toggle-mic.payload';
     credentials: true,
   },
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    @Inject(ChatSessionManager.name)
-    private readonly chatSessionManager: ChatSessionManager,
+    @Inject(GatewaySessionManager.name)
+    private readonly gatewaySessionManager: GatewaySessionManager,
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
     private readonly participantService: ParticipantService,
+    private readonly userMatchService: UserMatchService,
   ) {}
 
   @WebSocketServer()
   server: Server;
-  private readonly logger: Logger = new Logger(ChatGateway.name);
+  private readonly logger: Logger = new Logger(Gateway.name);
 
   handleConnection(client: IAuthSocket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
-    this.chatSessionManager.setUserSocket(client.user._id, client);
+    this.gatewaySessionManager.setUserSocket(client.user._id, client);
   }
 
   handleDisconnect(client: IAuthSocket) {
     this.logger.log(`Client disconnected: ${client.id}`);
-    this.chatSessionManager.removeUserSocket(client.user._id);
+    this.gatewaySessionManager.removeUserSocket(client.user._id);
   }
 
+  // chat
   @SubscribeMessage(REQUEST_ALL_CONVERSATIONS)
   async requestAllConversations(@ConnectedSocket() socket: IAuthSocket) {
     // conversation for user (exclude conversation deleted)
@@ -263,8 +270,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { receiverId, messageId, conversation } = messageDeleteDTO;
 
-    const sender = this.chatSessionManager.getUserSocket(socket.user._id);
-    const receiver = this.chatSessionManager.getUserSocket(receiverId);
+    const sender = this.gatewaySessionManager.getUserSocket(socket.user._id);
+    const receiver = this.gatewaySessionManager.getUserSocket(receiverId);
 
     await this.messageService.deleteMessage(messageId);
     const messages = await this.messageService.getMessagesByConversationIdAndUserId(
@@ -293,7 +300,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { receiverId, conversationId, callType } = payload;
 
     const caller = socket.user;
-    const receiverSocket = this.chatSessionManager.getUserSocket(receiverId);
+    const receiverSocket = this.gatewaySessionManager.getUserSocket(receiverId);
 
     if (!receiverSocket) {
       setTimeout(() => {
@@ -339,7 +346,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
     if (!conversation) throw new WsException('Conversation not found');
 
-    const callerSocket = this.chatSessionManager.getUserSocket(caller._id);
+    const callerSocket = this.gatewaySessionManager.getUserSocket(caller._id);
     if (callerSocket) {
       const _payload = { acceptor: socket.user, caller };
       callerSocket.emit(callEvent, _payload);
@@ -380,7 +387,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { caller } = payload;
 
-    const callerSocket = this.chatSessionManager.getUserSocket(caller._id);
+    const callerSocket = this.gatewaySessionManager.getUserSocket(caller._id);
 
     callerSocket &&
       callerSocket.emit(ON_CALL_REJECTED, { receiver: socket.user });
@@ -394,14 +401,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { receiver, caller } = payload;
 
     if (socket?.user?.id === caller?.id) {
-      const receiverSocket = this.chatSessionManager.getUserSocket(receiver.id);
+      const receiverSocket = this.gatewaySessionManager.getUserSocket(
+        receiver.id,
+      );
       socket.emit(ON_CALL_HANG_UP);
       receiverSocket && receiverSocket?.emit(ON_CALL_HANG_UP);
       return;
     }
 
     socket.emit(ON_CALL_HANG_UP);
-    const callerSocket = this.chatSessionManager.getUserSocket(caller.id);
+    const callerSocket = this.gatewaySessionManager.getUserSocket(caller.id);
     callerSocket && callerSocket.emit(ON_CALL_HANG_UP);
+  }
+
+  // user matches
+  @SubscribeMessage(CREATE_USER_MATCH)
+  async createUserMatch(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() payload: CreateUserMatchPayload,
+  ) {
+    const { userMatchId } = payload;
+
+    const user = socket.user;
+    const existingMatch = await this.userMatchService.checkExistingMatch({
+      userId: userMatchId,
+      userMatchId: user._id,
+    });
+
+    const userMatchedSocket = this.gatewaySessionManager.getUserSocket(
+      userMatchId,
+    );
+    if (existingMatch) {
+      await this.userMatchService.updateStatus({ matchId: existingMatch._id });
+
+      userMatchedSocket &&
+        userMatchedSocket.emit(ON_USER_MATCHED, { userMatched: socket.user });
+      socket.emit(ON_USER_MATCHED, { userMatched: existingMatch.user });
+    } else {
+      await this.userMatchService.create({ ...payload, userId: user._id });
+
+      userMatchedSocket && userMatchedSocket.emit(ON_CREATE_USER_MATCH);
+    }
   }
 }

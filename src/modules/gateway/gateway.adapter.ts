@@ -5,7 +5,7 @@ import { parse } from 'cookie';
 import { IAuthSocket } from './interfaces/auth-socket.interface';
 import { AuthService } from '../auth/auth.service';
 
-export class ChatAdapter extends IoAdapter {
+export class GatewayAdapter extends IoAdapter {
   private authService: AuthService;
   constructor(private readonly app: INestApplicationContext) {
     super(app);

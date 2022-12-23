@@ -13,7 +13,7 @@ export const MAIL_ROUTE = 'mail';
 export const SEND_VERIFY_MAIL_ROUTE = 'send-verify-mail';
 export const VERIFY_MAIL_ROUTE = 'verify-mail/:token';
 
-export const CHAT_ROUTE = 'chat';
+export const CHAT_ROUTE = 'gateway';
 
 export const UPLOAD_ROUTE = 'upload';
 export const UPLOAD_SINGLE_IMAGE = 'single-image';

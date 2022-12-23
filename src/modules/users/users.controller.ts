@@ -44,7 +44,12 @@ export class UsersController {
   }
 
   @Get(GET_USERS_EXPLORE_ROUTE)
-  getUsersExplore(@Query() getUsersExploreDTO: GetUsersExploreDTO) {
-    return this.usersService.getUsersExplore(getUsersExploreDTO);
+  getUsersExplore(
+    @Req() req: Request,
+    @Query() getUsersExploreDTO: GetUsersExploreDTO,
+  ) {
+    const user = req.user as User;
+
+    return this.usersService.getUsersExplore(user._id, getUsersExploreDTO);
   }
 }

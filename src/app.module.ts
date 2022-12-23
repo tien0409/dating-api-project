@@ -8,7 +8,7 @@ import { UsersModule } from './modules/users/users.module';
 import envConfigs from './configs/env.config';
 import { MongoConfig } from './configs/mongodb.config';
 import { MailModule } from './modules/mail/mail.module';
-import { ChatModule } from './modules/chat/chat.module';
+import { GatewayModule } from './modules/gateway/gateway.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { MessageModule } from './modules/message/message.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
@@ -41,7 +41,7 @@ import { UserMatchModule } from './modules/user-match/user-match.module';
     AuthModule,
     UsersModule,
     MailModule,
-    ChatModule,
+    GatewayModule,
     CloudinaryModule,
     MessageModule,
     ConversationModule,

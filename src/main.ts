@@ -4,11 +4,11 @@ import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
-import { ChatAdapter } from './modules/chat/chat.adapter';
+import { GatewayAdapter } from './modules/gateway/gateway.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const adapter = new ChatAdapter(app);
+  const adapter = new GatewayAdapter(app);
   app.useWebSocketAdapter(adapter);
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:3003'],

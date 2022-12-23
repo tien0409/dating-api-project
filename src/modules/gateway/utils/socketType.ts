@@ -1,3 +1,4 @@
+// chat
 export const REQUEST_ALL_CONVERSATIONS = 'request_all_conversations';
 export const SEND_ALL_CONVERSATIONS = 'send_all_conversations';
 
@@ -36,3 +37,9 @@ export const CALL_HANG_UP = 'call_hang_up';
 export const ON_CALL_HANG_UP = 'on_call_hang_up';
 export const TOGGLE_MIC = 'toggle_mic';
 export const ON_TOGGLE_MIC = 'on_toggle_mic';
+
+// user matches
+export const CREATE_USER_MATCH = 'create_user_match';
+export const ON_CREATE_USER_MATCH = 'on_create_user_match';
+
+export const ON_USER_MATCHED = 'on_user_matched';

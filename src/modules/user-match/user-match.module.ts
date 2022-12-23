@@ -13,5 +13,6 @@ import { UserMatch, UserMatchSchema } from './user-match.schema';
   ],
   providers: [UserMatchService],
   controllers: [UserMatchController],
+  exports: [UserMatchService],
 })
 export class UserMatchModule {}

@@ -33,10 +33,16 @@ export class UsersService {
     return this.userModel.findOne({ _id: userId });
   }
 
-  async getUsersExplore(getUsersExploreDTO: GetUsersExploreDTO) {
+  async getUsersExplore(
+    userId: string,
+    getUsersExploreDTO: GetUsersExploreDTO,
+  ) {
     const { page } = getUsersExploreDTO;
 
-    const filter: FilterQuery<UserDocument> = { fullName: { $ne: null } };
+    const filter: FilterQuery<UserDocument> = {
+      fullName: { $ne: null },
+      _id: { $ne: userId },
+    };
     const userExplores = await this.userModel
       .find(filter)
       .populate('photos passions')
