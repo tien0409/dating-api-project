@@ -19,10 +19,12 @@ export class UserLikeService {
   ) {
     const { userLikedId } = checkExistingLikeDTO;
 
-    return this.userLikeModel.findOne({
-      user: new Types.ObjectId(userId),
-      userLiked: new Types.ObjectId(userLikedId),
-    });
+    return this.userLikeModel
+      .findOne({
+        user: new Types.ObjectId(userId),
+        userLiked: new Types.ObjectId(userLikedId),
+      })
+      .populate('user');
   }
 
   getByFilter(filter: FilterQuery<UserLike>) {

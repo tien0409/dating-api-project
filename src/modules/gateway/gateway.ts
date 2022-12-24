@@ -442,14 +442,25 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       userLikedId,
     );
     if (existingLiked) {
-      await this.userMatchService.create(user._id, {
-        userMatchedId: user._id,
-        type: UserMatchLikeType,
-      });
+      const [newConversation] = await Promise.all([
+        this.conversationService.create(user._id, {
+          receiverId: userLikedId,
+        }),
+        this.userMatchService.create(user._id, {
+          userMatchedId: user._id,
+          type: UserMatchLikeType,
+        }),
+      ]);
 
       userLikedSocket &&
-        userLikedSocket.emit(ON_USER_MATCHED, { userMatched: socket.user });
-      socket.emit(ON_USER_MATCHED, { userMatched: existingLiked.user });
+        userLikedSocket.emit(ON_USER_MATCHED, {
+          userMatched: socket.user,
+          conversation: newConversation,
+        });
+      socket.emit(ON_USER_MATCHED, {
+        userMatched: existingLiked.user,
+        conversation: newConversation,
+      });
     } else {
       userLikedSocket && userLikedSocket.emit(ON_CREATE_USER_LIKE);
     }

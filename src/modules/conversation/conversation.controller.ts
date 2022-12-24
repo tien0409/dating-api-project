@@ -19,9 +19,6 @@ export class ConversationController {
   ) {
     const user = req.user as User;
 
-    return this.conversationService.createConversation(
-      user._id,
-      createConversationDTO,
-    );
+    return this.conversationService.create(user._id, createConversationDTO);
   }
 }

@@ -75,10 +75,7 @@ export class ConversationService {
     });
   }
 
-  async createConversation(
-    userAuthId: string,
-    createConversationDTO: CreateConversationDTO,
-  ) {
+  async create(userId: string, createConversationDTO: CreateConversationDTO) {
     const { receiverId, conversationType = 'private' } = createConversationDTO;
 
     const conversation = await this.conversationModel.create({
@@ -87,7 +84,7 @@ export class ConversationService {
     });
     const senderParticipantPromise = this.participantService.createParticipant({
       conversationId: conversation._id,
-      userId: userAuthId,
+      userId,
     });
     const receiverParticipantPromise = this.participantService.createParticipant(
       {
