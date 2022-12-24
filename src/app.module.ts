@@ -26,6 +26,8 @@ import { UserPreferenceModule } from './modules/user-preference/user-preference.
 import { RelationshipTypeModule } from './modules/relationship-type/relationship-type.module';
 import { PassionModule } from './modules/passion/passion.module';
 import { UserMatchModule } from './modules/user-match/user-match.module';
+import { UserDiscardModule } from './modules/user-discard/user-discard.module';
+import { UserLikeModule } from './modules/user-like/user-like.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { UserMatchModule } from './modules/user-match/user-match.module';
     RelationshipTypeModule,
     PassionModule,
     UserMatchModule,
+    UserDiscardModule,
+    UserLikeModule,
   ],
   controllers: [],
 })

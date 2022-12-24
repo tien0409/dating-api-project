@@ -30,6 +30,10 @@ export const USER_MATCH_STATUSES_ADMIN_ROUTE = 'admin/user-match-statuses';
 
 export const USER_MATCHES_ROUTE = 'user-matches';
 
+export const USER_LIKES_ROUTE = 'user-likes';
+
+export const USER_DISCARDS_ROUTE = 'user-discards';
+
 export const GENDERS_ROUTE = 'genders';
 export const GENDERS_ADMIN_ROUTE = 'admin/genders';
 
