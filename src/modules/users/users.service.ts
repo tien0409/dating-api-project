@@ -12,6 +12,7 @@ import { UserGenderService } from '../user-gender/user-gender.service';
 import { RoleService } from '../role/role.service';
 import { RelationshipTypeService } from '../relationship-type/relationship-type.service';
 import { GetUsersExploreDTO } from './dtos/get-users-explore.dto';
+import { UserMatchService } from '../user-match/user-match.service';
 
 @Injectable()
 export class UsersService {
@@ -23,6 +24,7 @@ export class UsersService {
     private readonly userGenderService: UserGenderService,
     private readonly roleService: RoleService,
     private readonly relationshipTypeService: RelationshipTypeService,
+    private readonly userMatchService: UserMatchService,
   ) {}
 
   getByEmail(email: string) {
@@ -39,10 +41,18 @@ export class UsersService {
   ) {
     const { page } = getUsersExploreDTO;
 
+    const userMatchExclude = await this.userMatchService.getByFilter({
+      user: new Types.ObjectId(userId),
+    });
+    const userMatchIdsExcludeArr = userMatchExclude.map(
+      (item) => item.userMatch,
+    );
+
     const filter: FilterQuery<UserDocument> = {
       fullName: { $ne: null },
-      _id: { $ne: userId },
+      _id: { $nin: [...userMatchIdsExcludeArr, new Types.ObjectId(userId)] },
     };
+
     const userExplores = await this.userModel
       .find(filter)
       .populate('photos passions')
@@ -56,7 +66,7 @@ export class UsersService {
       pagination: {
         perPage: 2,
         currentPage: page,
-        totalPage: Math.ceil(total / 2),
+        totalPage: Math.ceil(2 / 2),
       },
     };
   }

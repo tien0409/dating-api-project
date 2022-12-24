@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { UserMatch, UserMatchDocument } from './user-match.schema';
@@ -13,6 +13,10 @@ export class UserMatchService {
     @InjectModel(UserMatch.name)
     private readonly userMatchModel: Model<UserMatchDocument>,
   ) {}
+
+  getByFilter(filter: FilterQuery<UserMatch>) {
+    return this.userMatchModel.find(filter);
+  }
 
   async create(createUserMatchDTO: CreateUserMatchDTO) {
     const { userId: user, userMatchId: userMatch, type } = createUserMatchDTO;

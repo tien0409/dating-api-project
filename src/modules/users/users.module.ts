@@ -10,6 +10,7 @@ import { InterestedInGenderModule } from '../interested-in-gender/interested-in-
 import { UserGenderModule } from '../user-gender/user-gender.module';
 import { RoleModule } from '../role/role.module';
 import { RelationshipTypeModule } from '../relationship-type/relationship-type.module';
+import { UserMatchModule } from '../user-match/user-match.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RelationshipTypeModule } from '../relationship-type/relationship-type.m
     UserGenderModule,
     RoleModule,
     RelationshipTypeModule,
+    UserMatchModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

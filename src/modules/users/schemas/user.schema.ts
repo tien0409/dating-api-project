@@ -8,6 +8,7 @@ import { UserPhoto } from './user-photo.schema';
 import { emailRegex } from '../../../utils/regexes';
 import { UserGender } from '../../user-gender/user-gender.schema';
 import { Type } from 'class-transformer';
+import { UserMatch } from '../../user-match/user-match.schema';
 
 export type UserDocument = User & Document;
 
@@ -99,6 +100,18 @@ UserSchema.virtual('age').get(function (this: UserDocument) {
   return this.birthday
     ? Math.floor((new Date().getTime() - this.birthday.getTime()) / 3.15576e10)
     : null;
+});
+
+UserSchema.virtual('userSendMatches', {
+  ref: 'UserMatch',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('userReceiveMatches', {
+  ref: 'UserMatch',
+  localField: '_id',
+  foreignField: 'userMatch',
 });
 
 UserSchema.virtual('photos', {
