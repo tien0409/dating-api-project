@@ -13,5 +13,6 @@ import { UserLike, UserLikeSchema } from './user-like.schema';
   ],
   controllers: [UserLikeController],
   providers: [UserLikeService],
+  exports: [UserLikeService],
 })
 export class UserLikeModule {}

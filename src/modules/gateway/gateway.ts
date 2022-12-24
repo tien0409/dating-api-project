@@ -14,10 +14,11 @@ import { Inject, Logger } from '@nestjs/common';
 import {
   CALL_HANG_UP,
   CALL_REJECTED,
-  CREATE_USER_MATCH,
+  CREATE_USER_DISCARD,
+  CREATE_USER_LIKE,
   ON_CALL_HANG_UP,
   ON_CALL_REJECTED,
-  ON_CREATE_USER_MATCH,
+  ON_CREATE_USER_LIKE,
   ON_TOGGLE_MIC,
   ON_USER_MATCHED,
   ON_USER_UNAVAILABLE,
@@ -62,8 +63,12 @@ import { VideoCallAcceptedPayload } from './payloads/video-call-accepted-payload
 import { VideoCallRejectedPayload } from './payloads/video-call-rejected.payload';
 import { VideoCallHangUpPayload } from './payloads/video-call-hang-up.payload';
 import { ToggleMicPayload } from './payloads/toggle-mic.payload';
-import { CreateUserMatchPayload } from './payloads/create-user-match.payload';
+import { CreateUserLikePayload } from './payloads/create-user-like.payload';
 import { UserMatchService } from '../user-match/user-match.service';
+import { UserLikeService } from '../user-like/user-like.service';
+import { UserMatchLikeType } from '../user-match/user-match.schema';
+import { CreateUserDiscardPayload } from './payloads/create-user-discard.payload';
+import { UserDiscardService } from '../user-discard/user-discard.service';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -79,6 +84,8 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly conversationService: ConversationService,
     private readonly participantService: ParticipantService,
     private readonly userMatchService: UserMatchService,
+    private readonly userLikeService: UserLikeService,
+    private readonly userDiscardService: UserDiscardService,
   ) {}
 
   @WebSocketServer()
@@ -415,32 +422,47 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // user matches
-  @SubscribeMessage(CREATE_USER_MATCH)
-  async createUserMatch(
+  @SubscribeMessage(CREATE_USER_LIKE)
+  async createUserLike(
     @ConnectedSocket() socket: IAuthSocket,
-    @MessageBody() payload: CreateUserMatchPayload,
+    @MessageBody() payload: CreateUserLikePayload,
   ) {
-    const { userMatchId } = payload;
+    const { userLikedId } = payload;
 
     const user = socket.user;
-    const existingMatch = await this.userMatchService.checkExistingMatch({
-      userId: userMatchId,
-      userMatchId: user._id,
-    });
-
-    const userMatchedSocket = this.gatewaySessionManager.getUserSocket(
-      userMatchId,
+    const existingLiked = await this.userLikeService.checkExistingLike(
+      userLikedId,
+      {
+        userLikedId: user._id,
+      },
     );
-    if (existingMatch) {
-      await this.userMatchService.updateStatus({ matchId: existingMatch._id });
+    await this.userLikeService.create(user._id, payload);
 
-      userMatchedSocket &&
-        userMatchedSocket.emit(ON_USER_MATCHED, { userMatched: socket.user });
-      socket.emit(ON_USER_MATCHED, { userMatched: existingMatch.user });
+    const userLikedSocket = this.gatewaySessionManager.getUserSocket(
+      userLikedId,
+    );
+    if (existingLiked) {
+      await this.userMatchService.create(user._id, {
+        userMatchedId: user._id,
+        type: UserMatchLikeType,
+      });
+
+      userLikedSocket &&
+        userLikedSocket.emit(ON_USER_MATCHED, { userMatched: socket.user });
+      socket.emit(ON_USER_MATCHED, { userMatched: existingLiked.user });
     } else {
-      await this.userMatchService.create({ ...payload, userId: user._id });
-
-      userMatchedSocket && userMatchedSocket.emit(ON_CREATE_USER_MATCH);
+      userLikedSocket && userLikedSocket.emit(ON_CREATE_USER_LIKE);
     }
+  }
+
+  @SubscribeMessage(CREATE_USER_DISCARD)
+  async createUserDiscard(
+    @ConnectedSocket() socket: IAuthSocket,
+    @MessageBody() payload: CreateUserDiscardPayload,
+  ) {
+    const { userDiscardId } = payload;
+
+    const user = socket.user;
+    await this.userDiscardService.create(user._id, payload);
   }
 }

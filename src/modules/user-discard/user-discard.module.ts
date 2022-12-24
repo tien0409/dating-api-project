@@ -13,5 +13,6 @@ import { UserDiscard, UserDiscardSchema } from './user-discard.schema';
   ],
   providers: [UserDiscardService],
   controllers: [UserDiscardController],
+  exports: [UserDiscardService],
 })
 export class UserDiscardModule {}

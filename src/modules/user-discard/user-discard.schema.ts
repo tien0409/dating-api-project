@@ -6,6 +6,7 @@ import { BaseSchema } from '../base/schemas/base.schema';
 export type UserDiscardDocument = UserDiscard & Document;
 
 @Schema({
+  collection: 'user-discards',
   timestamps: true,
   toJSON: {
     virtuals: true,
@@ -20,7 +21,7 @@ export class UserDiscard extends BaseSchema {
   user: Types.ObjectId;
 
   @Prop({ required: true, ref: 'User', type: SchemaTypes.ObjectId })
-  user_discarded: Types.ObjectId;
+  userDiscarded: Types.ObjectId;
 }
 
 export const UserDiscardSchema = SchemaFactory.createForClass(UserDiscard);

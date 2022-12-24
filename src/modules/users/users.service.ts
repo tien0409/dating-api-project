@@ -45,7 +45,7 @@ export class UsersService {
       user: new Types.ObjectId(userId),
     });
     const userMatchIdsExcludeArr = userMatchExclude.map(
-      (item) => item.userMatch,
+      (item) => item.userMatched,
     );
 
     const filter: FilterQuery<UserDocument> = {

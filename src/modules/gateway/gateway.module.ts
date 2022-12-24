@@ -7,6 +7,8 @@ import { MessageModule } from '../message/message.module';
 import { ParticipantModule } from '../participant/participant.module';
 import { ConversationModule } from '../conversation/conversation.module';
 import { UserMatchModule } from '../user-match/user-match.module';
+import { UserLikeModule } from '../user-like/user-like.module';
+import { UserDiscardModule } from '../user-discard/user-discard.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { UserMatchModule } from '../user-match/user-match.module';
     MessageModule,
     ParticipantModule,
     UserMatchModule,
+    UserLikeModule,
+    UserDiscardModule,
   ],
   providers: [
     Gateway,
