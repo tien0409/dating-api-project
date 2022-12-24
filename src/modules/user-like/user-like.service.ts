@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { UserLike, UserLikeDocument } from './user-like.schema';
@@ -23,6 +23,10 @@ export class UserLikeService {
       user: new Types.ObjectId(userId),
       userLiked: new Types.ObjectId(userLikedId),
     });
+  }
+
+  getByFilter(filter: FilterQuery<UserLike>) {
+    return this.userLikeModel.find(filter);
   }
 
   create(userId: string, createUserLikeDTO: CreateUserLikeDTO) {

@@ -11,6 +11,8 @@ import { UserGenderModule } from '../user-gender/user-gender.module';
 import { RoleModule } from '../role/role.module';
 import { RelationshipTypeModule } from '../relationship-type/relationship-type.module';
 import { UserMatchModule } from '../user-match/user-match.module';
+import { UserLikeModule } from '../user-like/user-like.module';
+import { UserDiscardModule } from '../user-discard/user-discard.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { UserMatchModule } from '../user-match/user-match.module';
     RoleModule,
     RelationshipTypeModule,
     UserMatchModule,
+    UserLikeModule,
+    UserDiscardModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { CreateUserDiscardDTO } from './dtos/create-user-discard.dto';
 import { UserDiscard, UserDiscardDocument } from './user-discard.schema';
@@ -11,6 +11,10 @@ export class UserDiscardService {
     @InjectModel(UserDiscard.name)
     private readonly userDiscardModel: Model<UserDiscardDocument>,
   ) {}
+
+  getByFilter(filter: FilterQuery<UserDiscard>) {
+    return this.userDiscardModel.find(filter);
+  }
 
   create(userId: string, createUserDiscardDTO: CreateUserDiscardDTO) {
     const { userDiscardId } = createUserDiscardDTO;

@@ -13,6 +13,11 @@ import { RoleService } from '../role/role.service';
 import { RelationshipTypeService } from '../relationship-type/relationship-type.service';
 import { GetUsersExploreDTO } from './dtos/get-users-explore.dto';
 import { UserMatchService } from '../user-match/user-match.service';
+import { UserLikeService } from '../user-like/user-like.service';
+import { UserDiscardService } from '../user-discard/user-discard.service';
+import { UserDiscardDocument } from '../user-discard/user-discard.schema';
+import { UserLikeDocument } from '../user-like/user-like.schema';
+import { LIMIT } from '../../configs/constants.config';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +30,8 @@ export class UsersService {
     private readonly roleService: RoleService,
     private readonly relationshipTypeService: RelationshipTypeService,
     private readonly userMatchService: UserMatchService,
+    private readonly userLikeService: UserLikeService,
+    private readonly userDiscardService: UserDiscardService,
   ) {}
 
   getByEmail(email: string) {
@@ -41,16 +48,23 @@ export class UsersService {
   ) {
     const { page } = getUsersExploreDTO;
 
-    const userMatchExclude = await this.userMatchService.getByFilter({
+    const matchTypeFilter: FilterQuery<
+      UserDiscardDocument | UserLikeDocument
+    > = {
       user: new Types.ObjectId(userId),
-    });
-    const userMatchIdsExcludeArr = userMatchExclude.map(
-      (item) => item.userMatched,
+    };
+    const [userLikeExclude, userDiscardExclude] = await Promise.all([
+      this.userLikeService.getByFilter(matchTypeFilter),
+      this.userDiscardService.getByFilter(matchTypeFilter),
+    ]);
+    const userLikeIdsExcludeArr = userLikeExclude.map((item) => item.userLiked);
+    const userDiscardIdsExcludeArr = userDiscardExclude.map(
+      (item) => item.userDiscarded,
     );
 
     const filter: FilterQuery<UserDocument> = {
       fullName: { $ne: null },
-      _id: { $nin: [...userMatchIdsExcludeArr, new Types.ObjectId(userId)] },
+      _id: { $nin: [new Types.ObjectId(userId), ...userLikeIdsExcludeArr] },
     };
 
     const userExplores = await this.userModel
@@ -64,9 +78,9 @@ export class UsersService {
     return {
       userExplores,
       pagination: {
-        perPage: 2,
+        perPage: LIMIT,
         currentPage: page,
-        totalPage: Math.ceil(2 / 2),
+        totalPage: Math.ceil(total / LIMIT),
       },
     };
   }
