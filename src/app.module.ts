@@ -30,6 +30,7 @@ import { UserDiscardModule } from './modules/user-discard/user-discard.module';
 import { UserLikeModule } from './modules/user-like/user-like.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { PremiumPackageModule } from './modules/premium-package/premium-package.module';
+import { UserPremiumPackageModule } from './modules/user-premium-package/user-premium-package.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { PremiumPackageModule } from './modules/premium-package/premium-package.
     UserLikeModule,
     PaymentModule,
     PremiumPackageModule,
+    UserPremiumPackageModule,
   ],
   controllers: [],
 })

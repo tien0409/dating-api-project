@@ -58,4 +58,7 @@ export const CONVERSATIONS_ROUTE = 'conversations';
 export const PAYMENTS_ROUTE = 'payments';
 
 export const PREMIUM_PACKAGES_ROUTE = 'premium-packages';
-export const PREMIUM_PACKAGES_ADMIN_ROUTE = 'premium-packages';
+export const PREMIUM_PACKAGES_ADMIN_ROUTE = 'admin/premium-packages';
+
+export const USER_PREMIUM_PACKAGES_ROUTE = 'user-premium-packages';
+export const USER_PREMIUM_PACKAGES_ADMIN_ROUTE = 'admin/user-premium-packages';
