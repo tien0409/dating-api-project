@@ -56,3 +56,6 @@ export const PARTICIPANTS_ROUTE = 'participants';
 export const CONVERSATIONS_ROUTE = 'conversations';
 
 export const PAYMENTS_ROUTE = 'payments';
+
+export const PREMIUM_PACKAGES_ROUTE = 'premium-packages';
+export const PREMIUM_PACKAGES_ADMIN_ROUTE = 'premium-packages';

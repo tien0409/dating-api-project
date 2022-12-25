@@ -29,6 +29,7 @@ import { UserMatchModule } from './modules/user-match/user-match.module';
 import { UserDiscardModule } from './modules/user-discard/user-discard.module';
 import { UserLikeModule } from './modules/user-like/user-like.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { PremiumPackageModule } from './modules/premium-package/premium-package.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     UserDiscardModule,
     UserLikeModule,
     PaymentModule,
+    PremiumPackageModule,
   ],
   controllers: [],
 })
