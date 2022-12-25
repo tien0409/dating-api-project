@@ -32,6 +32,9 @@ export class Gender extends BaseSchema {
 
   @Prop()
   description?: string;
+
+  @Prop({ default: true })
+  deletable: boolean;
 }
 
 export const GenderSchema = SchemaFactory.createForClass(Gender);

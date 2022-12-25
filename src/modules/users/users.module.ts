@@ -13,6 +13,7 @@ import { RelationshipTypeModule } from '../relationship-type/relationship-type.m
 import { UserMatchModule } from '../user-match/user-match.module';
 import { UserLikeModule } from '../user-like/user-like.module';
 import { UserDiscardModule } from '../user-discard/user-discard.module';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UserDiscardModule } from '../user-discard/user-discard.module';
     UserMatchModule,
     UserLikeModule,
     UserDiscardModule,
+    PaymentModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

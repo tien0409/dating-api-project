@@ -18,6 +18,7 @@ import { UserDiscardService } from '../user-discard/user-discard.service';
 import { UserDiscardDocument } from '../user-discard/user-discard.schema';
 import { UserLikeDocument } from '../user-like/user-like.schema';
 import { LIMIT } from '../../configs/constants.config';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class UsersService {
@@ -32,6 +33,7 @@ export class UsersService {
     private readonly userMatchService: UserMatchService,
     private readonly userLikeService: UserLikeService,
     private readonly userDiscardService: UserDiscardService,
+    private readonly stripeService: PaymentService,
   ) {}
 
   getByEmail(email: string) {
@@ -87,7 +89,6 @@ export class UsersService {
 
   async createUser(createUserDTO: CreateUserDTO) {
     const { role } = createUserDTO;
-
     if (!role) {
       createUserDTO.role = await this.roleService.getByName({ name: 'USER' });
     }
@@ -100,13 +101,20 @@ export class UsersService {
       userPhotos,
       interestedInGender,
       userGender,
+      firstName,
+      lastName,
       ...updateProfileData
     } = updateProfileDTO;
+    const user = await this.getById(userId);
+    const stripeCustomer = await this.stripeService.createCustomer(
+      firstName + ' ' + lastName,
+      user.email,
+    );
 
     const defaultRelationshipType = await this.relationshipTypeService.getDefault();
 
     const newUser = await this.userModel.findOneAndUpdate(
-      { _id: userId },
+      { _id: userId, stripeCustomerId: stripeCustomer.id },
       {
         $set: {
           ...updateProfileData,
@@ -118,7 +126,7 @@ export class UsersService {
     const genderIds = [interestedInGender].map((item) => item.id);
     const userPhotosPayload = userPhotos.map<UserPhoto>((item) => ({
       link: item,
-      user: newUser._id,
+      user: new Types.ObjectId(userId),
     }));
     userGender.user = new Types.ObjectId(userId);
 

@@ -28,6 +28,7 @@ import { PassionModule } from './modules/passion/passion.module';
 import { UserMatchModule } from './modules/user-match/user-match.module';
 import { UserDiscardModule } from './modules/user-discard/user-discard.module';
 import { UserLikeModule } from './modules/user-like/user-like.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { UserLikeModule } from './modules/user-like/user-like.module';
     UserMatchModule,
     UserDiscardModule,
     UserLikeModule,
+    PaymentModule,
   ],
   controllers: [],
 })

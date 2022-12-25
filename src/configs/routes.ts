@@ -54,3 +54,5 @@ export const MESSAGE_ATTACHMENTS_ROUTE = 'message-attachments';
 export const PARTICIPANTS_ROUTE = 'participants';
 
 export const CONVERSATIONS_ROUTE = 'conversations';
+
+export const PAYMENTS_ROUTE = 'payments';

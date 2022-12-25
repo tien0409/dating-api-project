@@ -86,6 +86,9 @@ export class User extends BaseSchema {
   })
   relationshipType?: Types.ObjectId;
 
+  @Prop()
+  stripeCustomerId?: string;
+
   @Prop({ type: SchemaTypes.ObjectId, ref: Address.name, autopopulate: true })
   address?: Types.ObjectId;
 }
