@@ -72,7 +72,7 @@ import { UserDiscardService } from '../user-discard/user-discard.service';
 
 @WebSocketGateway(3002, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3003'],
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_CLIENT_URL],
     credentials: true,
   },
 })

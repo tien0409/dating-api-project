@@ -1,6 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
@@ -11,7 +11,7 @@ async function bootstrap() {
   const adapter = new GatewayAdapter(app);
   app.useWebSocketAdapter(adapter);
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3003'],
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_CLIENT_URL],
     credentials: true,
   });
   app.use(cookieParser());
@@ -22,7 +22,7 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new TransformResponseInterceptor());
   app.setGlobalPrefix('api');
-  await app.listen(3001, '0.0.0.0');
+  await app.listen(process.env.PORT);
 }
 
 bootstrap();
