@@ -10,6 +10,7 @@ import {
 import { GetPremiumPackagesDTO } from './dtos/get-premium-packages.dto';
 import { CreatePremiumPackageDTO } from './dtos/create-premium-package.dto';
 import { UpdatePremiumPackageDTO } from './dtos/update-premium-package.dto';
+import { UpdateStatusDTO } from './dtos/update-status.dto';
 
 @Injectable()
 export class PremiumPackageService {
@@ -58,6 +59,14 @@ export class PremiumPackageService {
       throw new BadRequestException('Number of months already exist');
   }
 
+  async checkNumOfStatus(id: string) {
+    const counter = await this.premiumPackageModel.count({
+      active: true,
+    });
+    if (counter >= 4)
+      throw new BadRequestException('Maximum 4 active packages');
+  }
+
   async create(createPremiumPackageDTO: CreatePremiumPackageDTO) {
     console.log('abc');
     const { numberOfMonths } = createPremiumPackageDTO;
@@ -89,6 +98,17 @@ export class PremiumPackageService {
         },
       },
       { new: true },
+    );
+  }
+
+  async updateStatus(id: string, updateStatusDTO: UpdateStatusDTO) {
+    const { active } = updateStatusDTO;
+
+    if (active) await this.checkNumOfStatus(id);
+
+    return this.premiumPackageModel.updateOne(
+      { _id: id },
+      { $set: { active } },
     );
   }
 

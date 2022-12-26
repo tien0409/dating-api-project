@@ -29,6 +29,9 @@ export class PremiumPackage extends BaseSchema {
   @Prop({ required: true })
   price: number;
 
+  @Prop({ default: false })
+  active: boolean;
+
   @Prop({ default: true })
   deletable: boolean;
 }

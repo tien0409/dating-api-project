@@ -14,6 +14,7 @@ import { PremiumPackageService } from './premium-package.service';
 import { GetPremiumPackagesDTO } from './dtos/get-premium-packages.dto';
 import { CreatePremiumPackageDTO } from './dtos/create-premium-package.dto';
 import { UpdatePremiumPackageDTO } from './dtos/update-premium-package.dto';
+import { UpdateStatusDTO } from './dtos/update-status.dto';
 
 @Controller(PREMIUM_PACKAGES_ADMIN_ROUTE)
 export class PremiumPackageAdminController {
@@ -35,6 +36,14 @@ export class PremiumPackageAdminController {
     @Body() updatePremiumPackageDTO: UpdatePremiumPackageDTO,
   ) {
     return this.premiumPackageService.update(id, updatePremiumPackageDTO);
+  }
+
+  @Put('status/:id')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() updateStatusDTO: UpdateStatusDTO,
+  ) {
+    return this.premiumPackageService.updateStatus(id, updateStatusDTO);
   }
 
   @Delete(':id')
