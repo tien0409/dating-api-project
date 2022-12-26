@@ -1,7 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes, Types } from 'mongoose';
+import { Document, SchemaTypes } from 'mongoose';
 
 import { BaseSchema } from '../base/schemas/base.schema';
+import { PremiumPackage } from '../premium-package/premium-package.schema';
+import { User } from '../users/schemas/user.schema';
 
 export type UserPremiumPackageDocument = UserPremiumPackage & Document;
 
@@ -18,10 +20,10 @@ export type UserPremiumPackageDocument = UserPremiumPackage & Document;
 })
 export class UserPremiumPackage extends BaseSchema {
   @Prop({ required: true, ref: 'User', type: SchemaTypes.ObjectId })
-  user: Types.ObjectId;
+  user: User;
 
   @Prop({ required: true, ref: 'PremiumPackage', type: SchemaTypes.ObjectId })
-  premiumPackage: Types.ObjectId;
+  premiumPackage: PremiumPackage;
 
   @Prop({ required: true })
   purchaseDate: Date;
@@ -29,9 +31,4 @@ export class UserPremiumPackage extends BaseSchema {
 
 export const UserPremiumPackageSchema = SchemaFactory.createForClass(
   UserPremiumPackage,
-);
-
-UserPremiumPackageSchema.index(
-  { user: 1, premiumPackage: 1 },
-  { unique: true },
 );

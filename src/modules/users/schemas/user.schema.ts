@@ -10,6 +10,13 @@ import { UserGender } from '../../user-gender/user-gender.schema';
 import { Type } from 'class-transformer';
 import { UserMatch } from '../../user-match/user-match.schema';
 
+export const FREE_SUBSCRIPTION_STATUS = 'free';
+export const PREMIUM_SUBSCRIPTION_STATUS = 'premium';
+export const SUBSCRIPTION_STATUS_ENUM = [
+  FREE_SUBSCRIPTION_STATUS,
+  PREMIUM_SUBSCRIPTION_STATUS,
+];
+
 export type UserDocument = User & Document;
 
 @Schema({
@@ -68,6 +75,15 @@ export class User extends BaseSchema {
     validators: [(v) => v.length <= 5, '{PATH} exceeds the limit of 5'],
   })
   passions: Types.ObjectId[];
+
+  @Prop({ default: 10 })
+  swipeRemaining: number;
+
+  @Prop()
+  lastSwipeTime?: Date;
+
+  @Prop({ enum: SUBSCRIPTION_STATUS_ENUM, default: FREE_SUBSCRIPTION_STATUS })
+  subscriptionStatus: string;
 
   @Prop({ type: SchemaTypes.ObjectId, ref: 'Role', autopopulate: true })
   role?: Types.ObjectId;
