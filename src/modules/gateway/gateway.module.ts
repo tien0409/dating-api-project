@@ -27,5 +27,6 @@ import { UserDiscardModule } from '../user-discard/user-discard.module';
       useClass: GatewaySessionManager,
     },
   ],
+  exports: [Gateway],
 })
 export class GatewayModule {}

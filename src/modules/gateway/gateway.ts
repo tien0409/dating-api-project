@@ -70,12 +70,7 @@ import { UserMatchLikeType } from '../user-match/user-match.schema';
 import { CreateUserDiscardPayload } from './payloads/create-user-discard.payload';
 import { UserDiscardService } from '../user-discard/user-discard.service';
 
-@WebSocketGateway(3002, {
-  cors: {
-    origin: [process.env.CLIENT_URL, process.env.ADMIN_CLIENT_URL],
-    credentials: true,
-  },
-})
+@WebSocketGateway()
 export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     @Inject(GatewaySessionManager.name)
