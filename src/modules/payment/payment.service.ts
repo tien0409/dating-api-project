@@ -8,7 +8,7 @@ export class PaymentService {
   private stripe: Stripe;
 
   constructor(private readonly configService: ConfigService) {
-    this.stripe = new Stripe(this.configService.get('payment.secretKey'), {
+    this.stripe = new Stripe(this.configService.get('stripe.secretKey'), {
       apiVersion: '2022-11-15',
     });
   }
@@ -25,7 +25,7 @@ export class PaymentService {
 
     return this.stripe.paymentIntents.create({
       amount,
-      currency: this.configService.get('payment.currency'),
+      currency: this.configService.get('stripe.currency'),
       customer: customerId,
       payment_method: paymentMethodId,
       off_session: true,

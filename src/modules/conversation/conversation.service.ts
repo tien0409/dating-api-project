@@ -78,7 +78,7 @@ export class ConversationService {
   async create(userId: string, createConversationDTO: CreateConversationDTO) {
     const { receiverId, conversationType = 'private' } = createConversationDTO;
 
-    const conversation = await this.conversationModel.create({
+    let conversation = await this.conversationModel.create({
       type: conversationType,
       timeStarted: new Date(),
     });
@@ -93,6 +93,12 @@ export class ConversationService {
       },
     );
     await Promise.all([senderParticipantPromise, receiverParticipantPromise]);
+
+    conversation = await conversation.populate({
+      path: 'participants',
+      populate: 'user',
+      select: '-participants.conversation',
+    });
     return conversation;
   }
 

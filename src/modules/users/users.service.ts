@@ -66,7 +66,13 @@ export class UsersService {
 
     const filter: FilterQuery<UserDocument> = {
       fullName: { $ne: null },
-      _id: { $nin: [new Types.ObjectId(userId), ...userLikeIdsExcludeArr] },
+      _id: {
+        $nin: [
+          new Types.ObjectId(userId),
+          ...userLikeIdsExcludeArr,
+          ...userDiscardIdsExcludeArr,
+        ],
+      },
     };
 
     const userExplores = await this.userModel
@@ -113,16 +119,6 @@ export class UsersService {
 
     const defaultRelationshipType = await this.relationshipTypeService.getDefault();
 
-    const newUser = await this.userModel.findOneAndUpdate(
-      { _id: userId, stripeCustomerId: stripeCustomer.id },
-      {
-        $set: {
-          ...updateProfileData,
-          relationshipType: defaultRelationshipType,
-        },
-      },
-    );
-
     const genderIds = [interestedInGender].map((item) => item.id);
     const userPhotosPayload = userPhotos.map<UserPhoto>((item) => ({
       link: item,
@@ -138,7 +134,16 @@ export class UsersService {
 
     await this.userModel.updateOne(
       { _id: userId },
-      { $set: { avatar: photos[0]?.link } },
+      {
+        $set: {
+          ...updateProfileData,
+          firstName,
+          lastName,
+          stripeCustomerId: stripeCustomer.id,
+          relationshipType: defaultRelationshipType,
+          avatar: photos[0]?.link,
+        },
+      },
     );
     return {};
   }
