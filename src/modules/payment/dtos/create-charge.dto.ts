@@ -8,4 +8,8 @@ export class CreateChargeDTO {
   @IsNotEmpty()
   @IsString()
   paymentMethodId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  premiumPackageId: string;
 }

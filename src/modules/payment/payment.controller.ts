@@ -16,9 +16,6 @@ export class PaymentController {
   createCharge(@Req() req: Request, @Body() createChargeDTO: CreateChargeDTO) {
     const user = req.user as User;
 
-    return this.paymentService.createCharge(
-      user.stripeCustomerId,
-      createChargeDTO,
-    );
+    return this.paymentService.createCharge(user, createChargeDTO);
   }
 }
