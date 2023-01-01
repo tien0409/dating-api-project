@@ -28,7 +28,6 @@ export class MessageService {
     console.log('recipientsParticipants', recipientsParticipant);
     return this.messageModel
       .find({
-        active: true,
         participant: {
           $in: [
             senderParticipant._id,

@@ -46,7 +46,7 @@ export class ParticipantService {
   getByConversationId(conversationId: string) {
     return this.participantModel
       .find({
-        conversation: conversationId,
+        conversation: new Types.ObjectId(conversationId),
       })
       .populate('user');
   }
