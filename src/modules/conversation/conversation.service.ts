@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Conversation, ConversationDocument } from './conversation.schema';
@@ -27,15 +27,19 @@ export class ConversationService {
       });
   }
 
-  getByUserIdIncludeConversationDeleted(getByUserIdDTO: GetByUserIdDTO) {
+  async getByUserIdIncludeConversationDeleted(getByUserIdDTO: GetByUserIdDTO) {
     const { userId } = getByUserIdDTO;
+    const myConversations = await this.participantService.getAll({
+      user: new Types.ObjectId(userId),
+    });
+
+    const myConversationIds = myConversations.map((item) => item.conversation);
 
     return this.conversationModel
-      .find({})
+      .find({ _id: { $in: myConversationIds } })
       .populate({
         path: 'participants',
         populate: { path: 'user' },
-        match: { user: userId },
       })
       .populate({ path: 'lastMessage', populate: 'attachments' });
   }
@@ -49,7 +53,7 @@ export class ConversationService {
     );
 
     const conversationIds = participantInConversations?.map(
-      (item) => item.conversation?._id,
+      (item) => item.conversation,
     );
 
     return this.conversationModel
@@ -64,7 +68,8 @@ export class ConversationService {
       .populate({
         path: 'lastMessage',
         populate: 'attachments',
-      });
+      })
+      .sort({ _id: -1, lastMessage: -1 });
   }
 
   isCreated(isCreatedDTO: IsCreatedDTO) {

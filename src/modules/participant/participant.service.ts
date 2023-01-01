@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { Participant, ParticipantDocument } from './participant.schema';
 import { CreateParticipantDTO } from './dtos/create-participant.dto';
@@ -15,6 +15,10 @@ export class ParticipantService {
     private readonly participantModel: Model<ParticipantDocument>,
   ) {}
 
+  getAll(query: FilterQuery<ParticipantDocument>) {
+    return this.participantModel.find(query);
+  }
+
   getByUserId(userId: string) {
     return this.participantModel.findOne({
       user: userId,
@@ -28,7 +32,7 @@ export class ParticipantService {
 
     return this.participantModel.find({
       $and: [
-        { user: userId },
+        { user: new Types.ObjectId(userId) },
         {
           $or: [
             { $expr: { $gt: ['$timeJoined', '$timeLeft'] } },

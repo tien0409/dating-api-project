@@ -153,16 +153,21 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     const participantsPromise = this.participantService.getByConversationId(
       conversationId,
     );
-    const messagesPromise = this.messageService.getMessagesByConversationIdAndUserId(
-      conversationId,
-      socket.user._id,
-    );
-
-    const [conversation, participants, messages] = await Promise.all([
+    const [conversation, participants] = await Promise.all([
       conversationConversation,
       participantsPromise,
-      messagesPromise,
     ]);
+
+    const sender = participants.find(
+      (item) => item.user?._id?.toString() === socket.user._id.toString(),
+    );
+    const recipients = participants.filter(
+      (item) => item.user?._id?.toString() !== socket.user._id.toString(),
+    );
+    const messages = await this.messageService.getMessagesByConversationIdAndUserId(
+      sender,
+      recipients,
+    );
 
     socket.emit(SEND_ALL_MESSAGES, {
       conversation,
@@ -215,16 +220,24 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!attachments && !content?.trim())
       throw new WsException("Message can't be empty");
 
-    const {
-      newMessage,
-      conversationUpdated,
-    } = await this.messageService.create({
-      conversationId,
+    const newMessage = await this.messageService.create({
       content,
       replyTo,
       senderParticipantId,
       attachments,
     });
+
+    // note: update time joined another participant before create message
+    await this.participantService.updateManyTimeJoined({
+      conversationId,
+    });
+
+    const conversationUpdated = await this.conversationService.updateLastMessage(
+      {
+        conversationId,
+        lastMessage: newMessage,
+      },
+    );
 
     this.server.in(conversationId).emit(SEND_MESSAGE, {
       message: newMessage,
@@ -272,13 +285,25 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { receiverId, messageId, conversation } = messageDeleteDTO;
 
-    const sender = this.gatewaySessionManager.getUserSocket(socket.user._id);
-    const receiver = this.gatewaySessionManager.getUserSocket(receiverId);
+    const senderSocket = this.gatewaySessionManager.getUserSocket(
+      socket.user._id,
+    );
+    const receiverSocket = this.gatewaySessionManager.getUserSocket(receiverId);
 
     await this.messageService.deleteMessage(messageId);
-    const messages = await this.messageService.getMessagesByConversationIdAndUserId(
+
+    const participants = await this.participantService.getByConversationId(
       conversation._id,
-      socket.user._id,
+    );
+    const sender = participants.find(
+      (item) => item.user.toString() === socket.user._id.toString(),
+    );
+    const recipients = participants.filter(
+      (item) => item.user.toString() !== socket.user._id.toString(),
+    );
+    const messages = await this.messageService.getMessagesByConversationIdAndUserId(
+      sender,
+      recipients,
     );
 
     let conversationUpdated;
@@ -292,10 +317,13 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
 
-    sender &&
-      sender.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
-    receiver &&
-      receiver.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
+    senderSocket &&
+      senderSocket.emit(SEND_DELETE_MESSAGE, { messages, conversationUpdated });
+    receiverSocket &&
+      receiverSocket.emit(SEND_DELETE_MESSAGE, {
+        messages,
+        conversationUpdated,
+      });
   }
 
   handleCallInit(socket: IAuthSocket, payload: CallPayload) {
@@ -466,8 +494,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: IAuthSocket,
     @MessageBody() payload: CreateUserDiscardPayload,
   ) {
-    const { userDiscardId } = payload;
-
     const user = socket.user;
     await this.userDiscardService.create(user._id, payload);
   }
