@@ -23,6 +23,9 @@ export class PremiumPackageService {
     return this.premiumPackageModel.find();
   }
 
+  getActive() {
+    return this.premiumPackageModel.find({ active: true });
+  }
   async getAdminAll(getPremiumPackagesDTO: GetPremiumPackagesDTO) {
     const { page = 1, search = '' } = getPremiumPackagesDTO;
 
@@ -68,7 +71,6 @@ export class PremiumPackageService {
   }
 
   async create(createPremiumPackageDTO: CreatePremiumPackageDTO) {
-    console.log('abc');
     const { numberOfMonths } = createPremiumPackageDTO;
 
     await this.checkMonthExist(numberOfMonths);

@@ -121,16 +121,22 @@ UserSchema.virtual('age').get(function (this: UserDocument) {
     : null;
 });
 
-UserSchema.virtual('userSendMatches', {
-  ref: 'UserMatch',
+UserSchema.virtual('userLikes', {
+  ref: 'UserLike',
   localField: '_id',
   foreignField: 'user',
 });
 
-UserSchema.virtual('userReceiveMatches', {
+UserSchema.virtual('userDiscards', {
+  ref: 'UserDiscard',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('userMatches', {
   ref: 'UserMatch',
   localField: '_id',
-  foreignField: 'userMatch',
+  foreignField: 'user' || 'userMatched',
 });
 
 UserSchema.virtual('photos', {

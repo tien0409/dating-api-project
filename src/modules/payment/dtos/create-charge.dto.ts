@@ -7,9 +7,5 @@ export class CreateChargeDTO {
 
   @IsNotEmpty()
   @IsString()
-  customerId: string;
-
-  @IsNotEmpty()
-  @IsString()
   paymentMethodId: string;
 }

@@ -20,8 +20,8 @@ export class PaymentService {
     });
   }
 
-  createCharge(chargeDTO: CreateChargeDTO) {
-    const { amount, paymentMethodId, customerId } = chargeDTO;
+  createCharge(customerId: string, chargeDTO: CreateChargeDTO) {
+    const { amount, paymentMethodId } = chargeDTO;
 
     return this.stripe.paymentIntents.create({
       amount,

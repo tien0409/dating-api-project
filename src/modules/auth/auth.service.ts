@@ -85,7 +85,9 @@ export class AuthService {
   }
 
   getUserAuth(userId: string) {
-    return this.usersService.getById(userId).populate('photos');
+    return this.usersService
+      .getById(userId)
+      .populate('photos userLikes userDiscards userMatches');
   }
 
   async getAuthenticatedUser(authCredentialsDto: AuthCredentialsDTO) {

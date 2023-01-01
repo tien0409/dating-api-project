@@ -295,8 +295,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     const participants = await this.participantService.getByConversationId(
       conversation._id,
     );
-    console.log('conversation', conversation);
-    console.log('participants', participants);
     const sender = participants.find(
       (item) => item.user._id.toString() === socket.user._id.toString(),
     );
