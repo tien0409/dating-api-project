@@ -19,6 +19,7 @@ import { UserDiscardDocument } from '../user-discard/user-discard.schema';
 import { UserLikeDocument } from '../user-like/user-like.schema';
 import { LIMIT } from '../../configs/constants.config';
 import { PaymentService } from '../payment/payment.service';
+import { UpdateProfileDTO } from './dtos/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -100,6 +101,18 @@ export class UsersService {
     }
 
     return this.userModel.create(createUserDTO);
+  }
+
+  async updateProfile(userId: string, updateProfileDTO: UpdateProfileDTO) {
+    const { userGender } = updateProfileDTO;
+    if (userGender) {
+      await this.userGenderService.update(userId, userGender);
+      delete updateProfileDTO.userGender;
+    }
+
+    return this.userModel.findOneAndUpdate({ _id: userId }, updateProfileDTO, {
+      new: true,
+    });
   }
 
   async createProfile(userId: string, updateProfileDTO: CreateProfileDTO) {

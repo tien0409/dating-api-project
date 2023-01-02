@@ -87,7 +87,7 @@ export class AuthService {
   getUserAuth(userId: string) {
     return this.usersService
       .getById(userId)
-      .populate('photos userLikes userDiscards userMatches');
+      .populate('photos userLikes userDiscards userMatches userGender');
   }
 
   async getAuthenticatedUser(authCredentialsDto: AuthCredentialsDTO) {

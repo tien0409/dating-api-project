@@ -36,6 +36,8 @@ export class User extends BaseSchema {
 
   age?: number;
 
+  userGender?: UserGender;
+
   @Type(() => UserPhoto)
   photos: UserPhoto[];
 
@@ -57,10 +59,10 @@ export class User extends BaseSchema {
   @Prop()
   refreshToken?: string;
 
-  @Prop({ maxlength: 20 })
+  @Prop({ maxlength: 20, transform: (value) => value.trim() })
   firstName?: string;
 
-  @Prop({ maxlength: 15 })
+  @Prop({ maxlength: 15, transform: (value) => value.trim() })
   lastName?: string;
 
   @Prop()
@@ -87,13 +89,6 @@ export class User extends BaseSchema {
 
   @Prop({ type: SchemaTypes.ObjectId, ref: 'Role', autopopulate: true })
   role?: Types.ObjectId;
-
-  @Prop({
-    type: SchemaTypes.ObjectId,
-    ref: UserGender.name,
-    autopopulate: true,
-  })
-  userGender?: Types.ObjectId;
 
   @Prop({
     type: SchemaTypes.ObjectId,
@@ -149,6 +144,13 @@ UserSchema.virtual('interestedInGenders', {
   ref: 'InterestedInGender',
   localField: '_id',
   foreignField: 'user',
+});
+
+UserSchema.virtual('userGender', {
+  ref: 'UserGender',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: true,
 });
 
 UserSchema.virtual('interestedInRelations', {
