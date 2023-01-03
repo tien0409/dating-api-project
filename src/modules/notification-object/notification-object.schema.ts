@@ -21,7 +21,7 @@ export class NotificationObject extends BaseSchema {
     ref: 'User',
     required: true,
   })
-  receiver: Types.ObjectId;
+  recipient: Types.ObjectId;
 
   @Prop({
     type: SchemaTypes.ObjectId,

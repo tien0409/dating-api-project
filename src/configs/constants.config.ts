@@ -7,3 +7,6 @@ export const ROLE_GUARD = 'ROLE_GUARD';
 
 // pagination
 export const LIMIT = 10;
+
+export const ACTIVE = 'active';
+export const INACTIVE = 'in-active';

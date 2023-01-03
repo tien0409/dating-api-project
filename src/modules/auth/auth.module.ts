@@ -11,7 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token.strategy';
 import { MailService } from '../mail/mail.service';
-import { RoleGuard } from './guards/role.guard';
+import { AuthAdminController } from './auth.admin.controller';
 
 @Module({
   imports: [
@@ -37,7 +37,7 @@ import { RoleGuard } from './guards/role.guard';
     JwtStrategy,
     JwtRefreshTokenStrategy,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, AuthAdminController],
   exports: [AuthService],
 })
 export class AuthModule {}

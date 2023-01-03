@@ -3,6 +3,7 @@ export const ADMIN_ROUTE = 'admin';
 export const CREATE_ROUTE = 'create';
 
 export const AUTH_ROUTE = 'auth';
+export const AUTH_ADMIN_ROUTE = 'admin/auth';
 export const SIGN_UP_ROUTE = 'signup';
 export const SIGN_IN_ROUTE = 'signin';
 export const USER_AUTH = 'user-auth';
@@ -62,3 +63,8 @@ export const PREMIUM_PACKAGES_ADMIN_ROUTE = 'admin/premium-packages';
 
 export const USER_PREMIUM_PACKAGES_ROUTE = 'user-premium-packages';
 export const USER_PREMIUM_PACKAGES_ADMIN_ROUTE = 'admin/user-premium-packages';
+
+export const NOTIFICATIONS_ROUTE = 'notifications';
+export const NOTIFICATIONS_ADMIN_ROUTE = 'admin/notifications';
+export const NOTIFICATIONS_ACTIVE_ROUTE = 'active';
+export const NOTIFICATIONS_IN_ACTIVE_ROUTE = 'in-active';

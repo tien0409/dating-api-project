@@ -14,6 +14,7 @@ import { UserMatchModule } from '../user-match/user-match.module';
 import { UserLikeModule } from '../user-like/user-like.module';
 import { UserDiscardModule } from '../user-discard/user-discard.module';
 import { PaymentModule } from '../payment/payment.module';
+import { UsersAdminController } from './users.admin.controller';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { PaymentModule } from '../payment/payment.module';
     UserDiscardModule,
     PaymentModule,
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, UsersAdminController],
   providers: [UsersService],
   exports: [UsersService],
 })

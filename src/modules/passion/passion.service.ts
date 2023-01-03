@@ -58,7 +58,6 @@ export class PassionService {
   }
 
   async create(createPassionDTO: CreatePassionDTO) {
-    console.log('abc');
     const { name } = createPassionDTO;
 
     await this.checkNameExist(name);

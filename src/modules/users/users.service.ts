@@ -37,6 +37,10 @@ export class UsersService {
     private readonly stripeService: PaymentService,
   ) {}
 
+  getAll(filterQuery: FilterQuery<UserDocument> = {}) {
+    return this.userModel.find(filterQuery);
+  }
+
   getByEmail(email: string) {
     return this.userModel.findOne({ email });
   }
