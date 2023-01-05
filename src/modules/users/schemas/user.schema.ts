@@ -3,12 +3,12 @@ import { Document, SchemaTypes, Types } from 'mongoose';
 
 import { BaseSchema } from 'src/modules/base/schemas/base.schema';
 import { Address } from './address.schema';
-import { Role } from '../../role/role.schema';
 import { UserPhoto } from './user-photo.schema';
 import { emailRegex } from '../../../utils/regexes';
 import { UserGender } from '../../user-gender/user-gender.schema';
 import { Type } from 'class-transformer';
 import { UserMatch } from '../../user-match/user-match.schema';
+import { ADMIN_ROLE, USER_ROLE } from '../../../configs/constants.config';
 
 export const FREE_SUBSCRIPTION_STATUS = 'free';
 export const PREMIUM_SUBSCRIPTION_STATUS = 'premium';
@@ -16,6 +16,7 @@ export const SUBSCRIPTION_STATUS_ENUM = [
   FREE_SUBSCRIPTION_STATUS,
   PREMIUM_SUBSCRIPTION_STATUS,
 ];
+export const ROLES = [ADMIN_ROLE, USER_ROLE];
 
 export type UserDocument = User & Document;
 
@@ -87,8 +88,8 @@ export class User extends BaseSchema {
   @Prop({ enum: SUBSCRIPTION_STATUS_ENUM, default: FREE_SUBSCRIPTION_STATUS })
   subscriptionStatus: string;
 
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'Role', autopopulate: true })
-  role?: Types.ObjectId;
+  @Prop({ default: USER_ROLE, enum: ROLES })
+  role?: string;
 
   @Prop({
     type: SchemaTypes.ObjectId,

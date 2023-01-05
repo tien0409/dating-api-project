@@ -33,7 +33,6 @@ export class Notification extends BaseSchema {
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'User',
-    required: true,
   })
   sender?: Types.ObjectId;
 

@@ -17,7 +17,7 @@ import { UserLikeService } from '../user-like/user-like.service';
 import { UserDiscardService } from '../user-discard/user-discard.service';
 import { UserDiscardDocument } from '../user-discard/user-discard.schema';
 import { UserLikeDocument } from '../user-like/user-like.schema';
-import { LIMIT } from '../../configs/constants.config';
+import { LIMIT, USER_ROLE } from '../../configs/constants.config';
 import { PaymentService } from '../payment/payment.service';
 import { UpdateProfileDTO } from './dtos/update-profile.dto';
 
@@ -36,6 +36,10 @@ export class UsersService {
     private readonly userDiscardService: UserDiscardService,
     private readonly stripeService: PaymentService,
   ) {}
+
+  getPhotosByUserId(userId: string) {
+    return this.userPhotoModel.find({ user: userId });
+  }
 
   getAll(filterQuery: FilterQuery<UserDocument> = {}) {
     return this.userModel.find(filterQuery);
@@ -70,6 +74,7 @@ export class UsersService {
     );
 
     const filter: FilterQuery<UserDocument> = {
+      role: USER_ROLE,
       fullName: { $ne: null },
       _id: {
         $nin: [

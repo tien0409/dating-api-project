@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { NotificationService } from './notification.service';
@@ -12,6 +13,7 @@ import { NotificationObjectModule } from '../notification-object/notification-ob
   imports: [
     UsersModule,
     NotificationObjectModule,
+    ConfigModule,
     MongooseModule.forFeature([
       { name: Notification.name, schema: NotificationSchema },
     ]),

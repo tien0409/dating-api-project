@@ -73,6 +73,7 @@ import { CreateUserDiscardPayload } from './payloads/create-user-discard.payload
 import { UserDiscardService } from '../user-discard/user-discard.service';
 import { NOTIFICATION_EVENT_EMITTER } from './utils/eventEmitterType';
 import { CreateNotificationPayload } from './payloads/create-notification.payload';
+import { NotificationService } from '../notification/notification.service';
 
 @WebSocketGateway()
 export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -85,6 +86,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly userMatchService: UserMatchService,
     private readonly userLikeService: UserLikeService,
     private readonly userDiscardService: UserDiscardService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @WebSocketServer()
@@ -479,11 +481,16 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       ]);
 
-      userLikedSocket &&
-        userLikedSocket.emit(ON_USER_MATCHED, {
-          userMatched: socket.user,
-          conversation: newConversation,
-        });
+      await this.notificationService.createNotificationMatched({
+        userId: user._id,
+        userMatchedId: userLikedId,
+        conversationId: newConversation._id,
+      }),
+        userLikedSocket &&
+          userLikedSocket.emit(ON_USER_MATCHED, {
+            userMatched: socket.user,
+            conversation: newConversation,
+          });
       socket.emit(ON_USER_MATCHED, {
         userMatched: existingLiked.user,
         conversation: newConversation,
@@ -505,7 +512,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   @OnEvent(NOTIFICATION_EVENT_EMITTER.CREATE)
   createNotification(payload: CreateNotificationPayload) {
     const { recipientIds, notification } = payload;
-    console.log('recipientIds', recipientIds);
 
     recipientIds.forEach((recipientId) => {
       const userSocket = this.gatewaySessionManager.getUserSocket(recipientId);

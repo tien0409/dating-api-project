@@ -9,6 +9,7 @@ import { ConversationModule } from '../conversation/conversation.module';
 import { UserMatchModule } from '../user-match/user-match.module';
 import { UserLikeModule } from '../user-like/user-like.module';
 import { UserDiscardModule } from '../user-discard/user-discard.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserDiscardModule } from '../user-discard/user-discard.module';
     UserMatchModule,
     UserLikeModule,
     UserDiscardModule,
+    NotificationModule,
   ],
   providers: [
     Gateway,
