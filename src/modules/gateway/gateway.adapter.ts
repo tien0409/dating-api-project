@@ -33,7 +33,6 @@ export class GatewayAdapter extends IoAdapter {
     };
 
     const socketPort = this.configService.get('socketPort');
-    console.log('socketPort', socketPort);
 
     const server = super.createIOServer(socketPort, serverOptions);
     server.use(async (socket: IAuthSocket, next) => {

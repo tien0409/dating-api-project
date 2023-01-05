@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   Body,
   Controller,
@@ -18,25 +19,29 @@ import {
 import { NotificationService } from './notification.service';
 import { CreateNotificationDTO } from './dtos/create-notification.dto';
 import { User } from '../users/schemas/user.schema';
+import { NOTIFICATION_EVENT_EMITTER } from '../gateway/utils/eventEmitterType';
 
 @Controller(NOTIFICATIONS_ROUTE)
 @UseGuards(AuthGuard('jwt'))
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly emitter: EventEmitter2,
+  ) {}
 
   @Post()
-  create(
+  async create(
     @Req() req: Request,
     @Body() createNotificationDTO: CreateNotificationDTO,
   ) {
     const user = req.user as User;
 
-    return this.notificationService.create(user._id, createNotificationDTO);
-  }
+    const { notification } = await this.notificationService.create(
+      user._id,
+      createNotificationDTO,
+    );
 
-  @Patch(NOTIFICATIONS_ACTIVE_ROUTE + '/:id')
-  active(@Param('id') id: string) {
-    return this.notificationService.active(id);
+    return notification;
   }
 
   @Patch(NOTIFICATIONS_IN_ACTIVE_ROUTE + '/:id')

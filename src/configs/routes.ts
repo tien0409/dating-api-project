@@ -68,3 +68,10 @@ export const NOTIFICATIONS_ROUTE = 'notifications';
 export const NOTIFICATIONS_ADMIN_ROUTE = 'admin/notifications';
 export const NOTIFICATIONS_ACTIVE_ROUTE = 'active';
 export const NOTIFICATIONS_IN_ACTIVE_ROUTE = 'in-active';
+
+export const NOTIFICATION_OBJECTS_ROUTE = 'notification-objects';
+export const NOTIFICATION_OBJECTS_READ_ROUTE = 'read';
+export const NOTIFICATION_OBJECTS_UN_READ_ROUTE = 'un-read';
+export const NOTIFICATION_OBJECTS_READ_ALL_ROUTE = 'read-all';
+export const NOTIFICATION_OBJECTS_DELETE_ROUTE = 'delete';
+export const NOTIFICATION_OBJECTS_DELETE_ALL_ROUTE = 'delete-all';

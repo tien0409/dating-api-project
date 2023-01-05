@@ -1,6 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3001,
-  socketPort: parseInt(process.env.SOCKET_PORT, 10) || 3002,
+  socketPort: parseInt(process.env.SOCKET_PORT, 10) || 3001,
   clientURL: process.env.CLIENT_URL,
   adminURL: process.env.ADMIN_CLIENT_URL,
   database: {

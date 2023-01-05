@@ -1,3 +1,4 @@
+import { OnEvent } from '@nestjs/event-emitter';
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,6 +19,7 @@ import {
   CREATE_USER_LIKE,
   ON_CALL_HANG_UP,
   ON_CALL_REJECTED,
+  ON_CREATE_NOTIFICATION,
   ON_CREATE_USER_LIKE,
   ON_TOGGLE_MIC,
   ON_USER_MATCHED,
@@ -69,6 +71,8 @@ import { UserLikeService } from '../user-like/user-like.service';
 import { UserMatchLikeType } from '../user-match/user-match.schema';
 import { CreateUserDiscardPayload } from './payloads/create-user-discard.payload';
 import { UserDiscardService } from '../user-discard/user-discard.service';
+import { NOTIFICATION_EVENT_EMITTER } from './utils/eventEmitterType';
+import { CreateNotificationPayload } from './payloads/create-notification.payload';
 
 @WebSocketGateway()
 export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -496,5 +500,18 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const user = socket.user;
     await this.userDiscardService.create(user._id, payload);
+  }
+
+  @OnEvent(NOTIFICATION_EVENT_EMITTER.CREATE)
+  createNotification(payload: CreateNotificationPayload) {
+    const { recipientIds, notification } = payload;
+    console.log('recipientIds', recipientIds);
+
+    recipientIds.forEach((recipientId) => {
+      const userSocket = this.gatewaySessionManager.getUserSocket(recipientId);
+      if (userSocket) {
+        userSocket.emit(ON_CREATE_NOTIFICATION, notification);
+      }
+    });
   }
 }

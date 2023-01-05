@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 
@@ -41,6 +42,7 @@ import { NotificationObjectModule } from './modules/notification-object/notifica
       imports: [ConfigModule],
       useClass: MongoConfig,
     }),
+    EventEmitterModule.forRoot(),
     BaseModule,
     AuthModule,
     UsersModule,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { InjectModel } from '@nestjs/mongoose';
 import { Notification, NotificationDocument } from './notification.schema';
 import { CreateNotificationDTO } from './dtos/create-notification.dto';
 import { ACTIVE, INACTIVE, LIMIT } from '../../configs/constants.config';
@@ -55,6 +55,7 @@ export class NotificationService {
     const { recipientIds, isAll, ...data } = createNotificationDTO;
 
     let notificationObjects: CreateNotificationObjectDTO[] = [];
+    let userIds: string[] = [];
 
     const lastNotification = await this.notificationModel
       .findOne()
@@ -69,6 +70,7 @@ export class NotificationService {
     });
 
     if (recipientIds) {
+      userIds = recipientIds;
       notificationObjects = recipientIds.map((recipientId) => {
         return {
           notification: notification._id,
@@ -76,7 +78,8 @@ export class NotificationService {
         };
       });
     } else {
-      const users = await this.userService.getAll();
+      const users = await this.userService.getAll({ _id: { $ne: userId } });
+      userIds = users.map((user) => user._id);
       notificationObjects = users.map((user) => {
         return {
           notification: notification._id,
@@ -85,14 +88,36 @@ export class NotificationService {
       });
     }
     await this.notificationObjectService.createMany(notificationObjects);
-    return notification;
+    return { notification, userIds };
   }
 
-  active(id: string) {
-    return this.notificationModel.findByIdAndUpdate(id, { status: ACTIVE });
+  async active(id: string) {
+    const notificationUpdated = await this.notificationModel.findByIdAndUpdate(
+      id,
+      { status: ACTIVE, deletable: false },
+      { new: true },
+    );
+
+    await this.notificationObjectService.updateStatusByNotificationId(
+      notificationUpdated._id,
+    );
+
+    const notificationObjects = await this.notificationObjectService.getByNotificationId(
+      notificationUpdated._id,
+    );
+
+    const recipientIds = notificationObjects.map((notificationObject) =>
+      notificationObject.recipient.toString(),
+    );
+
+    return { notification: notificationUpdated, recipientIds };
   }
 
   inActive(id: string) {
     return this.notificationModel.findByIdAndUpdate(id, { status: INACTIVE });
+  }
+
+  delete(id: string) {
+    return this.notificationModel.deleteOne({ _id: id });
   }
 }
