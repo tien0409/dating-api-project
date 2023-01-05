@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import {
   Notification,
   NOTIFICATION_MATCHED_TYPE,
+  NOTIFICATION_PAYMENT_TYPE,
   NotificationDocument,
 } from './notification.schema';
 import { CreateNotificationDTO } from './dtos/create-notification.dto';
@@ -15,6 +16,7 @@ import { GetNotificationsDTO } from './dtos/get-notifications.dto';
 import { CreateNotificationObjectDTO } from '../notification-object/dtos/create-notification-object.dto';
 import { NotificationObjectService } from '../notification-object/notification-object.service';
 import { CreateNotificationMatchedDTO } from './dtos/create-notification-matched.dto';
+import { PremiumPackageService } from '../premium-package/premium-package.service';
 
 @Injectable()
 export class NotificationService {
@@ -23,6 +25,7 @@ export class NotificationService {
     private readonly notificationModel: Model<NotificationDocument>,
     private readonly userService: UsersService,
     private readonly notificationObjectService: NotificationObjectService,
+    private readonly premiumPackageService: PremiumPackageService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -198,6 +201,34 @@ export class NotificationService {
         notification: notificationsCreated[1]?._id,
         recipient: userMatched._id,
       },
+    ]);
+  }
+
+  async createNotificationPayment(
+    userId: string,
+    premiumPackageId: string,
+    typePayment: string,
+  ) {
+    const premiumPackage = await this.premiumPackageService.getById(
+      premiumPackageId,
+    );
+
+    const code = await this.getCode();
+    const notification = await this.notificationModel.create({
+      code,
+      type: NOTIFICATION_PAYMENT_TYPE,
+      title: 'Payment successful',
+      message: `You have successfully purchased and paid for a <strong>${
+        premiumPackage?.numberOfMonths
+      } month${
+        premiumPackage?.numberOfMonths > 1 ? 's' : ''
+      }</strong> premium package for <strong>$${
+        premiumPackage?.price
+      }</strong> by <strong>${typePayment}</strong>.`,
+    });
+
+    return this.notificationObjectService.createMany([
+      { notification: notification._id, recipient: userId },
     ]);
   }
 

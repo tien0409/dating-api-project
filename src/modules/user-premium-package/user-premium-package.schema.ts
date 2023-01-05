@@ -22,6 +22,9 @@ export class UserPremiumPackage extends BaseSchema {
 
   @Prop({ required: true, ref: 'PremiumPackage', type: SchemaTypes.ObjectId })
   premiumPackage: Types.ObjectId;
+
+  @Prop({ default: new Date() })
+  purchaseDate: Date;
 }
 
 export const UserPremiumPackageSchema = SchemaFactory.createForClass(

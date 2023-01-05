@@ -8,12 +8,16 @@ import { NotificationController } from './notification.controller';
 import { NotificationAdminController } from './notification.admin.controller';
 import { UsersModule } from '../users/users.module';
 import { NotificationObjectModule } from '../notification-object/notification-object.module';
+import { UserPremiumPackageModule } from '../user-premium-package/user-premium-package.module';
+import { PremiumPackageModule } from '../premium-package/premium-package.module';
 
 @Module({
   imports: [
     UsersModule,
     NotificationObjectModule,
     ConfigModule,
+    UserPremiumPackageModule,
+    PremiumPackageModule,
     MongooseModule.forFeature([
       { name: Notification.name, schema: NotificationSchema },
     ]),

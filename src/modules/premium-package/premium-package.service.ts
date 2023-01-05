@@ -19,6 +19,10 @@ export class PremiumPackageService {
     private readonly premiumPackageModel: Model<PremiumPackage>,
   ) {}
 
+  getById(id: string) {
+    return this.premiumPackageModel.findById(id);
+  }
+
   async getAll() {
     return this.premiumPackageModel.find();
   }

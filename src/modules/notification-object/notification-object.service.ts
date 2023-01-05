@@ -33,7 +33,8 @@ export class NotificationObjectService {
         populate: {
           path: 'sender',
         },
-      });
+      })
+      .sort({ createdAt: -1 });
 
     const result = notifications.map((_notification) => {
       const { notification, ...notificationObject } = _notification.toObject();

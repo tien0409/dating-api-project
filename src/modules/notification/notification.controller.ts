@@ -12,22 +12,17 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
 import {
-  NOTIFICATIONS_ACTIVE_ROUTE,
   NOTIFICATIONS_IN_ACTIVE_ROUTE,
   NOTIFICATIONS_ROUTE,
 } from '../../configs/routes';
 import { NotificationService } from './notification.service';
 import { CreateNotificationDTO } from './dtos/create-notification.dto';
 import { User } from '../users/schemas/user.schema';
-import { NOTIFICATION_EVENT_EMITTER } from '../gateway/utils/eventEmitterType';
 
 @Controller(NOTIFICATIONS_ROUTE)
 @UseGuards(AuthGuard('jwt'))
 export class NotificationController {
-  constructor(
-    private readonly notificationService: NotificationService,
-    private readonly emitter: EventEmitter2,
-  ) {}
+  constructor(private readonly notificationService: NotificationService) {}
 
   @Post()
   async create(

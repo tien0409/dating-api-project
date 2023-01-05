@@ -14,5 +14,6 @@ import { PremiumPackageAdminController } from './premium-package.admin.controlle
   ],
   providers: [PremiumPackageService],
   controllers: [PremiumPackageController, PremiumPackageAdminController],
+  exports: [PremiumPackageService],
 })
 export class PremiumPackageModule {}

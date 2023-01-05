@@ -19,8 +19,10 @@ import {
   CREATE_USER_LIKE,
   ON_CALL_HANG_UP,
   ON_CALL_REJECTED,
+  ON_CHARGE,
   ON_CREATE_NOTIFICATION,
   ON_CREATE_USER_LIKE,
+  ON_RESET_NOTIFICATIONS,
   ON_TOGGLE_MIC,
   ON_USER_MATCHED,
   ON_USER_UNAVAILABLE,
@@ -71,9 +73,14 @@ import { UserLikeService } from '../user-like/user-like.service';
 import { UserMatchLikeType } from '../user-match/user-match.schema';
 import { CreateUserDiscardPayload } from './payloads/create-user-discard.payload';
 import { UserDiscardService } from '../user-discard/user-discard.service';
-import { NOTIFICATION_EVENT_EMITTER } from './utils/eventEmitterType';
+import {
+  NOTIFICATION_EVENT_EMITTER,
+  PAYMENT_EVENT_EMITTER,
+} from './utils/eventEmitterType';
 import { CreateNotificationPayload } from './payloads/create-notification.payload';
 import { NotificationService } from '../notification/notification.service';
+import { CreateChargePayload } from './payloads/create-charge.payload';
+import { CreateOrderPayload } from './payloads/create-order.payload';
 
 @WebSocketGateway()
 export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -485,12 +492,14 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId: user._id,
         userMatchedId: userLikedId,
         conversationId: newConversation._id,
-      }),
-        userLikedSocket &&
-          userLikedSocket.emit(ON_USER_MATCHED, {
-            userMatched: socket.user,
-            conversation: newConversation,
-          });
+      });
+      userLikedSocket &&
+        userLikedSocket.emit(ON_USER_MATCHED, {
+          userMatched: socket.user,
+          conversation: newConversation,
+        });
+      userLikedSocket && userLikedSocket.emit(ON_RESET_NOTIFICATIONS);
+      socket.emit(ON_RESET_NOTIFICATIONS);
       socket.emit(ON_USER_MATCHED, {
         userMatched: existingLiked.user,
         conversation: newConversation,
@@ -519,5 +528,34 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         userSocket.emit(ON_CREATE_NOTIFICATION, notification);
       }
     });
+  }
+
+  @OnEvent(PAYMENT_EVENT_EMITTER.CHARGE)
+  async createCharge(payload: CreateChargePayload) {
+    const { userId, premiumPackageId } = payload;
+
+    await this.notificationService.createNotificationPayment(
+      userId,
+      premiumPackageId,
+      'Credit-card',
+    );
+
+    const userSocket = this.gatewaySessionManager.getUserSocket(userId);
+    console.log('userSocket', userSocket);
+    userSocket && userSocket.emit(ON_RESET_NOTIFICATIONS);
+  }
+
+  @OnEvent(PAYMENT_EVENT_EMITTER.ORDER)
+  async createOrder(payload: CreateOrderPayload) {
+    const { userId, premiumPackageId } = payload;
+
+    await this.notificationService.createNotificationPayment(
+      userId,
+      premiumPackageId,
+      'Paypal',
+    );
+
+    const userSocket = this.gatewaySessionManager.getUserSocket(userId);
+    userSocket && userSocket.emit(ON_RESET_NOTIFICATIONS);
   }
 }

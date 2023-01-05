@@ -15,6 +15,10 @@ export class UserPremiumPackageService {
     private readonly userPremiumPackageModel: Model<UserPremiumPackageDocument>,
   ) {}
 
+  getById(id: string) {
+    return this.userPremiumPackageModel.findById(id);
+  }
+
   create(
     userId: string,
     createUserPremiumPackageDTO: CreateUserPremiumPackageDTO,
