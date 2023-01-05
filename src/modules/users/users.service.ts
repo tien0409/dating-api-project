@@ -202,4 +202,11 @@ export class UsersService {
       { $set: { refreshToken: null } },
     );
   }
+
+  updatePassword(userId: string, newPassword: string) {
+    return this.userModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: { password: newPassword } },
+    );
+  }
 }

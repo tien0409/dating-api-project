@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Patch,
   Post,
   Req,
   Res,
@@ -24,9 +25,11 @@ import {
   REFRESH_ROUTE,
   SIGN_IN_ROUTE,
   SIGN_UP_ROUTE,
+  UPDATE_PASSWORD,
   USER_AUTH,
 } from 'src/configs/routes';
 import { User } from '../users/schemas/user.schema';
+import { UpdatePasswordDTO } from './dtos/update-password.dto';
 
 @Controller(AUTH_ROUTE)
 export class AuthController {
@@ -89,6 +92,17 @@ export class AuthController {
 
     res.setHeader('Set-Cookie', accessTokenCookie);
     return res.json({ data: user });
+  }
+
+  @Patch(UPDATE_PASSWORD)
+  @UseGuards(JwtAuthenticationGuard)
+  updatePassword(
+    @Req() req: Request,
+    @Body() updatePasswordDTO: UpdatePasswordDTO,
+  ) {
+    const user = req.user as User;
+
+    return this.authService.updatePassword(user._id, updatePasswordDTO);
   }
 
   @Post(LOGOUT_ROUTE)

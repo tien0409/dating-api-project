@@ -8,6 +8,7 @@ import { AuthCredentialsDTO } from './dtos/auth-credetials.dto';
 import { MailService } from '../mail/mail.service';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { CreateUserDTO } from '../users/dtos/create-user.dto';
+import { UpdatePasswordDTO } from './dtos/update-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -117,5 +118,31 @@ export class AuthService {
     new UnauthorizedException(
       "You don't have permission to access this resource",
     );
+  }
+
+  async updatePassword(userId: string, updatePasswordDTO: UpdatePasswordDTO) {
+    const { password, confirmPassword, newPassword } = updatePasswordDTO;
+
+    const userExist = await this.usersService.getById(userId);
+    if (!userExist) {
+      throw new UnauthorizedException(
+        'Email or password is incorrect. Please try again.',
+      );
+    }
+    const isMatchPassword = await bcrypt.compare(password, userExist.password);
+    if (!isMatchPassword) {
+      throw new UnauthorizedException(
+        'Password is incorrect. Please try again.',
+      );
+    } else if (newPassword !== confirmPassword) {
+      throw new UnauthorizedException(
+        'Confirm password is incorrect. Please try again.',
+      );
+    }
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    return this.usersService.updatePassword(userId, hashedPassword);
   }
 }
