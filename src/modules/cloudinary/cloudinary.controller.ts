@@ -1,13 +1,17 @@
 import {
-    Controller,
-    Post,
-    UploadedFile,
-    UploadedFiles,
-    UseGuards,
-    UseInterceptors
+  Controller,
+  Post,
+  UploadedFile,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { UPLOAD_MULTI_IMAGE, UPLOAD_ROUTE, UPLOAD_SINGLE_IMAGE } from 'src/configs/routes';
+import {
+  UPLOAD_MULTI_IMAGE,
+  UPLOAD_ROUTE,
+  UPLOAD_SINGLE_IMAGE,
+} from 'src/configs/routes';
 import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard';
 import { CloudinaryService } from './cloudinary.service';
 

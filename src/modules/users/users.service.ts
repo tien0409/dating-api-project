@@ -20,6 +20,8 @@ import { UserLikeDocument } from '../user-like/user-like.schema';
 import { LIMIT, USER_ROLE } from '../../configs/constants.config';
 import { PaymentService } from '../payment/payment.service';
 import { UpdateProfileDTO } from './dtos/update-profile.dto';
+import { CreatePhotoDTO } from './dtos/create-photo.dto';
+import { UpdatePhotoDTO } from './dtos/update-photo.dto';
 
 @Injectable()
 export class UsersService {
@@ -194,6 +196,41 @@ export class UsersService {
     );
 
     if (isMatchRefreshToken) return user;
+  }
+
+  createPhoto(userId: string, createPhotoDTO: CreatePhotoDTO) {
+    const { link } = createPhotoDTO;
+
+    return this.userPhotoModel.create({
+      user: new Types.ObjectId(userId),
+      link,
+    });
+  }
+
+  updatePhoto(userId: string, photoId: string, updatePhotoDTO: UpdatePhotoDTO) {
+    const { link } = updatePhotoDTO;
+
+    return this.userPhotoModel.findOneAndUpdate(
+      {
+        user: new Types.ObjectId(userId),
+        _id: new Types.ObjectId(photoId),
+      },
+      {
+        $set: {
+          link,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async deletePhoto(userId: string, photoId: string) {
+    await this.userPhotoModel.deleteOne({
+      user: new Types.ObjectId(userId),
+      _id: new Types.ObjectId(photoId),
+    });
+
+    return this.userPhotoModel.find({ user: new Types.ObjectId(userId) });
   }
 
   removeRefreshToken(userId: string) {

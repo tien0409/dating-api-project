@@ -25,6 +25,9 @@ export const USERS_ROUTE = 'users';
 export const GET_USERS_EXPLORE_ROUTE = 'explore';
 export const UPDATE_PROFILE_ROUTE = 'update-profile';
 export const CREATE_PROFILE_ROUTE = 'create-profile';
+export const CREATE_PHOTO_ROUTE = 'create-photo';
+export const UPDATE_PHOTO_ROUTE = 'update-photo';
+export const DELETE_PHOTO_ROUTE = 'delete-photo';
 
 export const USER_MATCH_TYPES_ADMIN_ROUTE = 'admin/user-match-types';
 
