@@ -16,6 +16,29 @@ export class UserMatchService {
     return this.userMatchModel.find(filter);
   }
 
+  async getByUserId(userId: string) {
+    const userMatches = await this.userMatchModel
+      .find({
+        $or: [
+          { user: new Types.ObjectId(userId) },
+          { userMatched: new Types.ObjectId(userId) },
+        ],
+      })
+      .populate('user userMatched')
+      .sort({ createdAt: -1 });
+
+    return userMatches.map((userMatch) => {
+      const { user, userMatched } = userMatch;
+
+      return {
+        ...userMatch.toObject(),
+        userMatched:
+          userMatched._id.toString() === userId.toString() ? user : userMatched,
+        user: user._id.toString() === userId.toString() ? userMatched : user,
+      };
+    });
+  }
+
   create(userId: string, createUserMatchDTO: CreateUserMatchDTO) {
     const { userMatchedId: userMatched, type } = createUserMatchDTO;
 

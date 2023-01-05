@@ -22,6 +22,10 @@ export class RelationshipTypeService {
     return this.relationshipTypeModel.findOne({ isDefault: true });
   }
 
+  getAll() {
+    return this.relationshipTypeModel.find({});
+  }
+
   async getAdminAll(getRelationshipTypesDTO: GetRelationshipTypesDTO) {
     const { page = 1, search = '' } = getRelationshipTypesDTO;
 

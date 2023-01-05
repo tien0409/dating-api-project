@@ -13,5 +13,6 @@ import { UserPreference, UserPreferenceSchema } from './user-preference.schema';
   ],
   controllers: [UserPreferenceController],
   providers: [UserPreferenceService],
+  exports: [UserPreferenceService],
 })
 export class UserPreferenceModule {}

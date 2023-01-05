@@ -44,6 +44,7 @@ export const ON_CREATE_USER_LIKE = 'on_create_user_like';
 export const CREATE_USER_DISCARD = 'create_user_discard';
 export const ON_CREATE_USER_DISCARD = 'on_create_user_discard';
 export const ON_USER_MATCHED = 'on_user_matched';
+export const ON_RESET_USER_MATCHES = 'on_reset_user_matches';
 
 // notifications
 export const ON_CREATE_NOTIFICATION = 'on_create_notification';

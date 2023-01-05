@@ -19,10 +19,10 @@ import {
   CREATE_USER_LIKE,
   ON_CALL_HANG_UP,
   ON_CALL_REJECTED,
-  ON_CHARGE,
   ON_CREATE_NOTIFICATION,
   ON_CREATE_USER_LIKE,
   ON_RESET_NOTIFICATIONS,
+  ON_RESET_USER_MATCHES,
   ON_TOGGLE_MIC,
   ON_USER_MATCHED,
   ON_USER_UNAVAILABLE,
@@ -482,9 +482,9 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.conversationService.create(user._id, {
           receiverId: userLikedId,
         }),
-        this.userMatchService.create(user._id, {
-          userMatchedId: user._id,
-          type: UserMatchLikeType,
+        this.userMatchService.create(userLikedId, {
+          userMatchedId: user._id.toString(),
+          type: UserMatchLikeType.toString(),
         }),
       ]);
 
@@ -493,13 +493,16 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         userMatchedId: userLikedId,
         conversationId: newConversation._id,
       });
-      userLikedSocket &&
+      if (userLikedSocket) {
         userLikedSocket.emit(ON_USER_MATCHED, {
           userMatched: socket.user,
           conversation: newConversation,
         });
-      userLikedSocket && userLikedSocket.emit(ON_RESET_NOTIFICATIONS);
+        userLikedSocket.emit(ON_RESET_NOTIFICATIONS);
+        userLikedSocket.emit(ON_RESET_USER_MATCHES);
+      }
       socket.emit(ON_RESET_NOTIFICATIONS);
+      socket.emit(ON_RESET_USER_MATCHES);
       socket.emit(ON_USER_MATCHED, {
         userMatched: existingLiked.user,
         conversation: newConversation,
@@ -541,7 +544,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     const userSocket = this.gatewaySessionManager.getUserSocket(userId);
-    console.log('userSocket', userSocket);
     userSocket && userSocket.emit(ON_RESET_NOTIFICATIONS);
   }
 

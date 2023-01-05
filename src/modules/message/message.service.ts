@@ -25,7 +25,6 @@ export class MessageService {
     senderParticipant: Participant,
     recipientsParticipant: Participant[],
   ) {
-    console.log('recipientsParticipants', recipientsParticipant);
     return this.messageModel
       .find({
         participant: {

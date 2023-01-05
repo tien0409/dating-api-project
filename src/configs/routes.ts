@@ -24,6 +24,7 @@ export const UPLOAD_MULTI_IMAGE = 'multi-image';
 export const USERS_ROUTE = 'users';
 export const GET_USERS_EXPLORE_ROUTE = 'explore';
 export const UPDATE_PROFILE_ROUTE = 'update-profile';
+export const DELETE_ACCOUNT_ROUTE = 'delete-account';
 export const CREATE_PROFILE_ROUTE = 'create-profile';
 export const CREATE_PHOTO_ROUTE = 'create-photo';
 export const UPDATE_PHOTO_ROUTE = 'update-photo';
@@ -79,3 +80,5 @@ export const NOTIFICATION_OBJECTS_UN_READ_ROUTE = 'un-read';
 export const NOTIFICATION_OBJECTS_READ_ALL_ROUTE = 'read-all';
 export const NOTIFICATION_OBJECTS_DELETE_ROUTE = 'delete';
 export const NOTIFICATION_OBJECTS_DELETE_ALL_ROUTE = 'delete-all';
+
+export const USER_PREFERENCES_ROUTE = 'user-preferences';

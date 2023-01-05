@@ -87,13 +87,14 @@ export class UsersService {
       },
     };
 
+    const total = await this.userModel.countDocuments(filter);
+
     const userExplores = await this.userModel
       .find(filter)
       .populate('photos passions')
-      .skip((page - 1) * 2)
-      .limit(2);
-
-    const total = await this.userModel.countDocuments(filter);
+      .skip(Math.random() * total)
+      // .skip((page - 1) * 2)
+      .limit(LIMIT);
 
     return {
       userExplores,
@@ -121,9 +122,13 @@ export class UsersService {
       delete updateProfileDTO.userGender;
     }
 
-    return this.userModel.findOneAndUpdate({ _id: userId }, updateProfileDTO, {
-      new: true,
-    });
+    return this.userModel
+      .findOneAndUpdate({ _id: userId }, updateProfileDTO, {
+        new: true,
+      })
+      .populate(
+        'photos userLikes userDiscards userMatches userGender relationshipType',
+      );
   }
 
   async createProfile(userId: string, updateProfileDTO: CreateProfileDTO) {
@@ -245,5 +250,9 @@ export class UsersService {
       { _id: userId },
       { $set: { password: newPassword } },
     );
+  }
+
+  deleteAccount(userId: string) {
+    this.userModel.remove({ _id: userId });
   }
 }

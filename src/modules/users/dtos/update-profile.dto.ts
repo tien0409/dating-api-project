@@ -50,6 +50,11 @@ export class UpdateProfileDTO {
   @IsNotEmpty()
   passions?: string[];
 
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  relationshipType?: string;
+
   @IsOptional()
   bio?: string;
 }

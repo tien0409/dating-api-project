@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 import { RELATIONSHIP_TYPES_ROUTE } from '../../configs/routes';
 import { RelationshipTypeService } from './relationship-type.service';
@@ -8,4 +8,9 @@ export class RelationshipTypeController {
   constructor(
     private readonly relationshipTypeService: RelationshipTypeService,
   ) {}
+
+  @Get()
+  getAll() {
+    return this.relationshipTypeService.getAll();
+  }
 }

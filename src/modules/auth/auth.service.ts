@@ -9,6 +9,7 @@ import { MailService } from '../mail/mail.service';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { CreateUserDTO } from '../users/dtos/create-user.dto';
 import { UpdatePasswordDTO } from './dtos/update-password.dto';
+import { UserPreferenceService } from '../user-preference/user-preference.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
+    private readonly userPreferenceService: UserPreferenceService,
   ) {}
 
   getCookieWithJwtAccessToken(jwtPayload: IJwtPayload) {
@@ -60,6 +62,7 @@ export class AuthService {
     };
     const newUser = await this.usersService.createUser(createUserDTO);
     await this.mailService.sendVerifyMail({ email, confirmationCode });
+    await this.userPreferenceService.create(newUser._id.toString());
 
     return newUser;
   }
@@ -88,7 +91,9 @@ export class AuthService {
   getUserAuth(userId: string) {
     return this.usersService
       .getById(userId)
-      .populate('photos userLikes userDiscards userMatches userGender');
+      .populate(
+        'photos userLikes userDiscards userMatches userGender relationshipType',
+      );
   }
 
   async getAuthenticatedUser(authCredentialsDto: AuthCredentialsDTO) {

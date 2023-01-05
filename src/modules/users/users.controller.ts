@@ -16,6 +16,7 @@ import { Request, Response } from 'express';
 import {
   CREATE_PHOTO_ROUTE,
   CREATE_PROFILE_ROUTE,
+  DELETE_ACCOUNT_ROUTE,
   DELETE_PHOTO_ROUTE,
   GET_USERS_EXPLORE_ROUTE,
   UPDATE_PHOTO_ROUTE,
@@ -95,5 +96,12 @@ export class UsersController {
     const user = req.user as User;
 
     return this.usersService.getUsersExplore(user._id, getUsersExploreDTO);
+  }
+
+  @Delete(DELETE_ACCOUNT_ROUTE)
+  deleteAccount(@Req() req: Request) {
+    const user = req.user as User;
+
+    return this.usersService.deleteAccount(user._id);
   }
 }

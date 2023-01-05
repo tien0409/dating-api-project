@@ -12,6 +12,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh-token.strategy';
 import { MailService } from '../mail/mail.service';
 import { AuthAdminController } from './auth.admin.controller';
+import { UserPreferenceModule } from '../user-preference/user-preference.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthAdminController } from './auth.admin.controller';
     UsersModule,
     PassportModule,
     MailModule,
+    UserPreferenceModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

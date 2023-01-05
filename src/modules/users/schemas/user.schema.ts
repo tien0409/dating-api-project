@@ -51,6 +51,9 @@ export class User extends BaseSchema {
   @Prop()
   avatar?: string;
 
+  @Prop({ default: false })
+  snooze: boolean;
+
   @Prop({ unique: true })
   confirmationCode?: string;
 

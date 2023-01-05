@@ -33,4 +33,4 @@ export class UserMatch extends BaseSchema {
 
 export const UserMatchSchema = SchemaFactory.createForClass(UserMatch);
 
-UserMatchSchema.index({ user: 1, userMatch: 1 }, { unique: true });
+UserMatchSchema.index({ user: 1, userMatched: 1 }, { unique: true });
