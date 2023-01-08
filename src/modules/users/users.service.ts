@@ -77,7 +77,7 @@ export class UsersService {
 
     const filter: FilterQuery<UserDocument> = {
       role: USER_ROLE,
-      fullName: { $ne: null },
+      lastName: { $ne: null },
       _id: {
         $nin: [
           new Types.ObjectId(userId),
@@ -107,11 +107,6 @@ export class UsersService {
   }
 
   async createUser(createUserDTO: CreateUserDTO) {
-    const { role } = createUserDTO;
-    if (!role) {
-      createUserDTO.role = await this.roleService.getByName({ name: 'USER' });
-    }
-
     return this.userModel.create(createUserDTO);
   }
 

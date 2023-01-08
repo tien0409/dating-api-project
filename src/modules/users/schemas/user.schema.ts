@@ -92,7 +92,7 @@ export class User extends BaseSchema {
   subscriptionStatus: string;
 
   @Prop({ default: USER_ROLE, enum: ROLES })
-  role?: string;
+  role: string;
 
   @Prop({
     type: SchemaTypes.ObjectId,

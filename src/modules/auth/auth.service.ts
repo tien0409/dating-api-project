@@ -26,9 +26,7 @@ export class AuthService {
       secret: this.configService.get('jwt.accessSecret'),
       expiresIn: this.configService.get('jwt.accessExpiresIn'),
     });
-    return `Authentication=${token}; Path=/; Max-Age=${this.configService.get(
-      'jwt.accessExpiresIn',
-    )}`;
+    return `Authentication=${token}`;
   }
 
   async getCookieWithJwtRefreshToken(jwtPayload: IJwtPayload) {
@@ -36,9 +34,7 @@ export class AuthService {
       secret: this.configService.get('jwt.refreshSecret'),
       expiresIn: this.configService.get('jwt.refreshExpiresIn') + 's',
     });
-    const cookie = `Refresh=${token}; Path=/; Max-Age=${this.configService.get(
-      'jwt.refreshExpiresIn',
-    )}`;
+    const cookie = `Refresh=${token}`;
 
     return { cookie, token };
   }

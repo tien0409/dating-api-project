@@ -64,10 +64,12 @@ export class AuthController {
       jwtPayload,
     );
 
-    res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
+    // res.setHeader('Set-Cookie', [accessTokenCookie, cookie]);
     res.json({
       data: {
         accountCreated: !!user?.firstName,
+        accessToken: accessTokenCookie,
+        refreshToken: cookie,
       },
       message: 'Login successfully!',
     });
@@ -90,7 +92,7 @@ export class AuthController {
       jwtPayload,
     );
 
-    res.setHeader('Set-Cookie', accessTokenCookie);
+    // res.setHeader('Set-Cookie', accessTokenCookie);
     return res.json({ data: user });
   }
 
@@ -112,7 +114,7 @@ export class AuthController {
     const user = req.user as User;
     const cookie = await this.authService.logout(user._id);
 
-    res.setHeader('Set-Cookie', cookie);
+    // res.setHeader('Set-Cookie', cookie);
     res.json({});
   }
 }
